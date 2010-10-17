@@ -59,6 +59,14 @@ class AssignmentsTestCase(unittest.TestCase):
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
+    def test_assign_mod(self):
+        source = get_source('assign_mod')
+        (nodes, functions) = get_digest('assign_mod')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
     def test_assign_multiply(self):
         source = get_source('assign_multiply')
         (nodes, functions) = get_digest('assign_multiply')
@@ -67,7 +75,6 @@ class AssignmentsTestCase(unittest.TestCase):
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
-    
     def test_assign_sequence(self):
         source = get_source('assign_sequence')
         (nodes, functions) = get_digest('assign_sequence')
@@ -141,6 +148,14 @@ class MathsTestCase(unittest.TestCase):
     def test_divide_integer(self):
         source = get_source('math_divide_integer')
         (nodes, functions) = get_digest('math_divide_integer')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
+    def test_mod(self):
+        source = get_source('math_mod')
+        (nodes, functions) = get_digest('math_mod')
 
         (digest_nodes, digest_functions, digest) = parser.parse(source)
 

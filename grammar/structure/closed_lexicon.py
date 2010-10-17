@@ -29,7 +29,7 @@ reserved = {
  'elif': 'ELIF',
  'else': 'ELSE',
  #states
- 'None': 'NONE', #This language's has-no-value keyword
+ 'None': 'NONE',
  #literals
  'True': 'TRUE',
  'False': 'FALSE',
@@ -40,12 +40,11 @@ reserved = {
  'nor': 'NOR',
  'xor': 'XOR',
  #functions
- '__undefined': 'UNDEFINED', #__undefined(x) : true if x is not a resolvable identifier
+ '__undefined': 'UNDEFINED',
  #statements
- 'goto': 'STMT_GOTO', #goto IDENTIFIER_LOCAL;
- 'return': 'STMT_RETURN', #return 5 == 4;
- 'exit': 'STMT_EXIT', #exit [1, 2, 5]; | exit "hello"; #Packs a string representation of the exit value (sequences are null-delimited) into a returned string; exit with no value or an implied kill will return the empty string
- #Things like int(), round(), and other common functions will be part of the 'language' namespace
+ 'goto': 'STMT_GOTO',
+ 'return': 'STMT_RETURN',
+ 'exit': 'STMT_EXIT',
 }
 
 tokens = [
@@ -69,12 +68,14 @@ tokens = [
  'ASSIGN_MULTIPLY',
  'ASSIGN_DIVIDE',
  'ASSIGN_DIVIDE_INTEGER',
+ 'ASSIGN_MOD',
  #operands
  'MULTIPLY',
  'DIVIDE',
  'DIVIDE_INTEGER',
  'ADD',
  'SUBTRACT',
+ 'MOD',
  #delimiters
  'LPAREN',
  'RPAREN',
@@ -86,7 +87,9 @@ tokens = [
  'SEMICOLON',
 ] + list(reserved.values())
 
-#Token mapping
+
+#Token-mapping
+##############
 def t_IDENTIFIER_SCOPED(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)+'
     t.type = reserved.get(t.value, 'IDENTIFIER_SCOPED')
@@ -133,12 +136,14 @@ t_ASSIGN_SUBTRACT = r'\-='
 t_ASSIGN_MULTIPLY = r'\*='
 t_ASSIGN_DIVIDE = r'/='
 t_ASSIGN_DIVIDE_INTEGER = r'\\='
+t_ASSIGN_MOD = r'%='
 
 t_MULTIPLY = r'\*'
 t_DIVIDE = r'/'
 t_DIVIDE_INTEGER = r'\\'
 t_ADD = r'\+'
 t_SUBTRACT = r'\-'
+t_MOD = r'%'
 
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
@@ -157,12 +162,17 @@ t_ignore_whitespace = r'[ \t]'
 t_ignore_semicolon = ';'
 t_ignore_comment = r'(?:\#|//).*'
 
+
+#Error-handing
+##############
 def t_error(t):
     raise ValueError("Illegal character on line %(line)i: '%(character)s'" % {
      'line': t.lexer.lineno,
      'character': t.value[0],
     })
+
     
 #Digest functional categories
+#############################
 lexer = ply.lex.lex()
 

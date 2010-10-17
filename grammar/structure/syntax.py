@@ -60,6 +60,7 @@ MATH_OR = 76
 MATH_NAND = 77
 MATH_NOR = 78
 MATH_XOR = 79
+MATH_MOD = 1070
 FUNCTIONCALL_LOCAL = 80
 FUNCTIONCALL_SCOPED = 81
 FUNCTIONCALL_UNDEFINED = 82
@@ -70,6 +71,7 @@ ASSIGN_MULTIPLY = 93
 ASSIGN_DIVIDE = 94
 ASSIGN_DIVIDE_INTEGER = 95
 ASSIGN_SEQUENCE = 96
+ASSIGN_MOD = 97
 
 precedence = (
  ('right',
@@ -77,7 +79,7 @@ precedence = (
    'AND', 'OR', 'NAND', 'NOR', 'XOR',
  ),
  ('left', 'ADD', 'SUBTRACT',),
- ('left', 'MULTIPLY', 'DIVIDE', 'DIVIDE_INTEGER',),
+ ('left', 'MULTIPLY', 'DIVIDE', 'DIVIDE_INTEGER', 'MOD'),
 )
 
 start = 'nodelist'
@@ -187,6 +189,7 @@ def p_assignment_augmented(p):
                | IDENTIFIER_LOCAL ASSIGN_MULTIPLY expression
                | IDENTIFIER_LOCAL ASSIGN_DIVIDE expression
                | IDENTIFIER_LOCAL ASSIGN_DIVIDE_INTEGER expression
+               | IDENTIFIER_LOCAL ASSIGN_MOD expression
     """
     if p[2] == '+=':
         p[0] = (ASSIGN_ADD, p[1], p[3])
@@ -198,6 +201,8 @@ def p_assignment_augmented(p):
         p[0] = (ASSIGN_DIVIDE, p[1], p[3])
     elif p[2] == '\=':
         p[0] = (ASSIGN_DIVIDE_INTEGER, p[1], p[3])
+    elif p[2] == '%=':
+        p[0] = (ASSIGN_MOD, p[1], p[3])
 def p_assignment_sequence(p):
     r"""
     assignment : sequence ASSIGN expression
@@ -246,6 +251,7 @@ def p_expression_math(p):
                | expression DIVIDE expression
                | expression SUBTRACT expression
                | expression ADD expression
+               | expression MOD expression
                | expression AND expression
                | expression OR expression
                | expression NAND expression
@@ -262,6 +268,8 @@ def p_expression_math(p):
         p[0] = (MATH_DIVIDE, p[1], p[3])
     elif p[2] == '\\':
         p[0] = (MATH_DIVIDE_INTEGER, p[1], p[3])
+    elif p[2] == '%':
+        p[0] = (MATH_MOD, p[1], p[3])
     elif p[2] == 'and':
         p[0] = (MATH_AND, p[1], p[3])
     elif p[2] == 'or':
