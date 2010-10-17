@@ -1,0 +1,54 @@
+setup{ #Things that need to happen before an event can begin.
+  INITIAL_CONTROL = storage.retrieve_control(key="abcdefg");
+  FALLBACK_CONTROL = storage.retrieve_control(key="hijklmn");
+  TRANSFER_CONTROL = storage.retrieve_control(key="opqrstu");
+  TRANSFER_FAILURE = storage.retrieve_control(key="vwxyz");
+
+  TRANSFER_LIMIT = 5;
+  TRANSFER_HANDLER = "10.0.0.1";
+  EVENT_TIMEOUT = 12000; #Two minutes
+}
+
+start{
+  event.set_kill_timeout(timeout=EVENT_TIMEOUT);
+
+  event.prime_anomaly_detection(timeout=5000, fork=start_fallback);
+  goto start_event;
+}
+
+start_event{
+  panel.listen(timeout=0, button_timeout=2000);
+  event.start_event(ruleset=INITIAL_CONTROL, break_on_panel_input=True);
+  if(panel.input == panel.INTERRUPT_PROCESS){
+    if(current_events.count(handler=TRANSFER_HANDLER) < TRANSFER_LIMIT){
+      event.start_event(ruleset=TRANSFER_CONTROL, asynchronous=True);
+      goto start_transfer;
+    }else{
+      goto transfer_failed;
+    }
+  }
+  exit 0;
+}
+
+start_fallback{
+  event.set_kill_timeout(timeout=EVENT_TIMEOUT);
+
+  event.prime_anomaly_detection(timeout=1000, fork=start_fallback);
+  event.start_event(ruleset=FALLBACK_CONTROL);
+  
+  exit 0;
+}
+
+start_transfer{
+  if(event.transfer(handler=TRANSFER_HANDLER)){
+    exit 1;
+  }else{
+    goto transfer_failed;
+  }
+}
+
+transfer_failed{
+  event.start_event(ruleset=TRANSFER_FAILURE);
+  exit 2;
+}
+

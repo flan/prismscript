@@ -1,0 +1,6 @@
+hello{
+    True nand False;
+    x nand True;
+    False nand x;
+}
+

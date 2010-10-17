@@ -1,0 +1,9 @@
+hello{
+    exit x;
+    exit [1, 2, 3];
+    exit 5.5;
+    exit lang.test;
+    exit "Hello!";
+    exit 5 == 4 == 4 == (3 == 3);
+}
+

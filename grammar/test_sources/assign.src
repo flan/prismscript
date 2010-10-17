@@ -1,0 +1,11 @@
+hello{
+    x = 1;
+    x = 'w';
+    x = "q";
+    x = 5.5;
+    x = y;
+    x = True;
+    x = False;
+    x = None;
+}
+

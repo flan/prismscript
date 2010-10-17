@@ -1,0 +1,6 @@
+hello{
+    True nor False;
+    x nor True;
+    False nor x;
+}
+
