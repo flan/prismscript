@@ -27,34 +27,6 @@ from . import (
  SignatureInconsistencyError,
 )
 
-class NodeTestCase(unittest.TestCase):
-    def test_node(self):
-        source = get_source('node')
-        (nodes, functions) = get_digest('node')
-
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_node_expressions(self):
-        source = get_source('node_expressions')
-        (nodes, functions) = get_digest('node_expressions')
-
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_node_broken(self):
-        source = get_source('node_broken')
-        (nodes, functions) = get_digest('node_broken')
-
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
-
-        self.assertRaises(
-         SignatureInconsistencyError, compare_nodesets,
-         nodes, digest_nodes
-        )
-        
 class FunctionTestCase(unittest.TestCase):
     def test_function(self):
         source = get_source('function')
@@ -63,14 +35,6 @@ class FunctionTestCase(unittest.TestCase):
         (digest_nodes, digest_functions, digest) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_function_expressions(self):
-        source = get_source('function_expressions')
-        (nodes, functions) = get_digest('function_expressions')
-
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(functions, digest_functions), None)
 
     def test_function_broken(self):
         source = get_source('function_broken')
@@ -93,6 +57,15 @@ class FunctionTestCase(unittest.TestCase):
          SignatureInconsistencyError, compare_nodesets,
          functions, digest_functions
         )
+        
+    def test_function_expressions(self):
+        source = get_source('function_expressions')
+        (nodes, functions) = get_digest('function_expressions')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(functions, digest_functions), None)
+
 
 class NamespaceTestCase(unittest.TestCase):
     def test_namespace(self):
@@ -102,18 +75,6 @@ class NamespaceTestCase(unittest.TestCase):
         (digest_nodes, digest_functions, digest) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-        self.assertEquals(compare_nodesets(functions, digest_functions), None)
-
-    def test_namespace_broken_node(self):
-        source = get_source('namespace_broken_node')
-        (nodes, functions) = get_digest('namespace_broken_node')
-
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
-
-        self.assertRaises(
-         SignatureInconsistencyError, compare_nodesets,
-         nodes, digest_nodes
-        )
         self.assertEquals(compare_nodesets(functions, digest_functions), None)
 
     def test_namespace_broken_function(self):
@@ -139,4 +100,46 @@ class NamespaceTestCase(unittest.TestCase):
          SignatureInconsistencyError, compare_nodesets,
          functions, digest_functions
         )
+
+    def test_namespace_broken_node(self):
+        source = get_source('namespace_broken_node')
+        (nodes, functions) = get_digest('namespace_broken_node')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertRaises(
+         SignatureInconsistencyError, compare_nodesets,
+         nodes, digest_nodes
+        )
+        self.assertEquals(compare_nodesets(functions, digest_functions), None)
+
+
+class NodeTestCase(unittest.TestCase):
+    def test_node(self):
+        source = get_source('node')
+        (nodes, functions) = get_digest('node')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
+    def test_node_broken(self):
+        source = get_source('node_broken')
+        (nodes, functions) = get_digest('node_broken')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertRaises(
+         SignatureInconsistencyError, compare_nodesets,
+         nodes, digest_nodes
+        )
         
+    def test_node_expressions(self):
+        source = get_source('node_expressions')
+        (nodes, functions) = get_digest('node_expressions')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
+
