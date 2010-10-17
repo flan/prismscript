@@ -25,17 +25,43 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 from structure.syntax import parser as _parser
 from structure.syntax import (
  NODE, FUNCTION,
+ 
  STMT_GOTO, STMT_RETURN, STMT_EXIT,
+ 
  COND_IF, COND_ELIF, COND_ELSE,
- TERM_IDENTIFIER_LOCAL, TERM_IDENTIFIER_SCOPED, TERM_NONE, TERM_BOOL, TERM_STRING, TERM_INTEGER, TERM_FLOAT,
+ 
+ TERM_IDENTIFIER_LOCAL, TERM_IDENTIFIER_SCOPED, TERM_NONE, TERM_BOOL, TERM_STRING, TERM_INTEGER,
+ TERM_FLOAT,
+ 
  SEQUENCE,
+ 
  TEST_EQUALITY, TEST_INEQUALITY, TEST_GREATER_EQUAL, TEST_GREATER, TEST_LESSER_EQUAL, TEST_LESSER,
- MATH_MULTIPLY, MATH_DIVIDE, MATH_DIVIDE_INTEGER, MATH_ADD, MATH_SUBTRACT, MATH_AND, MATH_OR, MATH_NAND, MATH_NOR,
+ 
+ MATH_MULTIPLY, MATH_DIVIDE, MATH_DIVIDE_INTEGER, MATH_ADD, MATH_SUBTRACT, MATH_AND, MATH_OR,
+ MATH_NAND, MATH_NOR,
+ 
  FUNCTIONCALL_LOCAL, FUNCTIONCALL_SCOPED, FUNCTIONCALL_UNDEFINED,
- ASSIGN, ASSIGN_ADD, ASSIGN_SUBTRACT, ASSIGN_MULTIPLY, ASSIGN_DIVIDE, ASSIGN_DIVIDE_INTEGER, ASSIGN_SEQUENCE,
+ 
+ ASSIGN, ASSIGN_ADD, ASSIGN_SUBTRACT, ASSIGN_MULTIPLY, ASSIGN_DIVIDE, ASSIGN_DIVIDE_INTEGER,
+ ASSIGN_SEQUENCE,
 )
 
 def parse(source):
+    """
+    Digests a script as ``source`` and provides a (``nodes``, ``functions``, ``structure``) tuple as
+    output:
+
+    - ``nodes``: A dictionary of ``name``:``expressionlist`` items
+    - ``functions``: A dictionary of (``name``, ``parameters``):``expressionlist`` items
+    - ``structure``: The raw digest, of interest only for advanced applications or debugging
+
+    ``name`` is always a string, ``parameters`` is always a frozenset of strings, and
+    ``expressionlist`` items are any type of interpretable expression, as described in the
+    programming guide.
+
+    An invalid script will never be partially salvaged by this routine. If something is illegal,
+    `ValueError` will be raised.
+    """
     structure = _parser.parse(source)
 
     nodes = {}
