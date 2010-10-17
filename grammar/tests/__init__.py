@@ -343,6 +343,7 @@ def compare_types(generated, reference):
          'reference': reference[1:],
         })
 
+
 #Exceptions
 ###########
 class ConditionalInconsistencyError(Exception):
