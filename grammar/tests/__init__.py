@@ -22,21 +22,13 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 #Set up a reverse-lookup dictionary by reflecting the parser's namespace.
 import parser
-TOKEN_NAME_MAP = {}
+TOKEN_NAME_MAP = {} #: A reverse-lookup dictionary to get human-readable token identifiers.
 for attribute in dir(parser):
     if(attribute.isupper()):
         TOKEN_NAME_MAP[getattr(parser, attribute)] = attribute
-        
-def get_source(name):
-    """
-    Provides a source script, identified by ``name``.
 
-    The returned value is a string.
-    """
-    return open('test_sources/%(name)s.src' % {
-     'name': name,
-    }).read()
-
+#Data-access functions
+######################
 def get_digest(name):
     """
     Provides a previously serialized digest of a source script, identified by ``name``.
@@ -49,6 +41,184 @@ def get_digest(name):
     nodes = eval(digest.readline())
     functions = eval(digest.readline())
     return (nodes, functions)
+
+def get_source(name):
+    """
+    Provides a source script, identified by ``name``.
+
+    The returned value is a string.
+    """
+    return open('test_sources/%(name)s.src' % {
+     'name': name,
+    }).read()
+
+
+#Testing functions
+##################
+def compare_assignments(generated, reference):
+    """
+    Compares two assignments, to see if they are equal.
+
+    ``generated`` and ``reference`` are both assignments of any valid type.
+
+    Exceptions:
+
+    - If the assignments' targets are non-equal, `TermInconsistencyError` is raised.
+    - If the assignmnets' values are non-equal, a child of `ExpressionInconsistencyError`
+      is raised.
+    """
+    if not generated[1] == reference[1]:
+        raise TermInconsistencyError("Local identifier %(generated)s not equal to %(reference)s" % {
+         'generated': generated[1],
+         'reference': reference[1],
+        })
+    compare_expressions(generated[2], reference[2])
+
+def compare_conditionals(generated, reference):
+    """
+    Compares two conditional structures, to see if they are equal.
+
+    ``generated`` and ``reference`` are both conditional entry-points.
+
+    Exceptions:
+
+    - If the structure of the conditionals is non-equal, `ConditionalInconsistencyError` is raised.
+    - If the conditionals' qualifiers or directives are non-equal,
+      `ExpressionListInconsistencyError` or a child of `ExpressionInconsistencyError` is raised.
+    """
+    compare_expressions(generated[1][0], reference[1][0])
+    compare_expression_lists(generated[1][1], reference[1][1])
+    generated = generated[2:]
+    reference = reference[2:]
+
+    while generated and reference:
+        g = generated.pop(0)
+        r = reference.pop(0)
+        if g == r: #Python recursively compares all native data-types by default.
+            continue
+
+        compare_types(g, r)
+        if g[0] == parser.COND_ELIF:
+            compare_expressions(g[1], r[1])
+            compare_expression_lists(g[2], r[2])
+        elif g[0] == parser.COND_ELSE:
+            compare_expression_lists(g[1], r[1])
+    if generated:
+        raise ConditionalInconsistencyError("Additional elements in generated: %(elements)s" % {
+         'elements': generated,
+        })
+    if reference:
+        raise ConditionalInconsistencyError("Additional elements in reference: %(elements)s" % {
+         'elements': reference,
+        })
+
+def compare_expressions(generated, reference):
+    """
+    Compares two expressions, to see if they are equal.
+
+    ``generated`` and ``reference`` are both expressions of any valid type.
+
+    Exceptions:
+
+    - If the expressions are non-equal, a child of `ExpressionInconsistencyError` is raised.
+    """
+    if TOKEN_NAME_MAP[generated[0]].startswith('TERM'):
+        compare_terms(generated, reference)
+    elif TOKEN_NAME_MAP[generated[0]].startswith('SEQUENCE'):
+        compare_sequences(generated, reference)
+    elif TOKEN_NAME_MAP[generated[0]].startswith('FUNCTIONCALL'):
+        compare_functioncalls(generated, reference)
+    elif TOKEN_NAME_MAP[generated[0]].startswith('TEST'):
+        compare_tests(generated, reference)
+    elif TOKEN_NAME_MAP[generated[0]].startswith('MATH'):
+        compare_maths(generated, reference)
+
+def compare_expression_lists(generated, reference):
+    """
+    A means of ensuring that two expressionlists are identical.
+
+    ``generated`` and ``reference`` are both expressionlists.
+
+    Exceptions:
+    
+    - If one expressionlist is longer than the other, `ExpressionListInconsistencyError` is raised.
+    - Any other exception from this module may be raised on an appropriate trigger, with the
+      omission of `SignatureInconsistencyError`; this parent-function invokes everything else.
+    """
+    while generated and reference:
+        g = generated.pop(0)
+        r = reference.pop(0)
+        if g == r: #Python recursively compares all native data-types by default.
+            continue
+
+        compare_types(g, r)
+        if g[0] == parser.COND_IF:
+            compare_conditionals(g, r)
+        elif TOKEN_NAME_MAP[g[0]].startswith('ASSIGN'):
+            compare_assignments(g, r)
+        elif TOKEN_NAME_MAP[g[0]].startswith('STMT'):
+            compare_statements(g, r)
+        else:
+            compare_expressions(g, r)
+    if generated:
+        raise ExpressionListInconsistencyError("Additional elements in generated: %(elements)s" % {
+         'elements': generated,
+        })
+    if reference:
+        raise ExpressionListInconsistencyError("Additional elements in reference: %(elements)s" % {
+         'elements': reference,
+        })
+
+def compare_functioncalls(generated, reference):
+    """
+    Compares two functioncalls, to see if they are equal.
+
+    ``generated`` and ``reference`` are both functioncalls of any valid type.
+
+    Exceptions:
+
+    - If the targets are non-equal, `FunctionCallInconsistencyError` is raised.
+    - If the parameters are non-equal, `FunctionCallParametersInconsistencyError` is raised.
+    - If the arguments are non-equal, a child of `ExpressionInconsistencyError` is raised.
+    """
+    if generated[0] == parser.FUNCTIONCALL_UNDEFINED:
+        if not generated[1] == reference[1]:
+            raise TermInconsistencyError("Local identifier %(generated)s not equal to %(reference)s" % {
+             'generated': generated[1],
+             'reference': reference[1],
+            })
+    else:
+        if not generated[1] == reference[1]:
+            raise FunctionCallInconsistencyError("FunctionCall %(generated)s not equal to %(reference)s" % {
+             'generated': generated[1],
+             'reference': reference[1],
+            })
+
+        generated_kwarg_paramaters = set(generated[2].keys())
+        reference_kwarg_paramaters = set(reference[2].keys())
+        if generated_kwarg_paramaters.symmetric_difference(reference_kwarg_paramaters):
+            raise FunctionCallParametersInconsistencyError("%(functioncall)s parameters %(generated)s not equal to %(reference)s" % {
+             'functioncall': generated[1],
+             'generated': sorted(generated_kwarg_paramaters),
+             'reference': sorted(reference_kwarg_paramaters),
+            })
+
+        for (paramater, argument) in generated[2]:
+            compare_expressions(argument, reference[2].get(paramater))
+
+def compare_maths(generated, reference):
+    """
+    Compares two math-expressions, to see if they are equal.
+
+    ``generated`` and ``reference`` are both math-expressions of any valid type.
+
+    Exceptions:
+
+    - If the left- and right-hand sides are non-equal, a child of `ExpressionInconsistencyError` is
+      raised.
+    """
+    compare_expressions(generated[1], reference[1])
+    compare_expressions(generated[2], reference[2])
 
 def compare_nodesets(generated, reference):
     """
@@ -97,99 +267,22 @@ def compare_node_signatures(generated, reference):
          'summary': ';'.join(summaries),
         })
 
-def compare_expression_lists(generated, reference):
+def compare_sequences(generated, reference):
     """
-    A means of ensuring that two expressionlists are identical.
+    Compares two sequences, to see if they are equal.
 
-    ``generated`` and ``reference`` are both expressionlists.
-
-    Exceptions:
-    
-    - If one expressionlist is longer than the other, `ExpressionListInconsistencyError` is raised.
-    - Any other exception from this module may be raised on an appropriate trigger, with the
-      omission of `SignatureInconsistencyError`; this parent-function invokes everything else.
-    """
-    while generated and reference:
-        g = generated.pop(0)
-        r = reference.pop(0)
-        if g == r: #Python recursively compares all native data-types by default.
-            continue
-
-        compare_types(g, r)
-        if g[0] == parser.COND_IF:
-            compare_conditionals(g, r)
-        elif TOKEN_NAME_MAP[g[0]].startswith('ASSIGN'):
-            compare_assignments(g, r)
-        elif TOKEN_NAME_MAP[g[0]].startswith('STMT'):
-            compare_statements(g, r)
-        else:
-            compare_expressions(g, r)
-    if generated:
-        raise ExpressionListInconsistencyError("Additional elements in generated: %(elements)s" % {
-         'elements': generated,
-        })
-    if reference:
-        raise ExpressionListInconsistencyError("Additional elements in reference: %(elements)s" % {
-         'elements': reference,
-        })
-
-def compare_conditionals(generated, reference):
-    """
-    Compares two conditional structures, to see if they are equal.
-
-    ``generated`` and ``reference`` are both conditional entry-points.
+    ``generated`` and ``reference`` are both sequences of any valid type.
 
     Exceptions:
 
-    - If the structure of the conditionals is non-equal, `ConditionalInconsistencyError` is raised.
-    - If the conditionals' qualifiers or directives are non-equal,
-      `ExpressionListInconsistencyError` or a child of `ExpressionInconsistencyError` is raised.
-    """
-    compare_expressions(generated[1][0], reference[1][0])
-    compare_expression_lists(generated[1][1], reference[1][1])
-    generated = generated[2:]
-    reference = reference[2:]
-
-    while generated and reference:
-        g = generated.pop(0)
-        r = reference.pop(0)
-        if g == r: #Python recursively compares all native data-types by default.
-            continue
-
-        compare_types(g, r)
-        if g[0] == parser.COND_ELIF:
-            compare_expressions(g[1], r[1])
-            compare_expression_lists(g[2], r[2])
-        elif g[0] == parser.COND_ELSE:
-            compare_expression_lists(g[1], r[1])
-    if generated:
-        raise ConditionalInconsistencyError("Additional elements in generated: %(elements)s" % {
-         'elements': generated,
-        })
-    if reference:
-        raise ConditionalInconsistencyError("Additional elements in reference: %(elements)s" % {
-         'elements': reference,
-        })
-        
-def compare_assignments(generated, reference):
-    """
-    Compares two assignments, to see if they are equal.
-
-    ``generated`` and ``reference`` are both assignments of any valid type.
-
-    Exceptions:
-
-    - If the assignments' targets are non-equal, `TermInconsistencyError` is raised.
-    - If the assignmnets' values are non-equal, a child of `ExpressionInconsistencyError`
-      is raised.
+    - If the sequences are non-equal, `SequenceInconsistencyError` is raised.
     """
     if not generated[1] == reference[1]:
-        raise TermInconsistencyError("Local identifier %(generated)s not equal to %(reference)s" % {
+        raise SequenceInconsistencyError("Sequence %(generated)s not equal to %(reference)s" % {
          'generated': generated[1],
          'reference': reference[1],
         })
-    compare_expressions(generated[2], reference[2])
-    
+
 def compare_statements(generated, reference):
     """
     Compares two statements, to see if they are equal.
@@ -202,92 +295,6 @@ def compare_statements(generated, reference):
     """
     compare_expressions(generated[1], reference[1])
     
-def compare_expressions(generated, reference):
-    """
-    Compares two expressions, to see if they are equal.
-
-    ``generated`` and ``reference`` are both expressions of any valid type.
-
-    Exceptions:
-
-    - If the expressions are non-equal, a child of `ExpressionInconsistencyError` is raised.
-    """
-    if TOKEN_NAME_MAP[generated[0]].startswith('TERM'):
-        compare_terms(generated, reference)
-    elif TOKEN_NAME_MAP[generated[0]].startswith('SEQUENCE'):
-        compare_sequences(generated, reference)
-    elif TOKEN_NAME_MAP[generated[0]].startswith('FUNCTIONCALL'):
-        compare_functioncalls(generated, reference)
-    elif TOKEN_NAME_MAP[generated[0]].startswith('TEST'):
-        compare_tests(generated, reference)
-    elif TOKEN_NAME_MAP[generated[0]].startswith('MATH'):
-        compare_maths(generated, reference)
-
-def compare_maths(generated, reference):
-    """
-    Compares two math-expressions, to see if they are equal.
-
-    ``generated`` and ``reference`` are both math-expressions of any valid type.
-
-    Exceptions:
-
-    - If the left- and right-hand sides are non-equal, a child of `ExpressionInconsistencyError` is
-      raised.
-    """
-    compare_expressions(generated[1], reference[1])
-    compare_expressions(generated[2], reference[2])
-        
-def compare_tests(generated, reference):
-    """
-    Compares two tests, to see if they are equal.
-
-    ``generated`` and ``reference`` are both tests of any valid type.
-
-    Exceptions:
-
-    - If the left- and right-hand sides are non-equal, a child of `ExpressionInconsistencyError` is
-      raised.
-    """
-    compare_expressions(generated[1], reference[1])
-    compare_expressions(generated[2], reference[2])
-    
-def compare_functioncalls(generated, reference):
-    """
-    Compares two functioncalls, to see if they are equal.
-
-    ``generated`` and ``reference`` are both functioncalls of any valid type.
-
-    Exceptions:
-
-    - If the targets are non-equal, `FunctionCallInconsistencyError` is raised.
-    - If the parameters are non-equal, `FunctionCallParametersInconsistencyError` is raised.
-    - If the arguments are non-equal, a child of `ExpressionInconsistencyError` is raised.
-    """
-    if generated[0] == parser.FUNCTIONCALL_UNDEFINED:
-        if not generated[1] == reference[1]:
-            raise TermInconsistencyError("Local identifier %(generated)s not equal to %(reference)s" % {
-             'generated': generated[1],
-             'reference': reference[1],
-            })
-    else:
-        if not generated[1] == reference[1]:
-            raise FunctionCallInconsistencyError("FunctionCall %(generated)s not equal to %(reference)s" % {
-             'generated': generated[1],
-             'reference': reference[1],
-            })
-
-        generated_kwarg_paramaters = set(generated[2].keys())
-        reference_kwarg_paramaters = set(reference[2].keys())
-        if generated_kwarg_paramaters.symmetric_difference(reference_kwarg_paramaters):
-            raise FunctionCallParametersInconsistencyError("%(functioncall)s parameters %(generated)s not equal to %(reference)s" % {
-             'functioncall': generated[1],
-             'generated': sorted(generated_kwarg_paramaters),
-             'reference': sorted(reference_kwarg_paramaters),
-            })
-
-        for (paramater, argument) in generated[2]:
-            compare_expressions(argument, reference[2].get(paramater))
-
 def compare_terms(generated, reference):
     """
     Compares two terms, to see if they are equal.
@@ -304,22 +311,20 @@ def compare_terms(generated, reference):
          'reference': reference[1],
         })
 
-def compare_sequences(generated, reference):
+def compare_tests(generated, reference):
     """
-    Compares two sequences, to see if they are equal.
+    Compares two tests, to see if they are equal.
 
-    ``generated`` and ``reference`` are both sequences of any valid type.
+    ``generated`` and ``reference`` are both tests of any valid type.
 
     Exceptions:
 
-    - If the sequences are non-equal, `SequenceInconsistencyError` is raised.
+    - If the left- and right-hand sides are non-equal, a child of `ExpressionInconsistencyError` is
+      raised.
     """
-    if not generated[1] == reference[1]:
-        raise SequenceInconsistencyError("Sequence %(generated)s not equal to %(reference)s" % {
-         'generated': generated[1],
-         'reference': reference[1],
-        })
-        
+    compare_expressions(generated[1], reference[1])
+    compare_expressions(generated[2], reference[2])
+
 def compare_types(generated, reference):
     """
     Compares two types, to see if their contents can be further contrasted.
@@ -337,18 +342,9 @@ def compare_types(generated, reference):
          'generated': generated[1:],
          'reference': reference[1:],
         })
-        
-class SignatureInconsistencyError(Exception):
-    """
-    Indicates that the signatures of two nodesets are inconsistent.
-    """
-    
-class ExpressionListInconsistencyError(Exception):
-    """
-    Indicates that two expressionlists have irreconcilable differences, such as differences in
-    length.
-    """
 
+#Exceptions
+###########
 class ConditionalInconsistencyError(Exception):
     """
     Indicates that two conditional structures are different.
@@ -359,15 +355,11 @@ class ExpressionInconsistencyError(Exception):
     Indicates that two expressions are irreconcilably different, in cases where more specifc
     inconsistency errors aren't applicalbe.
     """
-
-class TermInconsistencyError(ExpressionInconsistencyError):
+    
+class ExpressionListInconsistencyError(Exception):
     """
-    Indicates that two terms have different values.
-    """
-
-class SequenceInconsistencyError(ExpressionInconsistencyError):
-    """
-    Indicates that two sequences have different values.
+    Indicates that two expressionlists have irreconcilable differences, such as differences in
+    length.
     """
     
 class FunctionCallInconsistencyError(ExpressionInconsistencyError):
@@ -380,3 +372,18 @@ class FunctionCallParametersInconsistencyError(ExpressionInconsistencyError):
     Indicates that two function calls have different keyword argument parameters.
     """
 
+class SequenceInconsistencyError(ExpressionInconsistencyError):
+    """
+    Indicates that two sequences have different values.
+    """
+
+class SignatureInconsistencyError(Exception):
+    """
+    Indicates that the signatures of two nodesets are inconsistent.
+    """
+
+class TermInconsistencyError(ExpressionInconsistencyError):
+    """
+    Indicates that two terms have different values.
+    """
+    
