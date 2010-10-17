@@ -159,7 +159,6 @@ def t_newline(t):
     t.lexer.lineno += len(t.value) - t.value.count('\r\n')
     
 t_ignore_whitespace = r'[ \t]'
-t_ignore_semicolon = ';'
 t_ignore_comment = r'(?:\#|//).*'
 
 
