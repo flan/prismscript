@@ -27,37 +27,6 @@ from . import (
  ConditionalInconsistencyError, ExpressionInconsistencyError, ExpressionListInconsistencyError,
 )
 
-class ExpressionListTestCase(unittest.TestCase):
-    def test_expressionlist(self):
-        source = get_source('expressionlist')
-        (nodes, functions) = get_digest('expressionlist')
-
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_expressionlist_broken(self):
-        source = get_source('expressionlist_broken')
-        (nodes, functions) = get_digest('expressionlist_broken')
-
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
-
-        self.assertRaises(
-         ExpressionInconsistencyError, compare_nodesets,
-         nodes, digest_nodes
-        )
-
-    def test_expressionlist_broken_2(self):
-        source = get_source('expressionlist_broken_2')
-        (nodes, functions) = get_digest('expressionlist_broken_2')
-
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
-
-        self.assertRaises(
-         ExpressionListInconsistencyError, compare_nodesets,
-         nodes, digest_nodes
-        )
-
 class ConditionalTestCase(unittest.TestCase):
     def test_conditional(self):
         source = get_source('conditional')
@@ -161,4 +130,36 @@ class ConditionalTestCase(unittest.TestCase):
         (digest_nodes, digest_functions, digest) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
+
+class ExpressionListTestCase(unittest.TestCase):
+    def test_expressionlist(self):
+        source = get_source('expressionlist')
+        (nodes, functions) = get_digest('expressionlist')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
+    def test_expressionlist_broken(self):
+        source = get_source('expressionlist_broken')
+        (nodes, functions) = get_digest('expressionlist_broken')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertRaises(
+         ExpressionInconsistencyError, compare_nodesets,
+         nodes, digest_nodes
+        )
+
+    def test_expressionlist_broken_2(self):
+        source = get_source('expressionlist_broken_2')
+        (nodes, functions) = get_digest('expressionlist_broken_2')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertRaises(
+         ExpressionListInconsistencyError, compare_nodesets,
+         nodes, digest_nodes
+        )
         
