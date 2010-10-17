@@ -162,4 +162,37 @@ class ExpressionListTestCase(unittest.TestCase):
          ExpressionListInconsistencyError, compare_nodesets,
          nodes, digest_nodes
         )
+
+class WhileTestCase(unittest.TestCase):
+    def test_while(self):
+        source = get_source('while')
+        (nodes, functions) = get_digest('while')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
+    def test_while_break(self):
+        source = get_source('while_break')
+        (nodes, functions) = get_digest('while_break')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
+    def test_while_continue(self):
+        source = get_source('while_continue')
+        (nodes, functions) = get_digest('while_continue')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         
+    def test_while_nested(self):
+        source = get_source('while_nested')
+        (nodes, functions) = get_digest('while_nested')
+
+        (digest_nodes, digest_functions, digest) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+

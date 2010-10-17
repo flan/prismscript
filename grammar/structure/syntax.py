@@ -33,9 +33,12 @@ FUNCTION = 1
 STMT_GOTO = 10
 STMT_RETURN = 11
 STMT_EXIT = 12
+STMT_BREAK = 13
+STMT_CONTINUE = 14
 COND_IF = 20
 COND_ELIF = 21
 COND_ELSE = 22
+COND_WHILE = 23
 TERM_IDENTIFIER_LOCAL = 30
 TERM_IDENTIFIER_SCOPED = 31
 TERM_NONE = 32
@@ -141,6 +144,7 @@ def p_argumentset(p):
 def p_expressionlist(p):
     r"""
     expressionlist : expressionlist conditional
+                   | expressionlist while
                    | expressionlist assignment SEMICOLON
                    | expressionlist statement SEMICOLON
                    | expressionlist expression SEMICOLON
@@ -176,7 +180,13 @@ def p_conditionalterminal(p):
         p[0] = []
     else:
         p[0] = [(COND_ELSE, p[3])]
-        
+
+def p_while(p):
+    r"""
+    while : WHILE LPAREN expression RPAREN LCURLY expressionlist RCURLY
+    """
+    p[0] = (COND_WHILE, p[3], p[6])
+    
 def p_assignment(p):
     r"""
     assignment : IDENTIFIER_LOCAL ASSIGN expression
@@ -232,6 +242,16 @@ def p_statement_exit(p):
         p[0] = (STMT_EXIT, (TERM_STRING, ''))
     elif len(p) == 3:
         p[0] = (STMT_EXIT, p[2])
+def p_statement_break(p):
+    r"""
+    statement : STMT_BREAK
+    """
+    p[0] = (STMT_BREAK,)
+def p_statement_continue(p):
+    r"""
+    statement : STMT_CONTINUE
+    """
+    p[0] = (STMT_CONTINUE,)
 
 def p_expression(p):
     r"""

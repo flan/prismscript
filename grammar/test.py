@@ -54,6 +54,7 @@ if __name__ == '__main__':
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(tests.structure.ExpressionListTestCase),
       unittest.TestLoader().loadTestsFromTestCase(tests.structure.ConditionalTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(tests.structure.WhileTestCase),
      )),
     ))
     unittest.TextTestRunner().run(all_tests)

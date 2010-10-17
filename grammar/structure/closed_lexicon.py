@@ -28,6 +28,7 @@ reserved = {
  'if': 'IF',
  'elif': 'ELIF',
  'else': 'ELSE',
+ 'while': 'WHILE',
  #states
  'None': 'NONE',
  #literals
@@ -45,6 +46,8 @@ reserved = {
  'goto': 'STMT_GOTO',
  'return': 'STMT_RETURN',
  'exit': 'STMT_EXIT',
+ 'break': 'STMT_BREAK',
+ 'continue': 'STMT_CONTINUE',
 }
 
 tokens = [
