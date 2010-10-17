@@ -23,16 +23,17 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 import unittest
 
-import parser
-
-import tests
+from . import parser
+from . import (
+ get_source, get_digest, compare_nodesets,
+)
 
 class TheoreticalTestCase(unittest.TestCase):
     def test_io_model(self):
-        source = tests.get_source('theoretical_io_model')
-        (nodes, functions) = tests.get_digest('theoretical_io_model')
+        source = get_source('theoretical_io_model')
+        (nodes, functions) = get_digest('theoretical_io_model')
 
         (digest_nodes, digest_functions, digest) = parser.parse(source)
 
-        self.assertEquals(tests.compare_nodesets(nodes, digest_nodes), None)
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         

@@ -25,7 +25,7 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 import ply.yacc
 
-from closed_lexicon import tokens
+from .closed_lexicon import tokens
 
 #Type definitions
 NODE = 0
