@@ -44,6 +44,6 @@ def parse(source):
         if node[0] == NODE:
             nodes[node[1]] = node[2]
         elif node[0] == FUNCTION:
-            functions[(node[1], tuple(sorted(node[2])))] = node[3]
+            functions[(node[1], frozenset(node[2]))] = node[3]
     return (nodes, functions, structure)
     
