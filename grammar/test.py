@@ -28,12 +28,12 @@ return or an exception. Just something to keep in mind while reading.
 """
 import unittest
 
-import parser
+import .parser
 
-from tests import primitive
-from tests import structure
-from tests import expressions
-from tests import realistic
+from .tests import primitive
+from .tests import structure
+from .tests import expressions
+from .tests import realistic
 
 if __name__ == '__main__':
     all_tests = unittest.TestSuite((
