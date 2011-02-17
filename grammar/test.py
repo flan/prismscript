@@ -30,31 +30,35 @@ import unittest
 
 import parser
 
-import tests.primitive
-import tests.structure
-import tests.expressions
+from tests import primitive
+from tests import structure
+from tests import expressions
+from tests import realistic
 
 if __name__ == '__main__':
     all_tests = unittest.TestSuite((
      unittest.TestSuite((
-      unittest.TestLoader().loadTestsFromTestCase(tests.primitive.NodeTestCase),
-      unittest.TestLoader().loadTestsFromTestCase(tests.primitive.FunctionTestCase),
-      unittest.TestLoader().loadTestsFromTestCase(tests.primitive.NamespaceTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(primitive.NodeTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(primitive.FunctionTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(primitive.NamespaceTestCase),
      )),
      unittest.TestSuite((
-      unittest.TestLoader().loadTestsFromTestCase(tests.expressions.CommentsTestCase),
-      unittest.TestLoader().loadTestsFromTestCase(tests.expressions.TermsTestCase),
-      unittest.TestLoader().loadTestsFromTestCase(tests.expressions.MathsTestCase),
-      unittest.TestLoader().loadTestsFromTestCase(tests.expressions.TestsTestCase),
-      unittest.TestLoader().loadTestsFromTestCase(tests.expressions.SequencesTestCase),
-      unittest.TestLoader().loadTestsFromTestCase(tests.expressions.StatementsTestCase),
-      unittest.TestLoader().loadTestsFromTestCase(tests.expressions.AssignmentsTestCase),
-      unittest.TestLoader().loadTestsFromTestCase(tests.expressions.FunctionCallsTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.CommentsTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.TermsTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.MathsTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.TestsTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.SequencesTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.StatementsTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.AssignmentsTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.FunctionCallsTestCase),
      )),
      unittest.TestSuite((
-      unittest.TestLoader().loadTestsFromTestCase(tests.structure.ExpressionListTestCase),
-      unittest.TestLoader().loadTestsFromTestCase(tests.structure.ConditionalTestCase),
-      unittest.TestLoader().loadTestsFromTestCase(tests.structure.WhileTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(structure.ExpressionListTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(structure.ConditionalTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(structure.WhileTestCase),
+     )),
+     unittest.TestSuite((
+      unittest.TestLoader().loadTestsFromTestCase(realistic.TheoreticalTestCase),
      )),
     ))
     unittest.TextTestRunner().run(all_tests)
