@@ -363,9 +363,9 @@ def p_term(p):
          | INTEGER
          | FLOAT
     """
-    if isinstance(p[1], basestring):
+    if isinstance(p[1], str):
         p[0] = (TERM_STRING, p[1])
-    elif type(p[1]) in (int, long):
+    elif type(p[1]) == int:
         p[0] = (TERM_INTEGER, p[1])
     elif type(p[1]) == float:
         p[0] = (TERM_FLOAT, p[1])

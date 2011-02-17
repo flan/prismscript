@@ -234,7 +234,7 @@ def compare_nodesets(generated, reference):
     """
     compare_node_signatures(generated, reference)
 
-    for (signature, expressionlist) in generated.iteritems():
+    for (signature, expressionlist) in generated.items():
         compare_expression_lists(expressionlist[:], reference[signature][:])
         
 def compare_node_signatures(generated, reference):
