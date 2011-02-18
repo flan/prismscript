@@ -21,7 +21,7 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
 #Set up a reverse-lookup dictionary by reflecting the parser's namespace.
-import parser
+from .. import parser
 TOKEN_NAME_MAP = {} #: A reverse-lookup dictionary to get human-readable token identifiers.
 for attribute in dir(parser):
     if(attribute.isupper()):
@@ -35,7 +35,7 @@ def get_digest(name):
 
     A pair of dictionaries, one of nodes and one of functions, is returned.
     """
-    digest = open('test_sources/%(name)s.dgst' % {
+    digest = open('grammar/test_sources/%(name)s.dgst' % {
      'name': name,
     })
     nodes = eval(digest.readline())
@@ -48,7 +48,7 @@ def get_source(name):
 
     The returned value is a string.
     """
-    return open('test_sources/%(name)s.src' % {
+    return open('grammar/test_sources/%(name)s.src' % {
      'name': name,
     }).read()
 

@@ -21,7 +21,7 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 import unittest
 
-from . import parser
+from .. import parser
 from . import (
  get_source, get_digest, compare_nodesets,
  SignatureInconsistencyError,
