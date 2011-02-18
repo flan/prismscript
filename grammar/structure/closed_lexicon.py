@@ -37,14 +37,7 @@ reserved = {
  #operands
  'and': 'AND',
  'or': 'OR',
- 'nand': 'NAND',
- 'nor': 'NOR',
  'xor': 'XOR',
- #functions
- '__undefined': 'UNDEFINED',
- #variables
- '__error_code': 'ERROR_CODE',
- '__error_msg': 'ERROR_MSG',
  #statements
  'goto': 'STMT_GOTO',
  'return': 'STMT_RETURN',

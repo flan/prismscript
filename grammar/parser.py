@@ -22,8 +22,8 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unpo
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or send a
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
-from structure.syntax import parser as _parser
-from structure.syntax import (
+from .structure.syntax import parser as _parser
+from .structure.syntax import (
  STMT_GOTO, STMT_RETURN, STMT_EXIT,
  STMT_BREAK, STMT_CONTINUE,
  
@@ -33,14 +33,13 @@ from structure.syntax import (
  TERM_IDENTIFIER_LOCAL, TERM_IDENTIFIER_LOCAL_LOCAL, TERM_IDENTIFIER_LOCAL_GLOBAL,
  TERM_IDENTIFIER_SCOPED,
  TERM_NONE, TERM_BOOL, TERM_STRING, TERM_INTEGER, TERM_FLOAT,
- TERM_ERROR_CODE, TERM_ERROR_MSG,
  
  SEQUENCE,
  
  TEST_EQUALITY, TEST_INEQUALITY, TEST_GREATER_EQUAL, TEST_GREATER, TEST_LESSER_EQUAL, TEST_LESSER,
  
  MATH_MULTIPLY, MATH_DIVIDE, MATH_DIVIDE_INTEGER, MATH_ADD, MATH_SUBTRACT, MATH_MOD,
- MATH_AND, MATH_OR, MATH_NAND, MATH_NOR,
+ MATH_AND, MATH_OR, MATH_XOR,
  
  FUNCTIONCALL_LOCAL, FUNCTIONCALL_SCOPED, FUNCTIONCALL_UNDEFINED,
  

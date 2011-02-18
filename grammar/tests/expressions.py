@@ -119,14 +119,6 @@ class FunctionCallsTestCase(unittest.TestCase):
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
-    def test_undefined(self):
-        source = get_source('functioncall_undefined')
-        (nodes, functions) = get_digest('functioncall_undefined')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
 
 class MathsTestCase(unittest.TestCase):
     def test_add(self):
@@ -180,22 +172,6 @@ class MathsTestCase(unittest.TestCase):
     def test_and(self):
         source = get_source('math_and')
         (nodes, functions) = get_digest('math_and')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_nand(self):
-        source = get_source('math_nand')
-        (nodes, functions) = get_digest('math_nand')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_nor(self):
-        source = get_source('math_nor')
-        (nodes, functions) = get_digest('math_nor')
 
         (digest_nodes, digest_functions) = parser.parse(source)
 
@@ -316,14 +292,6 @@ class TermsTestCase(unittest.TestCase):
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         
-    def test_error(self):
-        source = get_source('term_error')
-        (nodes, functions) = get_digest('term_error')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
 
 class TestsTestCase(unittest.TestCase):
     def test_equality(self):

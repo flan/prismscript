@@ -44,8 +44,6 @@ TERM_BOOL = 33
 TERM_STRING = 34
 TERM_INTEGER = 35
 TERM_FLOAT = 36
-TERM_ERROR_CODE = 37
-TERM_ERROR_MSG = 38
 TERM_IDENTIFIER_LOCAL_LOCAL = 39
 TERM_IDENTIFIER_LOCAL_GLOBAL = 1030
 SEQUENCE = 40
@@ -62,8 +60,6 @@ MATH_ADD = 73
 MATH_SUBTRACT = 74
 MATH_AND = 75
 MATH_OR = 76
-MATH_NAND = 77
-MATH_NOR = 78
 MATH_XOR = 79
 MATH_MOD = 1070
 FUNCTIONCALL_LOCAL = 80
@@ -81,7 +77,7 @@ ASSIGN_MOD = 97
 precedence = (
  ('right',
    'EQUALITY', 'INEQUALITY', 'GREATER_EQUAL', 'GREATER', 'LESSER_EQUAL', 'LESSER',
-   'AND', 'OR', 'NAND', 'NOR', 'XOR',
+   'AND', 'OR', 'XOR',
  ),
  ('left', 'ADD', 'SUBTRACT',),
  ('left', 'MULTIPLY', 'DIVIDE', 'DIVIDE_INTEGER', 'MOD'),
@@ -278,8 +274,6 @@ def p_expression_math(p):
                | expression MOD expression
                | expression AND expression
                | expression OR expression
-               | expression NAND expression
-               | expression NOR expression
                | expression XOR expression
     """
     if p[2] == '+':
@@ -298,10 +292,6 @@ def p_expression_math(p):
         p[0] = (MATH_AND, p[1], p[3])
     elif p[2] == 'or':
         p[0] = (MATH_OR, p[1], p[3])
-    elif p[2] == 'nand':
-        p[0] = (MATH_NAND, p[1], p[3])
-    elif p[2] == 'nor':
-        p[0] = (MATH_NOR, p[1], p[3])
     elif p[2] == 'xor':
         p[0] = (MATH_XOR, p[1], p[3])
 def p_expression_test(p):
@@ -355,12 +345,7 @@ def p_functioncall_local(p):
     functioncall : IDENTIFIER_LOCAL LPAREN argumentset RPAREN
     """
     p[0] = (FUNCTIONCALL_LOCAL, p[1], p[3])
-def p_functioncall_test_undefined(p):
-    r"""
-    functioncall : UNDEFINED LPAREN identifier_local RPAREN
-    """
-    p[0] = (FUNCTIONCALL_UNDEFINED, p[3])
-    
+
 def p_term(p):
     r"""
     term : STRING
@@ -385,15 +370,6 @@ def p_term_special(p):
         p[0] = (TERM_BOOL, True)
     elif p[1] == 'False':
         p[0] = (TERM_BOOL, False)
-def p_term_internal(p):
-    r"""
-    term : ERROR_CODE
-         | ERROR_MSG
-    """
-    if p[1] == '__error_code':
-        p[0] = (TERM_ERROR_CODE,)
-    elif p[1] == '__error_msg':
-        p[0] = (TERM_ERROR_MSG,)
 def p_term_identifier_scoped(p):
     r"""
     term : IDENTIFIER_SCOPED
