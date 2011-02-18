@@ -346,18 +346,23 @@ def compare_types(generated, reference):
 
 #Exceptions
 ###########
-class ConditionalInconsistencyError(Exception):
+class Error(Exception):
+    """
+    The base class from which all exceptions native to this package inherit.
+    """
+    
+class ConditionalInconsistencyError(Error):
     """
     Indicates that two conditional structures are different.
     """
     
-class ExpressionInconsistencyError(Exception):
+class ExpressionInconsistencyError(Error):
     """
     Indicates that two expressions are irreconcilably different, in cases where more specifc
     inconsistency errors aren't applicalbe.
     """
     
-class ExpressionListInconsistencyError(Exception):
+class ExpressionListInconsistencyError(Error):
     """
     Indicates that two expressionlists have irreconcilable differences, such as differences in
     length.
@@ -378,7 +383,7 @@ class SequenceInconsistencyError(ExpressionInconsistencyError):
     Indicates that two sequences have different values.
     """
 
-class SignatureInconsistencyError(Exception):
+class SignatureInconsistencyError(Error):
     """
     Indicates that the signatures of two nodesets are inconsistent.
     """

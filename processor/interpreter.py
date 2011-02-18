@@ -13,7 +13,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 0.2.0 : Feb. 17, 2011
+:Version: 0.3.0 : Feb. 18, 2011
 
 Legal
 -----
@@ -23,11 +23,7 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 from .grammar import parser
 """
- STMT_GOTO, STMT_RETURN, STMT_EXIT,
- STMT_BREAK, STMT_CONTINUE,
- 
  COND_IF, COND_ELIF, COND_ELSE,
- COND_WHILE,
  
  SEQUENCE, ASSIGN_SEQUENCE
  
@@ -51,7 +47,6 @@ class Interpreter:
     _nodes = None #A dictionary of nodes
     _globals = None #A dictionary of global variables
     
-    _exit_flag = False #True once an exit-directive has been invoked; causes scopes to break
     _log = None #A high-level execution log to aid debugging
     
     def __init__(self, script):
@@ -70,7 +65,13 @@ class Interpreter:
         Begins execution of the named function, with the given `arguments`, which are a dictionary
         of parameter-name/value items. The function's parameter-list must match the given arguments.
         
+        If the function terminates with a ``return`` statement, the specified value is returned.
+        Otherwise, ``None`` is returned by default.
+        
         If a problem occurs, an `ExecutionError` is raised.
+        
+        If execution terminates with an ``exit`` statement, `StatementExit` is raised and the
+        exit-value string may be obtained from its `value` attribute.
         """
         container_name = "%(name)s(%(args)s)" % {
          'name': function_name,
@@ -80,12 +81,14 @@ class Interpreter:
          'name': container_name,
         })
         
-        function = self._functions.get(function_name, frozenset(arguments.keys()))
+        function = self._functions.get((function_name, frozenset(arguments.keys())))
         if function is None:
             raise FunctionNotFoundError(container_name, "Function not defined")
             
         try:
-            self._process_statements(function, seed_locals=arguments)
+            return self._process_statements(function, seed_locals=arguments, function=True)
+        except StatementExit:
+            raise
         except ExecutionError as e:
             raise ExecutionError(container_name, e.location_path, e.message)
         except Exception as e:
@@ -98,6 +101,9 @@ class Interpreter:
         Begins execution of the named node.
         
         If a problem occurs, an `ExecutionError` is raised.
+        
+        If execution terminates with an ``exit`` statement, `StatementExit` is raised and the
+        exit-value string may be obtained from its `value` attribute.
         """
         self._log.append("Executing node '%(name)s'..." % {
          'name': node_name,
@@ -109,6 +115,10 @@ class Interpreter:
             
         try:
             self._process_statements(node)
+        except StatementExit:
+            raise
+        except StatementReturn as e:
+            raise StatementExit(e.value)
         except ExecutionError as e:
             raise ExecutionError(node_name, e.location_path, e.message)
         except Exception as e:
@@ -126,12 +136,12 @@ class Interpreter:
     def list_functions(self):
         """
         Provides a list of all functions defined within the interpreter's local environment.
-        
+        COND_WHILE
         The value returned is a sequence of names coupled with sets containing lists of named
         parameters.
         """
         return self._functions.keys()
-        
+        scope[identifier[1]]
     def list_nodes(self):
         """
         Provides a list of all nodes defined within the interpreter's local environment.
@@ -193,7 +203,8 @@ class Interpreter:
         if method == parser.ASSIGN_ADD:
             if isinstance(scope[identifier[1]], str) or isinstance(expression_result, str):
                 scope[identifier[1]] = ''.join((str(scope[identifier[1]]), str(expression_result)))
-            scope[identifier[1]] += expression_result
+            else:
+                scope[identifier[1]] += expression_result
         elif method == parser.ASSIGN_SUBTRACT:
             scope[identifier[1]] -= expression_result
         elif method == parser.ASSIGN_MULTIPLY:
@@ -250,7 +261,8 @@ class Interpreter:
         if method == parser.MATH_ADD:
             if isinstance(result_left, str) or isinstance(result_right, str):
                 return ''.join((str(result_left), str(result_right)))
-            return result_left + result_right
+            else:
+                return result_left + result_right
         elif method == parser.MATH_SUBTRACT:
             return result_left - result_right
         elif method == parser.MATH_MULTIPLY:
@@ -297,12 +309,21 @@ class Interpreter:
         ):
             return self._compare(expression[1], expression[2], expression[0], _locals)
             
-    def _process_statements(self, statement_list, scope_locals=None, seed_locals=None):
+    def _process_statements(self,
+     statement_list,
+     function=False, while_expression=None,
+     scope_locals=None, seed_locals=None
+    ):
         """
         Processes all statements within an execution-scope, such as a node, function, or conditional
         wrapper.
         
         `statement_list` is a sequence of statements to be processed in order.
+        
+        `function` indicates whether this statement-body is directly below a function, meaning that
+        a returned value is expected.
+        
+        `while_expression`, if set, causes a while-loop to be executed until it fails to hold true.
         
         `scope_locals` is an optional dictionary that, if provided, will be used as this scope's
         local variable store, rather than having a new one defined. This is generally expected
@@ -323,22 +344,53 @@ class Interpreter:
             _locals = scope_locals
         if not seed_locals is None: #Values were provided to be added to the local variables
             _locals.update(seed_locals)
-        for (i, statement) in enumerate(statement_list):
-            if self._exit_flag:
-                break
-                
+            
+        _while_expression = while_expression
+        if not while_expression: #Let the loop execute; this is inverted at the end.
+            _while_expression = (parser.TERM_BOOL, True)
+        while bool(self._evaluate_expression(_while_expression, _locals)):
+            i = 0 #Statement-enumerator for exception-tracing.
             try:
-                if statement[0] == parser.ASSIGN:
-                    self._assign(statement[1], statement[2], _locals)
-                elif statement[0] in (
-                 parser.ASSIGN_ADD, parser.ASSIGN_SUBTRACT, parser.ASSIGN_MULTIPLY,
-                 parser.ASSIGN_DIVIDE, parser.ASSIGN_DIVIDE_INTEGER, parser.ASSIGN_MOD,
-                 parser.ASSIGN_SEQUENCE
-                ):
-                    self._assign_augment(statement[1], statement[2], statement[0], _locals)
-                else:
-                    print(TOKEN_NAME_MAP[statement[0]])
-                    print(statement)
+                for (i, statement) in enumerate(statement_list):
+                    if statement[0] == parser.ASSIGN:
+                        self._assign(statement[1], statement[2], _locals)
+                    elif statement[0] in (
+                     parser.ASSIGN_ADD, parser.ASSIGN_SUBTRACT, parser.ASSIGN_MULTIPLY,
+                     parser.ASSIGN_DIVIDE, parser.ASSIGN_DIVIDE_INTEGER, parser.ASSIGN_MOD,
+                     parser.ASSIGN_SEQUENCE
+                    ):
+                        self._assign_augment(statement[1], statement[2], statement[0], _locals)
+                    elif statement[0] == parser.STMT_RETURN:
+                        raise StatementReturn(self._evaluate_expression(statement[1], _locals))
+                    elif statement[0] == parser.STMT_GOTO:
+                        self.execute_node(statement[1])
+                        return
+                    elif statement[0] == parser.COND_WHILE:
+                        self._process_statements(statement[2], while_expression=statement[1], scope_locals=_locals)
+                    elif statement[0] == parser.STMT_BREAK:
+                        raise StatementBreak()
+                    elif statement[0] == parser.STMT_CONTINUE:
+                        raise StatementContinue()
+                        
+                    elif statement[0] == parser.STMT_EXIT:
+                        raise StatementExit(str(self._evaluate_expression(statement[1], _locals)))
+                    else:
+                        print(TOKEN_NAME_MAP.get(statement[0]))
+                        print(statement)
+            except StatementBreak:
+                if not while_expression:
+                    raise ExecutionError(str(i + 1), [], "`break` statement not allowed outside of a loop")
+                break
+            except StatementContinue:
+                if not while_expression:
+                    raise ExecutionError(str(i + 1), [], "`continue` statement not allowed outside of a loop")
+                continue
+            except StatementReturn as e:
+                if function:
+                    return e.value
+                raise
+            except FlowControl: #Allow other control-directives to pass.
+                raise
             except ExecutionError as e:
                 raise ExecutionError(str(i + 1), e.location_path, e.message)
             except Error as e:
@@ -347,6 +399,9 @@ class Interpreter:
                 raise ExecutionError(str(i + 1), [], "An unexpected error occurred: %(error)s" % {
                  'error': str(e),
                 })
+                
+            if not while_expression: #It's not actually a loop, so kill it.
+                _while_expression = (parser.TERM_BOOL, False)
         print(_locals)
         
     def _resolve_local_identifier(self, identifier, _locals):
@@ -424,7 +479,7 @@ class ExecutionError(Error):
         }
         
 class NamespaceLookupError(Error):
-    """
+    """str(self._evaluate_expression(statement[1], _locals))
     Indicates that the requested namespace element could not be found.
     """
     def __init__(self, identifier, message="No additional information available"):
@@ -458,3 +513,35 @@ class ScopedVariableNotFoundError(VariableNotFoundError):
     Indicates that the requested scoped variable was not found.
     """
     
+    
+class FlowControl(Exception):
+    """
+    The base class from which flow-control events inherit.
+    """
+    
+class StatementBreak(FlowControl):
+    """
+    Indicates that a ``break`` statement was encountered.
+    """
+    
+class StatementContinue(FlowControl):
+    """
+    Indicates that a ``continue`` statement was encountered.
+    """
+    
+class StatementExit(FlowControl):
+    """
+    Indicates that an ``exit`` statement was encountered.
+    """
+    value = None
+    def __init__(self, value):
+        self.value = value
+        
+class StatementReturn(FlowControl):
+    """
+    Indicates that a ``return`` statement was encountered.
+    """
+    value = None
+    def __init__(self, value):
+        self.value = value
+        
