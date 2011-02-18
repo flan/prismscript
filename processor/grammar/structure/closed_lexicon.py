@@ -63,6 +63,8 @@ tokens = [
  'GREATER',
  'LESSER_EQUAL',
  'LESSER',
+ 'BOOL_AND',
+ 'BOOL_OR',
  #assignments
  'ASSIGN',
  'ASSIGN_ADD',
@@ -131,6 +133,8 @@ t_GREATER_EQUAL = r'>='
 t_GREATER = r'>'
 t_LESSER_EQUAL = r'<='
 t_LESSER = r'<'
+t_BOOL_AND = r'\&\&'
+t_BOOL_OR = r'\|\|'
 
 t_ASSIGN = r'='
 t_ASSIGN_ADD = r'\+='

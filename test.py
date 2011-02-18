@@ -29,12 +29,16 @@ return or an exception. Just something to keep in mind while reading.
 import unittest
 
 from processor.tests import functions
+from processor.tests import complex
 
 if __name__ == '__main__':
     all_tests = unittest.TestSuite((
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(functions.MathTestCase),
      )),
+     unittest.TestSuite((
+      unittest.TestLoader().loadTestsFromTestCase(complex.NestedCase),
+     ))
     ))
     unittest.TextTestRunner().run(all_tests)
     

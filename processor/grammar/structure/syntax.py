@@ -53,6 +53,8 @@ TEST_GREATER_EQUAL = 52
 TEST_GREATER = 53
 TEST_LESSER_EQUAL = 54
 TEST_LESSER = 55
+TEST_BOOL_OR = 56
+TEST_BOOL_AND = 57
 MATH_MULTIPLY = 70
 MATH_DIVIDE = 71
 MATH_DIVIDE_INTEGER = 72
@@ -80,7 +82,8 @@ precedence = (
    'AND', 'OR', 'XOR',
  ),
  ('left', 'ADD', 'SUBTRACT',),
- ('left', 'MULTIPLY', 'DIVIDE', 'DIVIDE_INTEGER', 'MOD'),
+ ('left', 'MULTIPLY', 'DIVIDE', 'DIVIDE_INTEGER', 'MOD',),
+ ('left', 'BOOL_OR', 'BOOL_AND',),
 )
 
 start = 'nodelist'
@@ -302,6 +305,8 @@ def p_expression_test(p):
                | expression GREATER expression
                | expression LESSER_EQUAL expression
                | expression LESSER expression
+               | expression BOOL_OR expression
+               | expression BOOL_AND expression
     """
     if p[2] == '==':
         p[0] = (TEST_EQUALITY, p[1], p[3])
@@ -315,6 +320,10 @@ def p_expression_test(p):
         p[0] = (TEST_LESSER_EQUAL, p[1], p[3])
     elif p[2] == '<':
         p[0] = (TEST_LESSER, p[1], p[3])
+    elif p[2] == '||':
+        p[0] = (TEST_BOOL_OR, p[1], p[3])
+    elif p[2] == '&&':
+        p[0] = (TEST_BOOL_AND, p[1], p[3])
         
 def p_sequence(p):
     r"""

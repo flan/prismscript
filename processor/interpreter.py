@@ -23,8 +23,6 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 from .grammar import parser
 """
- COND_IF, COND_ELIF, COND_ELSE,
- 
  SEQUENCE, ASSIGN_SEQUENCE
  
  FUNCTIONCALL_LOCAL, FUNCTIONCALL_SCOPED, FUNCTIONCALL_UNDEFINED,
@@ -228,21 +226,26 @@ class Interpreter:
         
         A boolean value is returned.
         """
-        result_left = self._evaluate_expression(expression_left, _locals)
-        result_right = self._evaluate_expression(expression_right, _locals)
-        if method == parser.TEST_EQUALITY:
-            return result_left == result_right
-        elif method == parser.TEST_INEQUALITY:
-            return result_left != result_right
-        elif method == parser.TEST_GREATER_EQUAL:
-            return result_left >= result_right
-        elif method == parser.TEST_GREATER:
-            return result_left > result_right
-        elif method == parser.TEST_LESSER_EQUAL:
-            return result_left <= result_right
-        elif method == parser.TEST_LESSER:
-            return result_left < result_right
-            
+        if method == parser.TEST_BOOL_OR:
+            return bool(self._evaluate_expression(expression_left, _locals)) or bool(self._evaluate_expression(expression_right, _locals))
+        elif method == parser.TEST_BOOL_AND:
+            return bool(self._evaluate_expression(expression_left, _locals)) and bool(self._evaluate_expression(expression_right, _locals))
+        else: #Lazy evaluation's not an option, so just evaluate both upfront
+            result_left = self._evaluate_expression(expression_left, _locals)
+            result_right = self._evaluate_expression(expression_right, _locals)
+            if method == parser.TEST_EQUALITY:
+                return result_left == result_right
+            elif method == parser.TEST_INEQUALITY:
+                return result_left != result_right
+            elif method == parser.TEST_GREATER_EQUAL:
+                return result_left >= result_right
+            elif method == parser.TEST_GREATER:
+                return result_left > result_right
+            elif method == parser.TEST_LESSER_EQUAL:
+                return result_left <= result_right
+            elif method == parser.TEST_LESSER:
+                return result_left < result_right
+                
     def _compute(self, expression_left, expression_right, method, _locals):
         """
         Performs a mathematic operation on two expressions.
@@ -280,6 +283,32 @@ class Interpreter:
         elif method == parser.MATH_XOR:
             return result_left ^ result_right
             
+    def _evaluate_conditional(self, statement, _locals):
+        """
+        Processes a conditional-block, executing the appropriate statement-list, if any conditions
+        are met.
+        
+        `statement` is the statement being processed, minus the ``COND_IF`` head and `_locals` is
+        the local variable store.
+        
+        Execution behaviour and exceptions are identical to `_process_statements`.
+        """
+        statement_list = None
+        if bool(self._evaluate_expression(statement[0][0], _locals)):
+            statement_list = statement[0][1]
+        else:
+            for substatement in statement[1:]:
+                if substatement[0] == parser.COND_ELIF:
+                    if bool(self._evaluate_expression(substatement[1], _locals)):
+                        statement_list = substatement[2]
+                        break
+                elif substatement[0] == parser.COND_ELSE:
+                    statement_list = substatement[1]
+                    break
+                    
+        if statement_list:
+            self._process_statements(statement_list, scope_locals=_locals)
+            
     def _evaluate_expression(self, expression, _locals):
         """
         Evalues an expression and returns a term.
@@ -305,7 +334,8 @@ class Interpreter:
             return self._compute(expression[1], expression[2], expression[0], _locals)
         elif expression[0] in (
          parser.TEST_EQUALITY, parser.TEST_INEQUALITY,
-         parser.TEST_GREATER_EQUAL, parser.TEST_GREATER, parser.TEST_LESSER_EQUAL, parser.TEST_LESSER
+         parser.TEST_GREATER_EQUAL, parser.TEST_GREATER, parser.TEST_LESSER_EQUAL, parser.TEST_LESSER,
+         parser.TEST_BOOL_OR, parser.TEST_BOOL_AND
         ):
             return self._compare(expression[1], expression[2], expression[0], _locals)
             
@@ -336,6 +366,10 @@ class Interpreter:
         like C or Java than PHP or Python.
         
         If a problem occurs, an `ExecutionError` is raised.
+        
+        `StatementReturn` may be raised from non-function contexts (conditional bodies, nodes that
+        use ``return`` instead of ``exit``) and `StatementExit` may occur if an ``exit`` statement
+        is encountered.
         """
         self._log.append("Executing statements...")
         
@@ -365,6 +399,8 @@ class Interpreter:
                     elif statement[0] == parser.STMT_GOTO:
                         self.execute_node(statement[1])
                         return
+                    elif statement[0] == parser.COND_IF:
+                        self._evaluate_conditional(statement[1:], _locals)
                     elif statement[0] == parser.COND_WHILE:
                         self._process_statements(statement[2], while_expression=statement[1], scope_locals=_locals)
                     elif statement[0] == parser.STMT_BREAK:
@@ -402,8 +438,7 @@ class Interpreter:
                 
             if not while_expression: #It's not actually a loop, so kill it.
                 _while_expression = (parser.TERM_BOOL, False)
-        print(_locals)
-        
+                
     def _resolve_local_identifier(self, identifier, _locals):
         """
         Provides the value of a local identifier by first looking in the local scope, then the
