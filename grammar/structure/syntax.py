@@ -28,8 +28,6 @@ import ply.yacc
 from .closed_lexicon import tokens
 
 #Type definitions
-NODE = 0
-FUNCTION = 1
 STMT_GOTO = 10
 STMT_RETURN = 11
 STMT_EXIT = 12
@@ -46,6 +44,10 @@ TERM_BOOL = 33
 TERM_STRING = 34
 TERM_INTEGER = 35
 TERM_FLOAT = 36
+TERM_ERROR_CODE = 37
+TERM_ERROR_MSG = 38
+TERM_IDENTIFIER_LOCAL_LOCAL = 39
+TERM_IDENTIFIER_LOCAL_GLOBAL = 1030
 SEQUENCE = 40
 TEST_EQUALITY = 50
 TEST_INEQUALITY = 51
@@ -99,21 +101,23 @@ def p_nodeset(p):
              | empty
     """
     if p[1] is None:
-        p[0] = []
+        p[0] = ({}, {})
     else:
-        p[0] = p[1] + [p[2]]
+        p[0] = p[1]
+        p[1][0].update(p[2][0])
+        p[1][1].update(p[2][1])
         
 def p_node(p):
     r"""
     node : IDENTIFIER_LOCAL LCURLY expressionlist RCURLY
     """
-    p[0] = (NODE, p[1], p[3])
+    p[0] = ({p[1]: p[3]}, {})
 
 def p_function(p):
     r"""
     function : IDENTIFIER_LOCAL LPAREN parameterset RPAREN LCURLY expressionlist RCURLY
     """
-    p[0] = (FUNCTION, p[1], p[3], p[6])
+    p[0] = ({}, {(p[1], frozenset(p[3])): p[6]})
 
 def p_parameterset(p):
     r"""
@@ -189,17 +193,17 @@ def p_while(p):
     
 def p_assignment(p):
     r"""
-    assignment : IDENTIFIER_LOCAL ASSIGN expression
+    assignment : identifier_local ASSIGN expression
     """
     p[0] = (ASSIGN, p[1], p[3])
 def p_assignment_augmented(p):
     r"""
-    assignment : IDENTIFIER_LOCAL ASSIGN_ADD expression
-               | IDENTIFIER_LOCAL ASSIGN_SUBTRACT expression
-               | IDENTIFIER_LOCAL ASSIGN_MULTIPLY expression
-               | IDENTIFIER_LOCAL ASSIGN_DIVIDE expression
-               | IDENTIFIER_LOCAL ASSIGN_DIVIDE_INTEGER expression
-               | IDENTIFIER_LOCAL ASSIGN_MOD expression
+    assignment : identifier_local ASSIGN_ADD expression
+               | identifier_local ASSIGN_SUBTRACT expression
+               | identifier_local ASSIGN_MULTIPLY expression
+               | identifier_local ASSIGN_DIVIDE expression
+               | identifier_local ASSIGN_DIVIDE_INTEGER expression
+               | identifier_local ASSIGN_MOD expression
     """
     if p[2] == '+=':
         p[0] = (ASSIGN_ADD, p[1], p[3])
@@ -353,7 +357,7 @@ def p_functioncall_local(p):
     p[0] = (FUNCTIONCALL_LOCAL, p[1], p[3])
 def p_functioncall_test_undefined(p):
     r"""
-    functioncall : UNDEFINED LPAREN IDENTIFIER_LOCAL RPAREN
+    functioncall : UNDEFINED LPAREN identifier_local RPAREN
     """
     p[0] = (FUNCTIONCALL_UNDEFINED, p[3])
     
@@ -381,6 +385,15 @@ def p_term_special(p):
         p[0] = (TERM_BOOL, True)
     elif p[1] == 'False':
         p[0] = (TERM_BOOL, False)
+def p_term_internal(p):
+    r"""
+    term : ERROR_CODE
+         | ERROR_MSG
+    """
+    if p[1] == '__error_code':
+        p[0] = (TERM_ERROR_CODE,)
+    elif p[1] == '__error_msg':
+        p[0] = (TERM_ERROR_MSG,)
 def p_term_identifier_scoped(p):
     r"""
     term : IDENTIFIER_SCOPED
@@ -388,10 +401,23 @@ def p_term_identifier_scoped(p):
     p[0] = (TERM_IDENTIFIER_SCOPED, p[1])
 def p_term_identifier_local(p):
     r"""
-    term : IDENTIFIER_LOCAL
+    term : identifier_local
     """
-    p[0] = (TERM_IDENTIFIER_LOCAL, p[1])
+    p[0] = p[1]
     
+def p_identifier_local(p):
+    r"""
+    identifier_local : IDENTIFIER_LOCAL
+                     | QUALIFIER_LOCAL IDENTIFIER_LOCAL
+                     | QUALIFIER_GLOBAL IDENTIFIER_LOCAL
+    """
+    if len(p) == 2:
+        p[0] = (TERM_IDENTIFIER_LOCAL, p[1])
+    elif p[1] == 'local':
+        p[0] = (TERM_IDENTIFIER_LOCAL_LOCAL, p[2])
+    elif p[1] == 'global':
+        p[0] = (TERM_IDENTIFIER_LOCAL_GLOBAL, p[2])
+        
 def p_error(t):
     if t:
         raise ValueError("Syntax error; offending token on line %(line)i: %(token)s" % {

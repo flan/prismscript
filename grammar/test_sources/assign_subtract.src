@@ -1,6 +1,6 @@
 hello{
     x -= 1;
-    x -= 5.5;
-    x -= y;
+    local x -= 5.5;
+    global x -= y;
 }
 

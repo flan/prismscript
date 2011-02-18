@@ -1,12 +1,12 @@
 setup{ #Things that need to happen before an event can begin.
-  INITIAL_CONTROL = storage.retrieve_control(key="abcdefg");
-  FALLBACK_CONTROL = storage.retrieve_control(key="hijklmn");
-  TRANSFER_CONTROL = storage.retrieve_control(key="opqrstu");
-  TRANSFER_FAILURE = storage.retrieve_control(key="vwxyz");
+  global INITIAL_CONTROL = storage.retrieve_control(key="abcdefg");
+  global FALLBACK_CONTROL = storage.retrieve_control(key="hijklmn");
+  global TRANSFER_CONTROL = storage.retrieve_control(key="opqrstu");
+  global TRANSFER_FAILURE = storage.retrieve_control(key="vwxyz");
 
-  TRANSFER_LIMIT = 5;
-  TRANSFER_HANDLER = "10.0.0.1";
-  EVENT_TIMEOUT = 12000; #Two minutes
+  global TRANSFER_LIMIT = 5;
+  global TRANSFER_HANDLER = "10.0.0.1";
+  global EVENT_TIMEOUT = 12000; #Two minutes
 }
 
 start{
@@ -40,7 +40,7 @@ start_fallback{
 }
 
 start_transfer{
-  if(event.transfer(handler=TRANSFER_HANDLER)){
+  if(event.transfer(handler=(global TRANSFER_HANDLER))){
     exit 1;
   }else{
     goto transfer_failed;

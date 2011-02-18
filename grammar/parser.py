@@ -22,18 +22,18 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unpo
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or send a
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
-from .structure.syntax import parser as _parser
-from .structure.syntax import (
- NODE, FUNCTION,
- 
+from structure.syntax import parser as _parser
+from structure.syntax import (
  STMT_GOTO, STMT_RETURN, STMT_EXIT,
  STMT_BREAK, STMT_CONTINUE,
  
  COND_IF, COND_ELIF, COND_ELSE,
  COND_WHILE,
  
- TERM_IDENTIFIER_LOCAL, TERM_IDENTIFIER_SCOPED, TERM_NONE, TERM_BOOL, TERM_STRING, TERM_INTEGER,
- TERM_FLOAT,
+ TERM_IDENTIFIER_LOCAL, TERM_IDENTIFIER_LOCAL_LOCAL, TERM_IDENTIFIER_LOCAL_GLOBAL,
+ TERM_IDENTIFIER_SCOPED,
+ TERM_NONE, TERM_BOOL, TERM_STRING, TERM_INTEGER, TERM_FLOAT,
+ TERM_ERROR_CODE, TERM_ERROR_MSG,
  
  SEQUENCE,
  
@@ -50,12 +50,10 @@ from .structure.syntax import (
 
 def parse(source):
     """
-    Digests a script as ``source`` and provides a (``nodes``, ``functions``, ``structure``) tuple as
-    output:
+    Digests a script as ``source`` and provides a (``nodes``, ``functions``) tuple as output:
 
     - ``nodes``: A dictionary of ``name``:``expressionlist`` items
     - ``functions``: A dictionary of (``name``, ``parameters``):``expressionlist`` items
-    - ``structure``: The raw digest, of interest only for advanced applications or debugging
 
     ``name`` is always a string, ``parameters`` is always a frozenset of strings, and
     ``expressionlist`` items are any type of interpretable expression, as described in the
@@ -64,14 +62,5 @@ def parse(source):
     An invalid script will never be partially salvaged by this routine. If something is illegal,
     `ValueError` will be raised.
     """
-    structure = _parser.parse(source)
-
-    nodes = {}
-    functions = {}
-    for node in structure:
-        if node[0] == NODE:
-            nodes[node[1]] = node[2]
-        elif node[0] == FUNCTION:
-            functions[(node[1], frozenset(node[2]))] = node[3]
-    return (nodes, functions, structure)
+    return _parser.parse(source)
     

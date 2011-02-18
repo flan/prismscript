@@ -32,7 +32,7 @@ class FunctionTestCase(unittest.TestCase):
         source = get_source('function')
         (nodes, functions) = get_digest('function')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -40,7 +40,7 @@ class FunctionTestCase(unittest.TestCase):
         source = get_source('function_broken')
         (nodes, functions) = get_digest('function_broken')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertRaises(
          SignatureInconsistencyError, compare_nodesets,
@@ -51,7 +51,7 @@ class FunctionTestCase(unittest.TestCase):
         source = get_source('function_broken_2')
         (nodes, functions) = get_digest('function_broken_2')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertRaises(
          SignatureInconsistencyError, compare_nodesets,
@@ -62,7 +62,7 @@ class FunctionTestCase(unittest.TestCase):
         source = get_source('function_expressions')
         (nodes, functions) = get_digest('function_expressions')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(functions, digest_functions), None)
 
@@ -72,7 +72,7 @@ class NamespaceTestCase(unittest.TestCase):
         source = get_source('namespace')
         (nodes, functions) = get_digest('namespace')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         self.assertEquals(compare_nodesets(functions, digest_functions), None)
@@ -81,7 +81,7 @@ class NamespaceTestCase(unittest.TestCase):
         source = get_source('namespace_broken_function')
         (nodes, functions) = get_digest('namespace_broken_function')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         self.assertRaises(
@@ -93,7 +93,7 @@ class NamespaceTestCase(unittest.TestCase):
         source = get_source('namespace_broken_function_signature')
         (nodes, functions) = get_digest('namespace_broken_function_signature')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         self.assertRaises(
@@ -105,7 +105,7 @@ class NamespaceTestCase(unittest.TestCase):
         source = get_source('namespace_broken_node')
         (nodes, functions) = get_digest('namespace_broken_node')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertRaises(
          SignatureInconsistencyError, compare_nodesets,
@@ -119,7 +119,7 @@ class NodeTestCase(unittest.TestCase):
         source = get_source('node')
         (nodes, functions) = get_digest('node')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -127,7 +127,7 @@ class NodeTestCase(unittest.TestCase):
         source = get_source('node_broken')
         (nodes, functions) = get_digest('node_broken')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertRaises(
          SignatureInconsistencyError, compare_nodesets,
@@ -138,7 +138,7 @@ class NodeTestCase(unittest.TestCase):
         source = get_source('node_expressions')
         (nodes, functions) = get_digest('node_expressions')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 

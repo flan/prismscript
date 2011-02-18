@@ -42,12 +42,18 @@ reserved = {
  'xor': 'XOR',
  #functions
  '__undefined': 'UNDEFINED',
+ #variables
+ '__error_code': 'ERROR_CODE',
+ '__error_msg': 'ERROR_MSG',
  #statements
  'goto': 'STMT_GOTO',
  'return': 'STMT_RETURN',
  'exit': 'STMT_EXIT',
  'break': 'STMT_BREAK',
  'continue': 'STMT_CONTINUE',
+ #qualifiers
+ 'global': 'QUALIFIER_GLOBAL',
+ 'local': 'QUALIFIER_LOCAL',
 }
 
 tokens = [

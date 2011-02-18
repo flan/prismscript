@@ -31,7 +31,7 @@ class AssignmentsTestCase(unittest.TestCase):
         source = get_source('assign')
         (nodes, functions) = get_digest('assign')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -39,7 +39,7 @@ class AssignmentsTestCase(unittest.TestCase):
         source = get_source('assign_add')
         (nodes, functions) = get_digest('assign_add')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -47,7 +47,7 @@ class AssignmentsTestCase(unittest.TestCase):
         source = get_source('assign_divide')
         (nodes, functions) = get_digest('assign_divide')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -55,7 +55,7 @@ class AssignmentsTestCase(unittest.TestCase):
         source = get_source('assign_divide_integer')
         (nodes, functions) = get_digest('assign_divide_integer')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -63,7 +63,7 @@ class AssignmentsTestCase(unittest.TestCase):
         source = get_source('assign_mod')
         (nodes, functions) = get_digest('assign_mod')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -71,7 +71,7 @@ class AssignmentsTestCase(unittest.TestCase):
         source = get_source('assign_multiply')
         (nodes, functions) = get_digest('assign_multiply')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -79,7 +79,7 @@ class AssignmentsTestCase(unittest.TestCase):
         source = get_source('assign_sequence')
         (nodes, functions) = get_digest('assign_sequence')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -87,7 +87,7 @@ class AssignmentsTestCase(unittest.TestCase):
         source = get_source('assign_subtract')
         (nodes, functions) = get_digest('assign_subtract')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -97,7 +97,7 @@ class CommentsTestCase(unittest.TestCase):
         source = get_source('comments')
         (nodes, functions) = get_digest('comments')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -107,7 +107,7 @@ class FunctionCallsTestCase(unittest.TestCase):
         source = get_source('functioncall_local')
         (nodes, functions) = get_digest('functioncall_local')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -115,7 +115,7 @@ class FunctionCallsTestCase(unittest.TestCase):
         source = get_source('functioncall_scoped')
         (nodes, functions) = get_digest('functioncall_scoped')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -123,7 +123,7 @@ class FunctionCallsTestCase(unittest.TestCase):
         source = get_source('functioncall_undefined')
         (nodes, functions) = get_digest('functioncall_undefined')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -133,7 +133,7 @@ class MathsTestCase(unittest.TestCase):
         source = get_source('math_add')
         (nodes, functions) = get_digest('math_add')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -141,7 +141,7 @@ class MathsTestCase(unittest.TestCase):
         source = get_source('math_divide')
         (nodes, functions) = get_digest('math_divide')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -149,7 +149,7 @@ class MathsTestCase(unittest.TestCase):
         source = get_source('math_divide_integer')
         (nodes, functions) = get_digest('math_divide_integer')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -157,7 +157,7 @@ class MathsTestCase(unittest.TestCase):
         source = get_source('math_mod')
         (nodes, functions) = get_digest('math_mod')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -165,7 +165,7 @@ class MathsTestCase(unittest.TestCase):
         source = get_source('math_multiply')
         (nodes, functions) = get_digest('math_multiply')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
     
@@ -173,7 +173,7 @@ class MathsTestCase(unittest.TestCase):
         source = get_source('math_subtract')
         (nodes, functions) = get_digest('math_subtract')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -181,7 +181,7 @@ class MathsTestCase(unittest.TestCase):
         source = get_source('math_and')
         (nodes, functions) = get_digest('math_and')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -189,7 +189,7 @@ class MathsTestCase(unittest.TestCase):
         source = get_source('math_nand')
         (nodes, functions) = get_digest('math_nand')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -197,7 +197,7 @@ class MathsTestCase(unittest.TestCase):
         source = get_source('math_nor')
         (nodes, functions) = get_digest('math_nor')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -205,7 +205,7 @@ class MathsTestCase(unittest.TestCase):
         source = get_source('math_or')
         (nodes, functions) = get_digest('math_or')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -213,7 +213,7 @@ class MathsTestCase(unittest.TestCase):
         source = get_source('math_xor')
         (nodes, functions) = get_digest('math_xor')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -222,7 +222,7 @@ class SequencesTestCase(unittest.TestCase):
         source = get_source('sequence')
         (nodes, functions) = get_digest('sequence')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -231,7 +231,7 @@ class StatementsTestCase(unittest.TestCase):
         source = get_source('stmt_exit')
         (nodes, functions) = get_digest('stmt_exit')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -239,7 +239,7 @@ class StatementsTestCase(unittest.TestCase):
         source = get_source('stmt_goto')
         (nodes, functions) = get_digest('stmt_goto')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -247,7 +247,7 @@ class StatementsTestCase(unittest.TestCase):
         source = get_source('stmt_return')
         (nodes, functions) = get_digest('stmt_return')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -256,7 +256,7 @@ class TermsTestCase(unittest.TestCase):
         source = get_source('term_bool')
         (nodes, functions) = get_digest('term_bool')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -264,7 +264,7 @@ class TermsTestCase(unittest.TestCase):
         source = get_source('term_float')
         (nodes, functions) = get_digest('term_float')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -272,7 +272,15 @@ class TermsTestCase(unittest.TestCase):
         source = get_source('term_identifier_local')
         (nodes, functions) = get_digest('term_identifier_local')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        
+    def test_identifier_local_qualified(self):
+        source = get_source('term_identifier_local_qualified')
+        (nodes, functions) = get_digest('term_identifier_local_qualified')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -280,7 +288,7 @@ class TermsTestCase(unittest.TestCase):
         source = get_source('term_identifier_scoped')
         (nodes, functions) = get_digest('term_identifier_scoped')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -288,7 +296,7 @@ class TermsTestCase(unittest.TestCase):
         source = get_source('term_integer')
         (nodes, functions) = get_digest('term_integer')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -296,7 +304,7 @@ class TermsTestCase(unittest.TestCase):
         source = get_source('term_none')
         (nodes, functions) = get_digest('term_none')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         
@@ -304,7 +312,15 @@ class TermsTestCase(unittest.TestCase):
         source = get_source('term_string')
         (nodes, functions) = get_digest('term_string')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        
+    def test_error(self):
+        source = get_source('term_error')
+        (nodes, functions) = get_digest('term_error')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -314,7 +330,7 @@ class TestsTestCase(unittest.TestCase):
         source = get_source('test_equality')
         (nodes, functions) = get_digest('test_equality')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -322,7 +338,7 @@ class TestsTestCase(unittest.TestCase):
         source = get_source('test_greater')
         (nodes, functions) = get_digest('test_greater')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -330,7 +346,7 @@ class TestsTestCase(unittest.TestCase):
         source = get_source('test_greater_equal')
         (nodes, functions) = get_digest('test_greater_equal')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -338,7 +354,7 @@ class TestsTestCase(unittest.TestCase):
         source = get_source('test_inequality')
         (nodes, functions) = get_digest('test_inequality')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
@@ -346,7 +362,7 @@ class TestsTestCase(unittest.TestCase):
         source = get_source('test_lesser')
         (nodes, functions) = get_digest('test_lesser')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         
@@ -354,7 +370,7 @@ class TestsTestCase(unittest.TestCase):
         source = get_source('test_lesser_equal')
         (nodes, functions) = get_digest('test_lesser_equal')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 

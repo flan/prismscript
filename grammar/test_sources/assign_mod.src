@@ -1,6 +1,7 @@
 hello{
     x %= 1;
     x %= 5.5;
-    x %= y;
+    local x %= y;
+    global x %= y;
 }
 

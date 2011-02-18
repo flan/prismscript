@@ -33,7 +33,7 @@ class TheoreticalTestCase(unittest.TestCase):
         source = get_source('theoretical_io_model')
         (nodes, functions) = get_digest('theoretical_io_model')
 
-        (digest_nodes, digest_functions, digest) = parser.parse(source)
+        (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         

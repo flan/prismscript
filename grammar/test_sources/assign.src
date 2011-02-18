@@ -3,7 +3,8 @@ hello{
     x = 'w';
     x = "q";
     x = 5.5;
-    x = y;
+    global x = y;
+    local x = 3.0;
     x = True;
     x = False;
     x = None;
