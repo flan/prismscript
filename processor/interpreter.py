@@ -370,7 +370,7 @@ class Interpreter:
             return expression[1]
         elif expression_type == parser.TERM_NONE:
             return None
-        elif expression_type == (parser.TERM_IDENTIFIER_LOCAL, parser.TERM_IDENTIFIER_LOCAL_LOCAL, parser.TERM_IDENTIFIER_LOCAL_GLOBAL):
+        elif expression_type in (parser.TERM_IDENTIFIER_LOCAL, parser.TERM_IDENTIFIER_LOCAL_LOCAL, parser.TERM_IDENTIFIER_LOCAL_GLOBAL):
             return self._resolve_local_identifier(expression[1], _locals, scope=expression_type)
         elif expression_type == parser.TERM_IDENTIFIER_SCOPED: #Only locally-scoped variables may have attributes
             return self._resolve_scoped_identifier(expression[1], _locals)
@@ -677,8 +677,13 @@ class Sequence(list):
         Pops an element from the head of the list.
         """
         return self.pop(0)
-    pop_tail = pop
-    
+        
+    def pop_tail(self):
+        """
+        Pops an element from the end of the list.
+        """
+        return self.pop()
+        
     def prepend(self, item):
         """
         Inserts `item` at the head of the sequence.
