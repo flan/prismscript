@@ -342,3 +342,19 @@ class TestsTestCase(unittest.TestCase):
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
+    def test_bool_and(self):
+        source = get_source('test_bool_and')
+        (nodes, functions) = get_digest('test_bool_and')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
+    def test_bool_or(self):
+        source = get_source('test_bool_or')
+        (nodes, functions) = get_digest('test_bool_or')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        
