@@ -21,23 +21,9 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unpo
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or send a
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
+import collections
+
 from .grammar import parser
-"""
- SEQUENCE, ASSIGN_SEQUENCE
- 
- FUNCTIONCALL_LOCAL, FUNCTIONCALL_SCOPED, FUNCTIONCALL_UNDEFINED,
- 
- #When implementing scoped function-call lookups, be sure to check the first scope-level against
- #the local variables scopes, since they can override the root. (This is important for
- #backwards-compatibility, since it's possible that a new namespace may be reserved after scripts
- #are already using like-named variables, and letting them behave as before is the right thing to
- #do, since they obviously don't need the new functionality)
-"""
-TOKEN_NAME_MAP = {} #: A reverse-lookup dictionary to get human-readable token identifiers.
-for attribute in dir(parser):
-    if(attribute.isupper()):
-        TOKEN_NAME_MAP[getattr(parser, attribute)] = attribute
-#This is a temporary hack meant to speed development. It should NOT be relied upon by any code. EVER.
 
 class Interpreter:
     _functions = None #A dictionary of local functions
@@ -65,6 +51,8 @@ class Interpreter:
         
         If the function terminates with a ``return`` statement, the specified value is returned.
         Otherwise, ``None`` is returned by default.
+        
+        If the function cannot be found, `FunctionNotFoundError` is raised.
         
         If a problem occurs, an `ExecutionError` is raised.
         
@@ -97,6 +85,8 @@ class Interpreter:
     def execute_node(self, node_name):
         """
         Begins execution of the named node.
+        
+        If the node cannot be found, `NodeNotFoundError` is raised.
         
         If a problem occurs, an `ExecutionError` is raised.
         
@@ -160,7 +150,7 @@ class Interpreter:
         """
         self._scoped_functions.update(dict(functions))
         
-    def _assign(self, identifier, expression, _locals):
+    def _assign(self, identifier, expression, _locals, evaluate_expression=True):
         """
         Assigns the result of an expression to a local variable, in either the local or global
         scope.
@@ -171,13 +161,17 @@ class Interpreter:
         `expression` is the expression to be evaluated.
         
         `_locals` is the current scope's local variables.
-        """
-        scope = _locals
-        if identifier[0] == parser.TERM_IDENTIFIER_LOCAL_GLOBAL:
-            scope = self._globals
-        scope[identifier[1]] = self._evaluate_expression(expression, _locals)
         
-    def _assign_augment(self, identifier, expression, method, _locals):
+        If `evaluate_expression` is False, the `expression` is stored directly, without processing.
+        This is meant for assigning pre-resolved values.
+        """
+        scope = self._get_assignment_scope(identifier[0], _locals)
+        value = expression
+        if evaluate_expression:
+            value = self._evaluate_expression(expression, _locals)
+        scope[identifier[1]] = value
+        
+    def _assign_augment(self, identifier, expression, method, _locals, evaluate_expression=True):
         """
         Merges the result of an expression with a pre-existing local variable's value, in either the
         local or global scope.
@@ -188,16 +182,19 @@ class Interpreter:
         
         `_locals` is the current scope's local variables.
         
+        If `evaluate_expression` is False, the `expression` is stored directly, without processing.
+        This is meant for assigning pre-resolved values.
+        
         If the operation is addition and the expression being added is a string or the value being
         augmented is a string, both terms are converted appropriately.
         """
-        scope = _locals
-        if identifier[0] == parser.TERM_IDENTIFIER_LOCAL_GLOBAL:
-            scope = self._globals
+        scope = self._get_assignment_scope(identifier[0], _locals)
         if not identifier[1] in scope:
             raise VariableNotFoundError(identifier[1], "Local identifier not declared")
             
-        expression_result = self._evaluate_expression(expression, _locals)
+        expression_result = expression
+        if evaluate_expression:
+            expression_result = self._evaluate_expression(expression, _locals)
         if method == parser.ASSIGN_ADD:
             if isinstance(scope[identifier[1]], str) or isinstance(expression_result, str):
                 scope[identifier[1]] = ''.join((str(scope[identifier[1]]), str(expression_result)))
@@ -214,6 +211,54 @@ class Interpreter:
             scope[identifier[1]] = int(scope[identifier[1]])
         elif method == parser.ASSIGN_MOD:
             scope[identifier[1]] %= expression_result
+            
+    def _assign_sequence(self, destination, source_expression, _locals):
+        """
+        Unpacks a Sequence into a series of bound variables.
+        
+        Variable targets may be local, global, or None. If None, the unpacked counterpart is simply
+        discarded.
+        
+        Sample usage::
+            y = [1, 2, 3];
+            [x, y, z] = y; //Sets x = 1, y = 2, z = 3.
+            
+        ValueError is raised if the unpack targets are not acceptable or if a non-sequence is given
+        as an unpack-source.
+        
+        `destination` is a sequence containing unresolved local identifiers or Nones.
+        
+        `source_expression` is the expression to be evaluated, which must resolve to a Sequence.
+        
+        `_locals` is the scope's local variable store.
+        """
+        source = self._evaluate_expression(source_expression, _locals)
+        if not type(source) == Sequence:
+            raise ValueError("Attempted to unpack non-sequence")
+            
+        unbound_locals = [] #Unpack-target variable-slots that extend beyond the size of the source
+        if not len(source) == len(destination):
+            self._log.append("Attempted to unpack sequence of length %(source)i into %(destination)i slots" % {
+             'source': len(source),
+             'destination': len(destination),
+            })
+            if len(source) > len(destination):
+                self._log.append("Destination variables outside the unpack-domain will be bound with a value of None")
+                unbound_locals = [v for v in destination[len(source):] if not v[0] == parser.TERM_NONE]
+            else:
+                self._log.append("Source values outside the unpack-domain will be discarded")
+                
+        for (identifier, value) in zip(destination, source):
+            if identifier[0] == parser.TERM_NONE: #None may be used as a non-assigning placeholder
+                continue
+                
+            if not identifier[0] in (parser.TERM_IDENTIFIER_LOCAL, parser.TERM_IDENTIFIER_LOCAL_LOCAL, parser.TERM_IDENTIFIER_LOCAL_GLOBAL):
+                raise ValueError("Unable to assign value to non-variable in sequence-unpack")
+                
+            self._assign(identifier, value, _locals, evaluate_expression=False)
+            
+        for identifier in unbound_locals: #Set anything that was trimmed in the unpack to None to avoid resolution errors
+            self._assign(identifier, None, _locals, evaluate_expression=False)
             
     def _compare(self, expression_left, expression_right, method, _locals):
         """
@@ -319,26 +364,124 @@ class Interpreter:
         
         If the expression does not have an explicit value, ``None`` is returned.
         """
-        if expression[0] in (parser.TERM_BOOL, parser.TERM_STRING, parser.TERM_INTEGER, parser.TERM_FLOAT):
+        expression_type = expression[0]
+        
+        if expression_type in (parser.TERM_BOOL, parser.TERM_STRING, parser.TERM_INTEGER, parser.TERM_FLOAT):
             return expression[1]
-        elif expression[0] == parser.TERM_NONE:
+        elif expression_type == parser.TERM_NONE:
             return None
-        elif expression[0] == parser.TERM_IDENTIFIER_LOCAL:
-            return self._resolve_local_identifier(expression[1], _locals)
-        elif expression[0] == parser.TERM_IDENTIFIER_SCOPED: #Only locally-scoped variables may have attributes
+        elif expression_type == (parser.TERM_IDENTIFIER_LOCAL, parser.TERM_IDENTIFIER_LOCAL_LOCAL, parser.TERM_IDENTIFIER_LOCAL_GLOBAL):
+            return self._resolve_local_identifier(expression[1], _locals, scope=expression_type)
+        elif expression_type == parser.TERM_IDENTIFIER_SCOPED: #Only locally-scoped variables may have attributes
             return self._resolve_scoped_identifier(expression[1], _locals)
-        elif expression[0] in (
+        elif expression_type in (
          parser.MATH_MULTIPLY, parser.MATH_DIVIDE, parser.MATH_DIVIDE_INTEGER, parser.MATH_ADD, parser.MATH_SUBTRACT,
          parser.MATH_MOD, parser.MATH_AND, parser.MATH_OR, parser.MATH_XOR
         ):
-            return self._compute(expression[1], expression[2], expression[0], _locals)
-        elif expression[0] in (
+            return self._compute(expression[1], expression[2], expression_type, _locals)
+        elif expression_type in (
          parser.TEST_EQUALITY, parser.TEST_INEQUALITY,
          parser.TEST_GREATER_EQUAL, parser.TEST_GREATER, parser.TEST_LESSER_EQUAL, parser.TEST_LESSER,
          parser.TEST_BOOL_OR, parser.TEST_BOOL_AND
         ):
-            return self._compare(expression[1], expression[2], expression[0], _locals)
+            return self._compare(expression[1], expression[2], expression_type, _locals)
+        elif expression_type in (parser.FUNCTIONCALL_LOCAL, parser.FUNCTIONCALL_SCOPED):
+            return self._invoke_function(expression, _locals)
+        elif expression_type == parser.SEQUENCE:
+            return Sequence([self._evaluate_expression(e, _locals) for e in expression[1]])
             
+        raise ValueError("Unknown expression encountered: %(expression)r" % {
+         'expression': expression,
+        })
+        
+    def _execute_local_function(self, function_name, arguments, _locals):
+        """
+        Attempts to execute the named function with the given `arguments`, which take the form
+        of standard ``**kwargs``.
+        
+        The local variable scopes are searched for bound functions first, to allow users to do
+        things like `x = call.play_file;` as a form of short-hand, with the interpreter's namespace
+        accessed if no bound variable is found or if the bound variable is not a function (to
+        address the case of people used to functions and variables residing in different namespaces,
+        as in Java).
+        
+        `_locals` is the current scope's local variables.
+        
+        The function's output is returned.
+        
+        If the function cannot be found, `FunctionNotFoundError` is raised.
+        
+        Any exceptions raised by the called function are passed through.
+        """
+        try:
+            function = self._resolve_local_identifier(function_name, _locals)
+            if isinstance(function, collections.Callable):
+                return function(arguments)
+            else:
+                raise VariableNotFoundError(function_name, "Local identifier is not a bound function")
+        except VariableNotFoundError:
+            return self.execute_function(function_name, arguments)
+            
+    def _execute_scoped_function(self, function_name, arguments, _locals):
+        """
+        Attempts to execute the named function with the given `arguments`, which take the form
+        of standard ``**kwargs``.
+        
+        The local variable scopes are searched for bound functions first, in case the function being
+        called is an attribute of a locally bound variable, with the set of registered scoped
+        functions accessed afterwards if no bound variable is found.
+        
+        `_locals` is the current scope's local variables.
+        
+        The function's output is returned.
+        
+        If the function cannot be found, `ScopedFunctionNotFoundError` is raised.
+        
+        Any exceptions raised by the called function, or issues like a non-callable variable being
+        given parameters, are passed through. 
+        """
+        try:
+            function = self._resolve_scoped_identifier(function_name, _locals)
+            if isinstance(function, collections.Callable):
+                return function(arguments)
+            else:
+                raise ScopedVariableNotFoundError(function_name, "Scoped identifier is not a bound function")
+        except ScopedVariableNotFoundError:
+            function = self._scoped_functions.get(function_name)
+            if not function:
+                raise ScopedFunctionNotFoundError(function_name, "Function not registered")
+            return function(arguments)
+            
+    def _get_assignment_scope(self, scope_identifier, _locals):
+        """
+        Returns the scope-variable-store for assignment indicated by the given identifier.
+        
+        `_locals` is the local variable store.
+        """
+        if scope_identifier == parser.TERM_IDENTIFIER_LOCAL_GLOBAL:
+            return self._globals
+        return _locals
+        
+    def _invoke_function(self, expression, _locals):
+        """
+        Resolves and executes a function.
+        
+        `expression` is the expression-body to be processed (scope, name, arguments) and `_locals`
+        is the local variable store for resolution purposes.
+        
+        If the returned value would be a Python sequence, it's marshalled into a Prismscript
+        Sequence.
+        """
+        result = None
+        if expression[0] == parser.FUNCTIONCALL_LOCAL:
+            result = self._execute_local_function(expression[1], expression[2], _locals)
+        elif expression[0] == parser.FUNCTIONCALL_SCOPED:
+            result = self._execute_scoped_function(expression[1], expression[2], _locals)
+            
+        if not type(result) == Sequence and isinstance(result, collections.Sequence):
+            return Sequence(result)
+        return result
+        
     def _process_statements(self,
      statement_list,
      function=False, while_expression=None,
@@ -363,7 +506,7 @@ class Interpreter:
         into the scope's local variable store. This is intended for use when invoking local
         functions, to pass their parameters, but it can also be used to allow for non-destructive
         access to a parent scope's variables, if you're designing a language that should work more
-        like C or Java than PHP or Python.
+        like C or Java than PHP or Python. (In that case, pass `scope_locals` in here)
         
         If a problem occurs, an `ExecutionError` is raised.
         
@@ -386,33 +529,34 @@ class Interpreter:
             i = 0 #Statement-enumerator for exception-tracing.
             try:
                 for (i, statement) in enumerate(statement_list):
-                    if statement[0] == parser.ASSIGN:
+                    statement_type = statement[0]
+                    
+                    if statement_type == parser.ASSIGN:
                         self._assign(statement[1], statement[2], _locals)
-                    elif statement[0] in (
+                    elif statement_type in (
                      parser.ASSIGN_ADD, parser.ASSIGN_SUBTRACT, parser.ASSIGN_MULTIPLY,
                      parser.ASSIGN_DIVIDE, parser.ASSIGN_DIVIDE_INTEGER, parser.ASSIGN_MOD,
-                     parser.ASSIGN_SEQUENCE
                     ):
-                        self._assign_augment(statement[1], statement[2], statement[0], _locals)
-                    elif statement[0] == parser.STMT_RETURN:
+                        self._assign_augment(statement[1], statement[2], statement_type, _locals)
+                    elif statement_type == parser.ASSIGN_SEQUENCE:
+                        self._assign_sequence(statement[1][1], statement[2], _locals)
+                    elif statement_type == parser.STMT_RETURN:
                         raise StatementReturn(self._evaluate_expression(statement[1], _locals))
-                    elif statement[0] == parser.STMT_GOTO:
+                    elif statement_type == parser.STMT_GOTO:
                         self.execute_node(statement[1])
                         return
-                    elif statement[0] == parser.COND_IF:
+                    elif statement_type == parser.COND_IF:
                         self._evaluate_conditional(statement[1:], _locals)
-                    elif statement[0] == parser.COND_WHILE:
+                    elif statement_type == parser.COND_WHILE:
                         self._process_statements(statement[2], while_expression=statement[1], scope_locals=_locals)
-                    elif statement[0] == parser.STMT_BREAK:
+                    elif statement_type == parser.STMT_BREAK:
                         raise StatementBreak()
-                    elif statement[0] == parser.STMT_CONTINUE:
+                    elif statement_type == parser.STMT_CONTINUE:
                         raise StatementContinue()
-                        
-                    elif statement[0] == parser.STMT_EXIT:
+                    elif statement_type == parser.STMT_EXIT:
                         raise StatementExit(str(self._evaluate_expression(statement[1], _locals)))
                     else:
-                        print(TOKEN_NAME_MAP.get(statement[0]))
-                        print(statement)
+                        self._evaluate_expression(statement, _locals)
             except StatementBreak:
                 if not while_expression:
                     raise ExecutionError(str(i + 1), [], "`break` statement not allowed outside of a loop")
@@ -439,7 +583,7 @@ class Interpreter:
             if not while_expression: #It's not actually a loop, so kill it.
                 _while_expression = (parser.TERM_BOOL, False)
                 
-    def _resolve_local_identifier(self, identifier, _locals):
+    def _resolve_local_identifier(self, identifier, _locals, scope=parser.TERM_IDENTIFIER_LOCAL):
         """
         Provides the value of a local identifier by first looking in the local scope, then the
         global scope.
@@ -447,15 +591,24 @@ class Interpreter:
         `identifier` is the name of the variable to be retrieved, and `locals` is the current
         scope's local variable store.
         
+        `scope` is an optional constant that can be used to narrow the search-scope from the onset.
+        
         A `VariableNotFoundError` is raised if the requested identifier has not been declared.
         """
-        if identifier in _locals:
-            return _locals[identifier]
-        elif identifier in self._globals:
-            return self._globals[identifier]
-        else:
-            raise VariableNotFoundError(identifier, "Local identifier not declared")
-            
+        if scope == parser.TERM_IDENTIFIER_LOCAL: #Search for the proper scope
+            if identifier in _locals:
+                return _locals[identifier]
+            elif identifier in self._globals:
+                return self._globals[identifier]
+        elif scope == parser.TERM_IDENTIFIER_LOCAL_LOCAL:
+            if identifier in _locals:
+                return _locals[identifier]
+        elif scope == parser.TERM_IDENTIFIER_LOCAL_GLOBAL:
+            if identifier in self._globals:
+                return self._globals[identifier]
+                
+        raise VariableNotFoundError(identifier, "Local identifier not declared")
+        
     def _resolve_scoped_identifier(self, identifier, _locals):
         """
         Provides the value of a scoped identifier.
@@ -479,7 +632,7 @@ class Interpreter:
             variable = self._resolve_local_identifier(elements[0], _locals)
         except VariableNotFoundError:
             raise ScopedVariableNotFoundError(identifier, "Unable to resolve scoped identifier: root is not a bound local variable")
-        if variable is None or type(variable) in (bool, str, int, float):
+        if variable is None or type(variable) in (bool, str, int, float, Sequence):
             raise ScopedVariableNotFoundError(identifier, "Unable to resolve scoped identifier: found a primitive data-type as a local referent")
             
         try:
@@ -492,6 +645,47 @@ class Interpreter:
             })
             
             
+class Sequence(list):
+    """
+    An extension-only subclass of the Python ``list`` type, intended to expose behaviour more
+    consistent with Java-like languages and to bypass the lack of access to Python's builtins.
+    
+    Objects of this type may be passed back to any Python function that expects a sequence.
+    """
+    def copy(self):
+        """
+        Returns a shallow copy of this Sequence's items in their current order, so that `sort` and
+        `reverse` operations can occur without being destructive.
+        """
+        return Sequence(self)
+        
+    def get(self, index):
+        """
+        Returns the item at the specified `index`.
+        """
+        return self[index]
+        
+    def _get_size(self):
+        """
+        Returns the current number of elements in the sequence.
+        """
+        return len(self)
+    length = property(_get_size)
+    
+    def pop_head(self):
+        """
+        Pops an element from the head of the list.
+        """
+        return self.pop(0)
+    pop_tail = pop
+    
+    def prepend(self, item):
+        """
+        Inserts `item` at the head of the sequence.
+        """
+        self.insert(0, item)
+        
+        
 class Error(Exception):
     """
     The base exception from which all exceptions native to this module inherit.
