@@ -1,4 +1,4 @@
-conditionals_in_loop(iterations, x, y, break_on_if, break_on_elif_1, break_on_elif_2, break_on_else){
+conditionals_in_loop(iterations, else_iterations, x, y, break_on_if, break_on_elif_1, break_on_elif_2, break_on_else){
     while(iterations > 0){
         break_on_last_run = iterations == 1;
 
@@ -16,6 +16,10 @@ conditionals_in_loop(iterations, x, y, break_on_if, break_on_elif_1, break_on_el
             }
         }else{
             if(break_on_else && break_on_last_run){
+                while(else_iterations > 0){
+                    x += else_iterations;
+                    else_iterations -= 1;
+                }
                 return x;
             }
         }

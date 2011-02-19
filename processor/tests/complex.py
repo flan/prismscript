@@ -35,6 +35,7 @@ class NestedCase(unittest.TestCase):
          self._interpreter.execute_function(
           'conditionals_in_loop', {
            'iterations': 2,
+           'else_iterations': 0,
            'x': 2, 'y': 3,
            'break_on_if': False,
            'break_on_elif_1': False,
@@ -50,6 +51,7 @@ class NestedCase(unittest.TestCase):
          self._interpreter.execute_function(
           'conditionals_in_loop', {
            'iterations': 2,
+           'else_iterations': 0,
            'x': 2, 'y': 3,
            'break_on_if': True,
            'break_on_elif_1': False,
@@ -65,6 +67,7 @@ class NestedCase(unittest.TestCase):
          self._interpreter.execute_function(
           'conditionals_in_loop', {
            'iterations': 2,
+           'else_iterations': 0,
            'x': 2, 'y': 3,
            'break_on_if': False,
            'break_on_elif_1': True,
@@ -80,6 +83,7 @@ class NestedCase(unittest.TestCase):
          self._interpreter.execute_function(
           'conditionals_in_loop', {
            'iterations': 2,
+           'else_iterations': 0,
            'x': 2, 'y': 3,
            'break_on_if': False,
            'break_on_elif_1': False,
@@ -95,6 +99,7 @@ class NestedCase(unittest.TestCase):
          self._interpreter.execute_function(
           'conditionals_in_loop', {
            'iterations': 2,
+           'else_iterations': 5,
            'x': 2, 'y': 3,
            'break_on_if': False,
            'break_on_elif_1': False,
@@ -102,6 +107,6 @@ class NestedCase(unittest.TestCase):
            'break_on_else': True,
           }
          ),
-         6
+         21
         )
         
