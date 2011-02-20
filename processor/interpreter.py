@@ -14,7 +14,8 @@ Notes
 At various points in this module, the following anti-pattern will appear::
     generator = <some-generator>
     for prompt in generator:
-        generator.send(yield prompt)
+        x = yield prompt
+        generator.send(x)
         
 This is needed to support the coroutine-oriented design of the language this reference interpreter
 is meant to provide. The reason for this is that externally registered functions may need to block
@@ -126,12 +127,17 @@ import types
 from .grammar import parser
 
 class Interpreter:
+    """
+    A shell for interacting with a script in a programmatic manner.
+    """
     _functions = None #A dictionary of local functions
     _scoped_functions = None #A dictionary of non-local functions
     _nodes = None #A dictionary of nodes
     _globals = None #A dictionary of global variables
     
     _log = None #A high-level execution log to aid debugging
+    
+    _loop_limit = 100000 #Limit loop-iterations to 100,000 by default, to hard-break infinite loops.
     
     def __init__(self, script):
         """
@@ -275,6 +281,21 @@ class Interpreter:
                  'function': function,
                 })
         self._scoped_functions.update(dict(functions))
+        
+    def set_loop_limit(self, limit):
+        """
+        Sets the loop-iteration-`limit` for hard-breaking infinite loops. A value of 0 will disable
+        this feature, but it is not recommended for cases where thread-pools will be involved, since
+        an infinite loop will lock a thread, and that could bring down the whole system.
+        
+        Since this language's primary purpose is to provide a comprehensive, though sandboxed,
+        environment for simple control-scripts, it's very possible that someone may, ignorantly or
+        maliciously, add a loop that never terminates, killing everything. It's probably better to
+        make their script fail than to productive work seize.
+        
+        The default limit is 100,000.
+        """
+        self._loop_limit = limit
         
     def _assign(self, identifier, expression, _locals, evaluate_expression=True):
         """
@@ -775,7 +796,14 @@ class Interpreter:
         _while_expression = while_expression
         if not while_expression: #Let the loop execute; this is inverted at the end.
             _while_expression = (parser.TERM_BOOL, True)
+        iteration_count = 0
         while True:
+            if self._loop_limit and self._loop_limit < iteration_count:
+                self._log.append("Hard-breaking loop for exceeding iteration-limit of %(limit)i cycles" % {
+                 'limit': self._loop_limit,
+                })
+                break
+                
             generator = self._evaluate_expression(_while_expression, _locals)
             try: #Resolve the while-loop's term
                 for prompt in generator:
@@ -878,7 +906,8 @@ class Interpreter:
                 
             if not while_expression: #It's not actually a loop, so kill it.
                 _while_expression = (parser.TERM_BOOL, False)
-                
+            iteration_count += 1
+            
     def _resolve_local_identifier(self, identifier, _locals, scope=parser.TERM_IDENTIFIER_LOCAL):
         """
         Provides the value of a local identifier by first looking in the local scope, then the
