@@ -8,6 +8,7 @@ processing model for speed and cleanliness, and it's fail-fast in the event of p
 track of the current statement and scope-level to provide some semblance of a traceback in the
 event of an exception.
 
+
 Notes
 -----
 At various points in this module, the following anti-pattern will appear::
@@ -15,21 +16,6 @@ At various points in this module, the following anti-pattern will appear::
     for prompt in generator:
         generator.send(yield prompt)
         
-Another anti-pattern, in the form of flow-control through exceptions, manifests itself for handling
-messages that need to transcend scope. Fortunately, they do not pervade outside of this module, and
-they are used quite consistently within. They are necessary because it is impossible to both yield
-to a co-routine and return an explicit value, so it came down to either having a loose standard of
-treating the last-yielded value of a function as its return-value (very, very error-prone and
-hard-to-follow) or wrapping them in exception-types and unwrapping them at the appropriate level of
-control. Once observed, the process of tracing them should be simple (hint: they're attached to
-every coroutine entry-point, which means if you search for 'yield', you'll find them all and know
-how to add them when expanding). The overhead associated with exception-handling in Python is
-marginal compared to most other languages, owing to its namespace-oriented design, so there's no
-real penalty to handling things this way, other than being a bit of a slap in Martin Fowler's face,
-but I don't really like his preachy tone anyway. (Even though he's right about most things when
-thinking in a Gosling-like mindset, but this is more Kay's domain, so the rules are a fair bit
-different)
-
 This is needed to support the coroutine-oriented design of the language this reference interpreter
 is meant to provide. The reason for this is that externally registered functions may need to block
 for asynchronous events and it's necessary to retain the state of the interpreter's environment
@@ -47,6 +33,23 @@ If you wish to repurpose this interpreter for a simpler, purely synchronous libr
 of the anti-pattern can be easily replaced with ``x = <some-generator>``. If you do it right, all
 unit tests should pass if you make the indicated changes to ``test_sources/__init__.py`` and disable
 the ``coroutine`` testcases in the driver.
+
+
+Another anti-pattern, in the form of flow-control through exceptions, manifests itself for handling
+messages that need to transcend scope. Fortunately, they do not pervade outside of this module, and
+they are used quite consistently within. They are necessary because it is impossible to both yield
+to a co-routine and return an explicit value, so it came down to either having a loose standard of
+treating the last-yielded value of a function as its return-value (very, very error-prone and
+hard-to-follow) or wrapping them in exception-types and unwrapping them at the appropriate level of
+control. Once observed, the process of tracing them should be simple (hint: they're attached to
+every coroutine entry-point, which means if you search for 'yield', you'll find them all and know
+how to add them when expanding). The overhead associated with exception-handling in Python is
+marginal compared to most other languages, owing to its namespace-oriented design, so there's no
+real penalty to handling things this way, other than being a bit of a slap in Martin Fowler's face,
+but I don't really like his preachy tone anyway. (Even though he's right about most things when
+thinking in a Gosling-like mindset, but this is more Kay's domain, so the rules are a fair bit
+different)
+
 
 Standard usage
 --------------
@@ -88,6 +91,7 @@ If calling a function directly::
         #This, however, will always occur, unless ``StatementExit`` is encountered.
         return_value = e.value
         
+        
 Warning
 -------
 Before attempting to modify this module, make sure you are well-versed in coroutine theory. Failure
@@ -100,12 +104,14 @@ may prove to be a good place to start: http://www.dabeaz.com/coroutines/
 He is also, by pure coincidence, the author of the library that handles parsing of the language's
 grammar.
 
+
 Meta
 ----
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
 :Version: 0.9.0 : Feb. 20, 2011
+
 
 Legal
 -----
