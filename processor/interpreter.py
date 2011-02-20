@@ -14,6 +14,21 @@ At various points in this module, the following anti-pattern will appear::
     generator = <some-generator>
     for prompt in generator:
         generator.send(yield prompt)
+        
+Another anti-pattern, in the form of flow-control through exceptions manifests itself for handling
+messages that need to transcend scope. Fortunately, they do not pervade outside of this module, and
+they are used quite consistently within. They are necessary because it is impossible to both yield
+to a co-routine and return an explicit value, so it came down to either having a loose standard of
+treating the last-yielded value of a function as its return-value (very, very error-prone and
+hard-to-follow) or wrapping them in exception-types and unwrapping them at the appropriate level of
+control. Once observed, the process of tracing them should be simple (hint: they're attached to
+every coroutine entry-point, which means if you search for 'yield', you'll find them all and know
+how to add them when expanding). The overhead associated with exception-handling in Python is
+marginal compared to most other languages, owing to its namespace-oriented design, so there's no
+real penalty to handling things this way, other than being a bit of a slap in Martin Fowler's face,
+but I don't really like his preachy tone anyway. (Even though he's right about most things when
+thinking in a Gosling-like mindset, but this is more Kay's domain, so the rules are a fair bit
+different)
 
 This is needed to support the coroutine-oriented design of the language this reference interpreter
 is meant to provide. The reason for this is that externally registered functions may need to block
@@ -23,8 +38,10 @@ coroutine-handlers seemed like the most externally clean and structurally sound 
 added a lot of seemingly duplicated code (that three-line chunk) that, as far as I can fathom,
 cannot be simplified, since the generator's evaluation has to take place within the scope of the
 executing function. It seems like an acceptable tradeoff, though, since the language will be
-primarily extended through library-injection, not syntax/semantics augmentation, so only one or two
-dedicated maintance programmers will ever be touching this file at a time.
+primarily extended through library-injection, not syntax/semantics augmentation (automatic Python
+type-marshalling makes it easy to define new data-structures and access-methods as language
+extensions), so only one or two dedicated maintance programmers will ever be touching this file at a
+time.
 
 If you wish to repurpose this interpreter for a simpler, purely synchronous library, most instances
 of the anti-pattern can be easily replaced with ``x = <some-generator>``. If you do it right, all
@@ -210,6 +227,7 @@ class Interpreter:
         """
         return self._functions.keys()
         scope[identifier[1]]
+        
     def list_nodes(self):
         """
         Provides a list of all nodes defined within the interpreter's local environment.
@@ -263,7 +281,7 @@ class Interpreter:
         """
         scope = self._get_assignment_scope(identifier[0], _locals)
         value = expression
-        if evaluate_expression:
+        if evaluate_expression: #Resolve the term
             try:
                 generator = self._evaluate_expression(expression, _locals)
                 for prompt in generator:
@@ -295,7 +313,7 @@ class Interpreter:
             raise VariableNotFoundError(identifier[1], "Local identifier not declared")
             
         expression_result = expression
-        if evaluate_expression:
+        if evaluate_expression: #Resolve the term
             try:
                 generator = self._evaluate_expression(expression, _locals)
                 for prompt in generator:
@@ -305,7 +323,7 @@ class Interpreter:
                 expression_result = e.value
                 
         if method == parser.ASSIGN_ADD:
-            if isinstance(scope[identifier[1]], str) or isinstance(expression_result, str):
+            if isinstance(scope[identifier[1]], str) or isinstance(expression_result, str): #Special handling for strings
                 scope[identifier[1]] = ''.join((str(scope[identifier[1]]), str(expression_result)))
             else:
                 scope[identifier[1]] += expression_result
@@ -342,12 +360,12 @@ class Interpreter:
         `_locals` is the scope's local variable store.
         """
         source = None
-        try:
+        try: #Resolve the sequence
             generator = self._evaluate_expression(source_expression, _locals)
             for prompt in generator:
                 x = yield prompt
                 generator.send(x)
-        except StatementReturn as e:
+        except StatementReturn as e: #Expected: occurs in lieu of a return
             source = e.value
             
         if not type(source) == Sequence:
@@ -393,12 +411,12 @@ class Interpreter:
         """
         #Resolve the left piece's value first, since it can be used for lazy evaluation of booleans.
         result_left = result_right = None
-        try:
+        try: #Resolve the left-hand side
             generator = self._evaluate_expression(expression_left, _locals)
             for prompt in generator:
                 x = yield prompt
                 generator.send(x)
-        except StatementReturn as e:
+        except StatementReturn as e: #Expected: occurs in lieu of a return
             result_left = e.value
             
         if method in (parser.TEST_BOOL_OR, parser.TEST_BOOL_AND):
@@ -407,20 +425,20 @@ class Interpreter:
             elif method == parser.TEST_BOOL_AND and not bool(result_left):
                 raise StatementReturn(False)
                 
-            try:
+            try: #Resolve the right-hand side
                 generator = self._evaluate_expression(expression_right, _locals)
                 for prompt in generator:
                     x = yield prompt
                     generator.send(x)
-            except StatementReturn as e:
+            except StatementReturn as e: #Expected: occurs in lieu of a return
                 raise StatementReturn(bool(e.value))
         else: #Lazy evaluation's not a useful option, so evaluate right upfront
-            try:
+            try: #Resolve the right-hand side
                 generator = self._evaluate_expression(expression_right, _locals)
                 for prompt in generator:
                     x = yield prompt
                     generator.send(x)
-            except StatementReturn as e:
+            except StatementReturn as e: #Expected: occurs in lieu of a return
                 result_right = e.value
                 
             if method == parser.TEST_EQUALITY:
@@ -453,23 +471,23 @@ class Interpreter:
         """
         #Resolve the left and right pieces' values.
         result_left = result_right = None
-        try:
+        try: #Resolve the left-hand side
             generator = self._evaluate_expression(expression_left, _locals)
             for prompt in generator:
                 x = yield prompt
                 generator.send(x)
-        except StatementReturn as e:
+        except StatementReturn as e: #Expected: occurs in lieu of a return
             result_left = e.value
-        try:
+        try: #Resolve the right-hand side
             generator = self._evaluate_expression(expression_right, _locals)
             for prompt in generator:
                 x = yield prompt
                 generator.send(x)
-        except StatementReturn as e:
+        except StatementReturn as e: #Expected: occurs in lieu of a return
             result_right = e.value
             
         if method == parser.MATH_ADD:
-            if isinstance(result_left, str) or isinstance(result_right, str):
+            if isinstance(result_left, str) or isinstance(result_right, str): #Special handling for strings
                 raise StatementReturn(''.join((str(result_left), str(result_right))))
             else:
                 raise StatementReturn(result_left + result_right)
@@ -504,11 +522,11 @@ class Interpreter:
         
         allow = None
         generator = self._evaluate_expression(statement[0][0], _locals)
-        try:
+        try: #Resolve the if-condition's term
             for prompt in generator:
                 x = yield prompt
                 generator.send(x)
-        except StatementReturn as e:
+        except StatementReturn as e: #Expected: occurs in lieu of a return
             allow = e.value
             
         if bool(allow):
@@ -517,11 +535,11 @@ class Interpreter:
             for substatement in statement[1:]:
                 if substatement[0] == parser.COND_ELIF:
                     generator = self._evaluate_expression(substatement[1], _locals)
-                    try:
+                    try: #Resolve the elif-condition's term
                         for prompt in generator:
                             x = yield prompt
                             generator.send(x)
-                    except StatementReturn as e:
+                    except StatementReturn as e: #Expected: occurs in lieu of a return
                         allow = e.value
                         
                     if bool(allow):
@@ -533,7 +551,7 @@ class Interpreter:
                     
         if statement_list:
             generator = self._process_statements(statement_list, scope_locals=_locals)
-            for prompt in generator:
+            for prompt in generator: #Coroutine boilerplate
                 x = yield prompt
                 generator.send(x)
                 
@@ -680,12 +698,13 @@ class Interpreter:
             result = self._execute_scoped_function(expression[1], expression[2], _locals)
             
         if type(result) == types.GeneratorType:
-            prompt = None
-            for prompt in result:
-                prompt = self._marshall_type(prompt)
-                x = yield (expression[1], prompt) #Construct a tuple with the identifier of the function in the first slot.
-                result.send(x)
-            raise StatementReturn(prompt)
+            try:
+                for prompt in result:
+                    x = yield (expression[1], prompt) #Construct a tuple with the identifier of the function in the first slot.
+                    result.send(x)
+            except StatementReturn as e: #The function is expected to raise a `StatementReturn` if it has a value
+                raise StatementReturn(self._marshall_type(e.value))
+            raise StatementReturn(None) #None is the standard otherwise.
         else:
             raise StatementReturn(self._marshall_type(result))
             
@@ -746,11 +765,11 @@ class Interpreter:
             _while_expression = (parser.TERM_BOOL, True)
         while True:
             generator = self._evaluate_expression(_while_expression, _locals)
-            try:
+            try: #Resolve the while-loop's term
                 for prompt in generator:
                     x = yield prompt
                     generator.send(x)
-            except StatementReturn as e:
+            except StatementReturn as e: #Expected: occurs in lieu of a return
                 if not bool(e.value):
                     break
                     
@@ -761,7 +780,7 @@ class Interpreter:
                     
                     if statement_type == parser.ASSIGN:
                         generator = self._assign(statement[1], statement[2], _locals)
-                        for prompt in generator:
+                        for prompt in generator: #Coroutine boilerplate
                             x = yield prompt
                             generator.send(x)
                     elif statement_type in (
@@ -769,24 +788,24 @@ class Interpreter:
                      parser.ASSIGN_DIVIDE, parser.ASSIGN_DIVIDE_INTEGER, parser.ASSIGN_MOD,
                     ):
                         generator = self._assign_augment(statement[1], statement[2], statement_type, _locals)
-                        for prompt in generator:
+                        for prompt in generator: #Coroutine boilerplate
                             x = yield prompt
                             generator.send(x)
                     elif statement_type == parser.ASSIGN_SEQUENCE:
                         generator = self._assign_sequence(statement[1][1], statement[2], _locals)
-                        for prompt in generator:
+                        for prompt in generator: #Coroutine boilerplate
                             x = yield prompt
                             generator.send(x)
                     elif statement_type == parser.STMT_RETURN:
                         generator = self._evaluate_expression(statement[1], _locals)
-                        for prompt in generator:
+                        for prompt in generator: #Coroutine boilerplate
                             x = yield prompt
                             generator.send(x)
-                        #`_evaluate_expression` is guaranteed to raise a `StatementReturn`, so nothing needs to be done here.
+                        #`_evaluate_expression` is guaranteed to raise `StatementReturn`, so nothing needs to be done here
                     elif statement_type == parser.STMT_GOTO:
                         self.execute_node(statement[1])
                         try:
-                            for prompt in generator:
+                            for prompt in generator: #Coroutine boilerplate
                                 x = yield prompt
                                 generator.send(x)
                         except StatementReturn as e: #Returns from nodes are treated as exits.
@@ -798,12 +817,12 @@ class Interpreter:
                         raise StatementExit('')
                     elif statement_type == parser.COND_IF:
                         generator = self._evaluate_conditional(statement[1:], _locals)
-                        for prompt in generator:
+                        for prompt in generator: #Coroutine boilerplate
                             x = yield prompt
                             generator.send(x)
                     elif statement_type == parser.COND_WHILE:
                         generator = self._process_statements(statement[2], while_expression=statement[1], scope_locals=_locals)
-                        for prompt in generator:
+                        for prompt in generator: #Coroutine boilerplate
                             x = yield prompt
                             generator.send(x)
                     elif statement_type == parser.STMT_BREAK:
@@ -813,15 +832,15 @@ class Interpreter:
                     elif statement_type == parser.STMT_EXIT:
                         try:
                             generator = self._evaluate_expression(statement[1], _locals)
-                            for prompt in generator:
+                            for prompt in generator: #Coroutine boilerplate
                                 x = yield prompt
                                 generator.send(x)
-                        except StatementReturn as e:
+                        except StatementReturn as e: #Expected: occurs in lieu of a return
                             raise StatementExit(str(e.value))
                     else:
                         try:
                             generator = self._evaluate_expression(statement, _locals)
-                            for prompt in generator:
+                            for prompt in generator: #Coroutine boilerplate
                                 x = yield prompt
                                 generator.send(x)
                         except StatementReturn as e: #Expected, since `_evaluate_expression` always raises one, but it doesn't do anything in this case.
