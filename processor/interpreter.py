@@ -16,14 +16,15 @@ At various points in this module, the following anti-pattern will appear::
         generator.send(yield prompt)
 
 This is needed to support the coroutine-oriented design of the language this reference interpreter
-is meant to support. The reason for this is that externally registered functions may need to block
+is meant to provide. The reason for this is that externally registered functions may need to block
 for asynchronous events and it's necessary to retain the state of the interpreter's environment
 until the event has completed. Building a recursive message-passing chain using generators as
 coroutine-handlers seemed like the most externally clean and structurally sound method, but it
-added a lot of seemingly duplicated code that, as far as I can fathom, cannot be simplified. It
-seems like an acceptable tradeoff, though, since the language will be primarily extended through
-library-injection, not syntax/semantics augmentation, so only one or two dedicated maintance
-programmers will ever be touching this file at a time.
+added a lot of seemingly duplicated code (that three-line chunk) that, as far as I can fathom,
+cannot be simplified, since the generator's evaluation has to take place within the scope of the
+executing function. It seems like an acceptable tradeoff, though, since the language will be
+primarily extended through library-injection, not syntax/semantics augmentation, so only one or two
+dedicated maintance programmers will ever be touching this file at a time.
 
 If you wish to repurpose this interpreter for a simpler, purely synchronous library, most instances
 of the anti-pattern can be easily replaced with ``x = <some-generator>``. If you do it right, all
@@ -72,15 +73,16 @@ If calling a function directly::
         
 Warning
 -------
-Before attempting to modify this module, make sure you are versed in coroutine theory. Failure to
-respect that model will lead to pain. Lots of it.
+Before attempting to modify this module, make sure you are well-versed in coroutine theory. Failure
+to respect that model will lead to pain. Lots of it. You will cry and people will hate you. It will
+be bad.
 
 Meta
 ----
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 0.3.0 : Feb. 18, 2011
+:Version: 0.9.0 : Feb. 20, 2011
 
 Legal
 -----
