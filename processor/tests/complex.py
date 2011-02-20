@@ -21,92 +21,93 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 import unittest
 
 from . import (
- get_interpreter,
+ get_interpreter, execute_no_yield,
+ StatementReturn,
 )
 
-class NestedCase(unittest.TestCase):
+class NestedTestCase(unittest.TestCase):
     _interpreter = None
     
     def setUp(self):
         self._interpreter = get_interpreter('complex')
         
     def test_iteration_no_conditional(self):
-        self.assertEquals(
-         self._interpreter.execute_function(
-          'conditionals_in_loop', {
-           'iterations': 2,
-           'else_iterations': 0,
-           'x': 2, 'y': 3,
-           'break_on_if': False,
-           'break_on_elif_1': False,
-           'break_on_elif_2': False,
-           'break_on_else': False,
-          }
-         ),
-         18
-        )
-        
+        try:
+            execute_no_yield(self._interpreter.execute_function('conditionals_in_loop', {
+             'iterations': 2,
+             'else_iterations': 0,
+             'x': 2, 'y': 3,
+             'break_on_if': False,
+             'break_on_elif_1': False,
+             'break_on_elif_2': False,
+             'break_on_else': False,
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 18)
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_iteration_break_on_if(self):
-        self.assertEquals(
-         self._interpreter.execute_function(
-          'conditionals_in_loop', {
-           'iterations': 2,
-           'else_iterations': 0,
-           'x': 2, 'y': 3,
-           'break_on_if': True,
-           'break_on_elif_1': False,
-           'break_on_elif_2': False,
-           'break_on_else': False,
-          }
-         ),
-         6
-        )
-        
+        try:
+            execute_no_yield(self._interpreter.execute_function('conditionals_in_loop', {
+             'iterations': 2,
+             'else_iterations': 0,
+             'x': 2, 'y': 3,
+             'break_on_if': True,
+             'break_on_elif_1': False,
+             'break_on_elif_2': False,
+             'break_on_else': False,
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 6)
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_iteration_break_on_elif_1(self):
-        self.assertEquals(
-         self._interpreter.execute_function(
-          'conditionals_in_loop', {
-           'iterations': 2,
-           'else_iterations': 0,
-           'x': 2, 'y': 3,
-           'break_on_if': False,
-           'break_on_elif_1': True,
-           'break_on_elif_2': False,
-           'break_on_else': False,
-          }
-         ),
-         6
-        )
-        
+        try:
+            execute_no_yield(self._interpreter.execute_function('conditionals_in_loop', {
+             'iterations': 2,
+             'else_iterations': 0,
+             'x': 2, 'y': 3,
+             'break_on_if': False,
+             'break_on_elif_1': True,
+             'break_on_elif_2': False,
+             'break_on_else': False,
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 6)
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_iteration_break_on_elif_2(self):
-        self.assertEquals(
-         self._interpreter.execute_function(
-          'conditionals_in_loop', {
-           'iterations': 2,
-           'else_iterations': 0,
-           'x': 2, 'y': 3,
-           'break_on_if': False,
-           'break_on_elif_1': False,
-           'break_on_elif_2': True,
-           'break_on_else': False,
-          }
-         ),
-         6
-        )
-        
+        try:
+            execute_no_yield(self._interpreter.execute_function('conditionals_in_loop', {
+             'iterations': 2,
+             'else_iterations': 0,
+             'x': 2, 'y': 3,
+             'break_on_if': False,
+             'break_on_elif_1': False,
+             'break_on_elif_2': True,
+             'break_on_else': False,
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 6)
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_iteration_break_on_else(self):
-        self.assertEquals(
-         self._interpreter.execute_function(
-          'conditionals_in_loop', {
-           'iterations': 2,
-           'else_iterations': 5,
-           'x': 2, 'y': 3,
-           'break_on_if': False,
-           'break_on_elif_1': False,
-           'break_on_elif_2': False,
-           'break_on_else': True,
-          }
-         ),
-         21
-        )
-        
+        try:
+            execute_no_yield(self._interpreter.execute_function('conditionals_in_loop', {
+             'iterations': 2,
+             'else_iterations': 5,
+             'x': 2, 'y': 3,
+             'break_on_if': False,
+             'break_on_elif_1': False,
+             'break_on_elif_2': False,
+             'break_on_else': True,
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 21)
+        else:
+            self.fail("StatementReturn not received")
+            

@@ -8,6 +8,73 @@ processing model for speed and cleanliness, and it's fail-fast in the event of p
 track of the current statement and scope-level to provide some semblance of a traceback in the
 event of an exception.
 
+Notes
+-----
+At various points in this module, the following anti-pattern will appear::
+    generator = <some-generator>
+    for prompt in generator:
+        generator.send(yield prompt)
+
+This is needed to support the coroutine-oriented design of the language this reference interpreter
+is meant to support. The reason for this is that externally registered functions may need to block
+for asynchronous events and it's necessary to retain the state of the interpreter's environment
+until the event has completed. Building a recursive message-passing chain using generators as
+coroutine-handlers seemed like the most externally clean and structurally sound method, but it
+added a lot of seemingly duplicated code that, as far as I can fathom, cannot be simplified. It
+seems like an acceptable tradeoff, though, since the language will be primarily extended through
+library-injection, not syntax/semantics augmentation, so only one or two dedicated maintance
+programmers will ever be touching this file at a time.
+
+If you wish to repurpose this interpreter for a simpler, purely synchronous library, most instances
+of the anti-pattern can be easily replaced with ``x = <some-generator>``. If you do it right, all
+unit tests should pass if you make the indicated changes to ``test_sources/__init__.py`` and disable
+the ``coroutine`` testcases in the driver.
+
+Standard usage
+--------------
+It may seem counter-intuitive, but callers will need to respect the couroutine design and brace
+themselves for exceptions used as flow-control mechanisms. (It's cleaner than having a ton of
+state-management logic everywhere. Seriously. I would not envy anyone who had to maintain the first
+draft).
+
+If calling a node directly::
+    node = interpreter.execute_node('my_sweet_node')
+    exit_value = None
+    try:
+        for prompt in node:
+            #This could be a series of calls made over a long period of time, rather than a loop.
+            if prompt == ('scope.subscope.function', 1): #Some function, somewhere, wants data.
+                node.send(prompt[1]) #What you send back is up to your function's needs.
+    except StatementExit as e:
+        #Not guaranteed to occur; if not encountered, no ``exit`` statement was reached.
+        #Node-level ``return`` statements will trigger this, too, for the sake of C/Java
+        #programmers.
+        exit_value = e.value
+        
+If calling a function directly::
+    function = interpreter.execute_function('my_awesome_function', {'l33t': 1337,})
+    return_value = None
+    try:
+        for prompt in function:
+            #This could be a series of calls made over a long period of time, rather than a loop.
+            if prompt == ('scope.subscope.function', 1): #Some function, somewhere, wants data.
+                node.send(prompt[1]) #What you send back is up to your function's needs.
+    except StatementExit as e:
+        #This is a subclass of `StatementReturn`, so it can be omitted to munge exit-statement
+        #values into the return-value. However, it does have different semantic meaning, in that
+        #it indicates an exit statement was reached, rather than a top-level return.
+        #
+        #This is not guaranteed to occur; if not encountered, no ``exit`` statement was reached
+        print(exit_value)
+    except StatementReturn as e:
+        #This, however, will always occur, unless ``StatementExit`` is encountered.
+        return_value = e.value
+        
+Warning
+-------
+Before attempting to modify this module, make sure you are versed in coroutine theory. Failure to
+respect that model will lead to pain. Lots of it.
+
 Meta
 ----
 :Authors:
@@ -22,6 +89,8 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
 import collections
+import re
+import types
 
 from .grammar import parser
 
@@ -49,8 +118,9 @@ class Interpreter:
         Begins execution of the named function, with the given `arguments`, which are a dictionary
         of parameter-name/value items. The function's parameter-list must match the given arguments.
         
-        If the function terminates with a ``return`` statement, the specified value is returned.
-        Otherwise, ``None`` is returned by default.
+        If the function terminates with a ``return`` statement, the specified value is provided as
+        the ``value`` attribute of a raised ``StatementReturn``. This attribute is set to ``None``
+        if the statement did not return an explicit value.
         
         If the function cannot be found, `FunctionNotFoundError` is raised.
         
@@ -72,8 +142,13 @@ class Interpreter:
             raise FunctionNotFoundError(container_name, "Function not defined")
             
         try:
-            return self._process_statements(function, seed_locals=arguments, function=True)
-        except StatementExit:
+            prompt = None
+            generator = self._process_statements(function, seed_locals=arguments, function=True)
+            for prompt in generator:
+                x = yield prompt
+                generator.send(x)
+            raise StatementReturn(prompt)
+        except FlowControl:
             raise
         except ExecutionError as e:
             raise ExecutionError(container_name, e.location_path, e.message)
@@ -103,6 +178,9 @@ class Interpreter:
             
         try:
             self._process_statements(node)
+            for prompt in generator:
+                x = yield prompt
+                generator.send(x)
         except StatementExit:
             raise
         except StatementReturn as e:
@@ -124,7 +202,7 @@ class Interpreter:
     def list_functions(self):
         """
         Provides a list of all functions defined within the interpreter's local environment.
-        COND_WHILE
+        
         The value returned is a sequence of names coupled with sets containing lists of named
         parameters.
         """
@@ -147,7 +225,23 @@ class Interpreter:
         written in other languages or that may have evolving signatures and optional parameters.
         
         Names should be fully qualified and MUST contain at least one scope-delimiter (dot).
+        
+        A ``ValueError`` is raised if the function-list is ill-formed.
         """
+        name_re = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)+$')
+        for (name, function) in functions: #Validate the list.
+            if not type(name) == str:
+                raise ValueError("%(name)r is not a string" % {
+                 'name': name,
+                })
+            if not name_re.match(name):
+                raise ValueError("'%(name)s' is not a valid scoped identifier" % {
+                 'name': name,
+                })
+            if not isinstance(function, collections.Callable):
+                raise ValueError("%(function)r is not a function" % {
+                 'function': function,
+                })
         self._scoped_functions.update(dict(functions))
         
     def _assign(self, identifier, expression, _locals, evaluate_expression=True):
@@ -168,7 +262,13 @@ class Interpreter:
         scope = self._get_assignment_scope(identifier[0], _locals)
         value = expression
         if evaluate_expression:
-            value = self._evaluate_expression(expression, _locals)
+            try:
+                generator = self._evaluate_expression(expression, _locals)
+                for prompt in generator:
+                    x = yield prompt
+                    generator.send(x)
+            except StatementReturn as e:
+                value = e.value
         scope[identifier[1]] = value
         
     def _assign_augment(self, identifier, expression, method, _locals, evaluate_expression=True):
@@ -194,7 +294,14 @@ class Interpreter:
             
         expression_result = expression
         if evaluate_expression:
-            expression_result = self._evaluate_expression(expression, _locals)
+            try:
+                generator = self._evaluate_expression(expression, _locals)
+                for prompt in generator:
+                    x = yield prompt
+                    generator.send(x)
+            except StatementReturn as e:
+                expression_result = e.value
+                
         if method == parser.ASSIGN_ADD:
             if isinstance(scope[identifier[1]], str) or isinstance(expression_result, str):
                 scope[identifier[1]] = ''.join((str(scope[identifier[1]]), str(expression_result)))
@@ -232,7 +339,15 @@ class Interpreter:
         
         `_locals` is the scope's local variable store.
         """
-        source = self._evaluate_expression(source_expression, _locals)
+        source = None
+        try:
+            generator = self._evaluate_expression(source_expression, _locals)
+            for prompt in generator:
+                x = yield prompt
+                generator.send(x)
+        except StatementReturn as e:
+            source = e.value
+            
         if not type(source) == Sequence:
             raise ValueError("Attempted to unpack non-sequence")
             
@@ -252,7 +367,10 @@ class Interpreter:
             if identifier[0] == parser.TERM_NONE: #None may be used as a non-assigning placeholder
                 continue
                 
-            if not identifier[0] in (parser.TERM_IDENTIFIER_LOCAL, parser.TERM_IDENTIFIER_LOCAL_LOCAL, parser.TERM_IDENTIFIER_LOCAL_GLOBAL):
+            if not identifier[0] in (
+             parser.TERM_IDENTIFIER_LOCAL,
+             parser.TERM_IDENTIFIER_LOCAL_LOCAL, parser.TERM_IDENTIFIER_LOCAL_GLOBAL
+            ):
                 raise ValueError("Unable to assign value to non-variable in sequence-unpack")
                 
             self._assign(identifier, value, _locals, evaluate_expression=False)
@@ -269,27 +387,52 @@ class Interpreter:
         
         `_locals` is the current scope's local variables.
         
-        A boolean value is returned.
+        A boolean value is returned as the ``value`` attribute of a raised `StatementReturn`.
         """
-        if method == parser.TEST_BOOL_OR:
-            return bool(self._evaluate_expression(expression_left, _locals)) or bool(self._evaluate_expression(expression_right, _locals))
-        elif method == parser.TEST_BOOL_AND:
-            return bool(self._evaluate_expression(expression_left, _locals)) and bool(self._evaluate_expression(expression_right, _locals))
-        else: #Lazy evaluation's not an option, so just evaluate both upfront
-            result_left = self._evaluate_expression(expression_left, _locals)
-            result_right = self._evaluate_expression(expression_right, _locals)
+        #Resolve the left piece's value first, since it can be used for lazy evaluation of booleans.
+        result_left = result_right = None
+        try:
+            generator = self._evaluate_expression(expression_left, _locals)
+            for prompt in generator:
+                x = yield prompt
+                generator.send(x)
+        except StatementReturn as e:
+            result_left = e.value
+            
+        if method in (parser.TEST_BOOL_OR, parser.TEST_BOOL_AND):
+            if method == parser.TEST_BOOL_OR and bool(result_left):
+                raise StatementReturn(True)
+            elif method == parser.TEST_BOOL_AND and not bool(result_left):
+                raise StatementReturn(False)
+                
+            try:
+                generator = self._evaluate_expression(expression_right, _locals)
+                for prompt in generator:
+                    x = yield prompt
+                    generator.send(x)
+            except StatementReturn as e:
+                raise StatementReturn(bool(e.value))
+        else: #Lazy evaluation's not a useful option, so evaluate right upfront
+            try:
+                generator = self._evaluate_expression(expression_right, _locals)
+                for prompt in generator:
+                    x = yield prompt
+                    generator.send(x)
+            except StatementReturn as e:
+                result_right = e.value
+                
             if method == parser.TEST_EQUALITY:
-                return result_left == result_right
+                raise StatementReturn(result_left == result_right)
             elif method == parser.TEST_INEQUALITY:
-                return result_left != result_right
+                raise StatementReturn(result_left != result_right)
             elif method == parser.TEST_GREATER_EQUAL:
-                return result_left >= result_right
+                raise StatementReturn(result_left >= result_right)
             elif method == parser.TEST_GREATER:
-                return result_left > result_right
+                raise StatementReturn(result_left > result_right)
             elif method == parser.TEST_LESSER_EQUAL:
-                return result_left <= result_right
+                raise StatementReturn(result_left <= result_right)
             elif method == parser.TEST_LESSER:
-                return result_left < result_right
+                raise StatementReturn(result_left < result_right)
                 
     def _compute(self, expression_left, expression_right, method, _locals):
         """
@@ -303,30 +446,47 @@ class Interpreter:
         A numerical value is returned in most cases, though strings can be concatenated through
         addition. If either expression provides a string, the other expression is converted
         appropriately.
+        
+        The returned value is in the ``value`` attribute of a raised `StatementReturn`.
         """
-        result_left = self._evaluate_expression(expression_left, _locals)
-        result_right = self._evaluate_expression(expression_right, _locals)
+        #Resolve the left and right pieces' values.
+        result_left = result_right = None
+        try:
+            generator = self._evaluate_expression(expression_left, _locals)
+            for prompt in generator:
+                x = yield prompt
+                generator.send(x)
+        except StatementReturn as e:
+            result_left = e.value
+        try:
+            generator = self._evaluate_expression(expression_right, _locals)
+            for prompt in generator:
+                x = yield prompt
+                generator.send(x)
+        except StatementReturn as e:
+            result_right = e.value
+            
         if method == parser.MATH_ADD:
             if isinstance(result_left, str) or isinstance(result_right, str):
-                return ''.join((str(result_left), str(result_right)))
+                raise StatementReturn(''.join((str(result_left), str(result_right))))
             else:
-                return result_left + result_right
+                raise StatementReturn(result_left + result_right)
         elif method == parser.MATH_SUBTRACT:
-            return result_left - result_right
+            raise StatementReturn(result_left - result_right)
         elif method == parser.MATH_MULTIPLY:
-            return result_left * result_right
+            raise StatementReturn(result_left * result_right)
         elif method == parser.MATH_DIVIDE:
-            return result_left / result_right
+            raise StatementReturn(result_left / result_right)
         elif method == parser.MATH_DIVIDE_INTEGER:
-            return int(result_left // result_right)
+            raise StatementReturn(int(result_left // result_right))
         elif method == parser.MATH_MOD:
-            return result_left % result_right
+            raise StatementReturn(result_left % result_right)
         elif method == parser.MATH_AND:
-            return result_left & result_right
+            raise StatementReturn(result_left & result_right)
         elif method == parser.MATH_OR:
-            return result_left | result_right
+            raise StatementReturn(result_left | result_right)
         elif method == parser.MATH_XOR:
-            return result_left ^ result_right
+            raise StatementReturn(result_left ^ result_right)
             
     def _evaluate_conditional(self, statement, _locals):
         """
@@ -339,12 +499,30 @@ class Interpreter:
         Execution behaviour and exceptions are identical to `_process_statements`.
         """
         statement_list = None
-        if bool(self._evaluate_expression(statement[0][0], _locals)):
+        
+        allow = None
+        generator = self._evaluate_expression(statement[0][0], _locals)
+        try:
+            for prompt in generator:
+                x = yield prompt
+                generator.send(x)
+        except StatementReturn as e:
+            allow = e.value
+            
+        if bool(allow):
             statement_list = statement[0][1]
         else:
             for substatement in statement[1:]:
                 if substatement[0] == parser.COND_ELIF:
-                    if bool(self._evaluate_expression(substatement[1], _locals)):
+                    generator = self._evaluate_expression(substatement[1], _locals)
+                    try:
+                        for prompt in generator:
+                            x = yield prompt
+                            generator.send(x)
+                    except StatementReturn as e:
+                        allow = e.value
+                        
+                    if bool(allow):
                         statement_list = substatement[2]
                         break
                 elif substatement[0] == parser.COND_ELSE:
@@ -352,43 +530,59 @@ class Interpreter:
                     break
                     
         if statement_list:
-            self._process_statements(statement_list, scope_locals=_locals)
-            
+            generator = self._process_statements(statement_list, scope_locals=_locals)
+            for prompt in generator:
+                x = yield prompt
+                generator.send(x)
+                
     def _evaluate_expression(self, expression, _locals):
         """
-        Evalues an expression and returns a term.
+        Evalues an expression and offers a term.
         
         `expression` is the expression to be evaluated.
         
         `_locals` is the current scope's local variables.
         
-        If the expression does not have an explicit value, ``None`` is returned.
+        ``StatementReturn`` is raised after the term has been resolved. This is normal; the term's
+        value is in its ``value`` attribute.
         """
         expression_type = expression[0]
         
         if expression_type in (parser.TERM_BOOL, parser.TERM_STRING, parser.TERM_INTEGER, parser.TERM_FLOAT):
-            return expression[1]
+            raise StatementReturn(expression[1])
         elif expression_type == parser.TERM_NONE:
-            return None
-        elif expression_type in (parser.TERM_IDENTIFIER_LOCAL, parser.TERM_IDENTIFIER_LOCAL_LOCAL, parser.TERM_IDENTIFIER_LOCAL_GLOBAL):
-            return self._resolve_local_identifier(expression[1], _locals, scope=expression_type)
+            raise StatementReturn(None)
+        elif expression_type in (
+         parser.TERM_IDENTIFIER_LOCAL,
+         parser.TERM_IDENTIFIER_LOCAL_LOCAL, parser.TERM_IDENTIFIER_LOCAL_GLOBAL
+        ):
+            raise StatementReturn(self._resolve_local_identifier(expression[1], _locals, scope=expression_type))
         elif expression_type == parser.TERM_IDENTIFIER_SCOPED: #Only locally-scoped variables may have attributes
-            return self._resolve_scoped_identifier(expression[1], _locals)
+            raise StatementReturn(self._resolve_scoped_identifier(expression[1], _locals))
         elif expression_type in (
          parser.MATH_MULTIPLY, parser.MATH_DIVIDE, parser.MATH_DIVIDE_INTEGER, parser.MATH_ADD, parser.MATH_SUBTRACT,
          parser.MATH_MOD, parser.MATH_AND, parser.MATH_OR, parser.MATH_XOR
         ):
-            return self._compute(expression[1], expression[2], expression_type, _locals)
+            generator = self._compute(expression[1], expression[2], expression_type, _locals)
+            for prompt in generator: #Generator is guaranteed to raise a StatementReturn at its end
+                x = yield prompt
+                generator.send(x)
         elif expression_type in (
          parser.TEST_EQUALITY, parser.TEST_INEQUALITY,
          parser.TEST_GREATER_EQUAL, parser.TEST_GREATER, parser.TEST_LESSER_EQUAL, parser.TEST_LESSER,
          parser.TEST_BOOL_OR, parser.TEST_BOOL_AND
         ):
-            return self._compare(expression[1], expression[2], expression_type, _locals)
+            generator = self._compare(expression[1], expression[2], expression_type, _locals)
+            for prompt in generator: #Generator is guaranteed to raise a StatementReturn at its end
+                x = yield prompt
+                generator.send(x)
         elif expression_type in (parser.FUNCTIONCALL_LOCAL, parser.FUNCTIONCALL_SCOPED):
-            return self._invoke_function(expression, _locals)
+            generator = self._invoke_function(expression, _locals)
+            for prompt in generator: #Generator is guaranteed to raise a StatementReturn at its end
+                x = yield prompt
+                generator.send(x)
         elif expression_type == parser.SEQUENCE:
-            return Sequence([self._evaluate_expression(e, _locals) for e in expression[1]])
+            raise StatementReturn(Sequence([self._evaluate_expression(e, _locals) for e in expression[1]]))
             
         raise ValueError("Unknown expression encountered: %(expression)r" % {
          'expression': expression,
@@ -429,7 +623,10 @@ class Interpreter:
         
         The local variable scopes are searched for bound functions first, in case the function being
         called is an attribute of a locally bound variable, with the set of registered scoped
-        functions accessed afterwards if no bound variable is found.
+        functions accessed afterwards if no bound variable is found. If a bound variable is found at
+        the root, but the full path to the named function cannot be resolved, the registered set of
+        functions is consulted; this may not be the most expected behaviour, but it will never do
+        the wrong thing, unless the author of a script actually wants to make their script fail.
         
         `_locals` is the current scope's local variables.
         
@@ -469,8 +666,10 @@ class Interpreter:
         `expression` is the expression-body to be processed (scope, name, arguments) and `_locals`
         is the local variable store for resolution purposes.
         
-        If the returned value would be a Python sequence, it's marshalled into a Prismscript
-        Sequence.
+        Any alien types are marshalled into Prismscript-compatible forms.
+        
+        ``StatementReturn`` is raised after any coroutine execution has completed. This is normal;
+        the function's return-value is in its ``value`` attribute.
         """
         result = None
         if expression[0] == parser.FUNCTIONCALL_LOCAL:
@@ -478,7 +677,23 @@ class Interpreter:
         elif expression[0] == parser.FUNCTIONCALL_SCOPED:
             result = self._execute_scoped_function(expression[1], expression[2], _locals)
             
-        if not type(result) == Sequence and isinstance(result, collections.Sequence):
+        if type(result) == types.GeneratorType:
+            prompt = None
+            for prompt in result:
+                prompt = self._marshall_type(prompt)
+                x = yield (expression[1], prompt) #Construct a tuple with the identifier of the function in the first slot.
+                result.send(x)
+            raise StatementReturn(prompt)
+        else:
+            raise StatementReturn(self._marshall_type(result))
+            
+    def _marshall_type(self, data):
+        """
+        Coerces `data` received from external sources into equivalent, Prismscript-compatible
+        formats.
+        """
+        if not type(data) == Sequence and isinstance(result, collections.Sequence):
+            #Python sequences -> Sequence
             return Sequence(result)
         return result
         
@@ -510,9 +725,10 @@ class Interpreter:
         
         If a problem occurs, an `ExecutionError` is raised.
         
-        `StatementReturn` may be raised from non-function contexts (conditional bodies, nodes that
-        use ``return`` instead of ``exit``) and `StatementExit` may occur if an ``exit`` statement
-        is encountered.
+        `StatementReturn` will be raised from function contexts and may be raised from non-function
+        contexts (conditional bodies, nodes that use ``return`` instead of ``exit``), and
+        `StatementExit` will occur if an ``exit`` statement is encountered or control is returned
+        after a ``goto`` statement.
         """
         self._log.append("Executing statements...")
         
@@ -522,41 +738,92 @@ class Interpreter:
         if not seed_locals is None: #Values were provided to be added to the local variables
             _locals.update(seed_locals)
             
+        _goto_flag = False #True if a goto was encountered, meaning processing should end.
         _while_expression = while_expression
         if not while_expression: #Let the loop execute; this is inverted at the end.
             _while_expression = (parser.TERM_BOOL, True)
-        while bool(self._evaluate_expression(_while_expression, _locals)):
+        while True:
+            generator = self._evaluate_expression(_while_expression, _locals)
+            try:
+                for prompt in generator:
+                    x = yield prompt
+                    generator.send(x)
+            except StatementReturn as e:
+                if not bool(e.value):
+                    break
+                    
             i = 0 #Statement-enumerator for exception-tracing.
             try:
                 for (i, statement) in enumerate(statement_list):
                     statement_type = statement[0]
                     
                     if statement_type == parser.ASSIGN:
-                        self._assign(statement[1], statement[2], _locals)
+                        generator = self._assign(statement[1], statement[2], _locals)
+                        for prompt in generator:
+                            x = yield prompt
+                            generator.send(x)
                     elif statement_type in (
                      parser.ASSIGN_ADD, parser.ASSIGN_SUBTRACT, parser.ASSIGN_MULTIPLY,
                      parser.ASSIGN_DIVIDE, parser.ASSIGN_DIVIDE_INTEGER, parser.ASSIGN_MOD,
                     ):
-                        self._assign_augment(statement[1], statement[2], statement_type, _locals)
+                        generator = self._assign_augment(statement[1], statement[2], statement_type, _locals)
+                        for prompt in generator:
+                            x = yield prompt
+                            generator.send(x)
                     elif statement_type == parser.ASSIGN_SEQUENCE:
-                        self._assign_sequence(statement[1][1], statement[2], _locals)
+                        generator = self._assign_sequence(statement[1][1], statement[2], _locals)
+                        for prompt in generator:
+                            x = yield prompt
+                            generator.send(x)
                     elif statement_type == parser.STMT_RETURN:
-                        raise StatementReturn(self._evaluate_expression(statement[1], _locals))
+                        generator = self._evaluate_expression(statement[1], _locals)
+                        for prompt in generator:
+                            x = yield prompt
+                            generator.send(x)
+                        #`_evaluate_expression` is guaranteed to raise a `StatementReturn`, so nothing needs to be done here.
                     elif statement_type == parser.STMT_GOTO:
                         self.execute_node(statement[1])
-                        return
+                        try:
+                            for prompt in generator:
+                                x = yield prompt
+                                generator.send(x)
+                        except StatementReturn as e: #Returns from nodes are treated as exits.
+                            raise StatementExit(e.value)
+                        #If control returns to this point, processing has to end, since a goto is a
+                        #break.
+                        #Gotos cannot be made non-nested because of the nature of the recursive
+                        #message-passing infrastructure needed to support the coroutine model.
+                        raise StatementExit('')
                     elif statement_type == parser.COND_IF:
-                        self._evaluate_conditional(statement[1:], _locals)
+                        generator = self._evaluate_conditional(statement[1:], _locals)
+                        for prompt in generator:
+                            x = yield prompt
+                            generator.send(x)
                     elif statement_type == parser.COND_WHILE:
-                        self._process_statements(statement[2], while_expression=statement[1], scope_locals=_locals)
+                        generator = self._process_statements(statement[2], while_expression=statement[1], scope_locals=_locals)
+                        for prompt in generator:
+                            x = yield prompt
+                            generator.send(x)
                     elif statement_type == parser.STMT_BREAK:
                         raise StatementBreak()
                     elif statement_type == parser.STMT_CONTINUE:
                         raise StatementContinue()
                     elif statement_type == parser.STMT_EXIT:
-                        raise StatementExit(str(self._evaluate_expression(statement[1], _locals)))
+                        try:
+                            generator = self._evaluate_expression(statement[1], _locals)
+                            for prompt in generator:
+                                x = yield prompt
+                                generator.send(x)
+                        except StatementReturn as e:
+                            raise StatementExit(str(e.value))
                     else:
-                        self._evaluate_expression(statement, _locals)
+                        try:
+                            generator = self._evaluate_expression(statement, _locals)
+                            for prompt in generator:
+                                x = yield prompt
+                                generator.send(x)
+                        except StatementReturn as e: #Expected, since `_evaluate_expression` always raises one, but it doesn't do anything in this case.
+                            pass
             except StatementBreak:
                 if not while_expression:
                     raise ExecutionError(str(i + 1), [], "`break` statement not allowed outside of a loop")
@@ -565,10 +832,6 @@ class Interpreter:
                 if not while_expression:
                     raise ExecutionError(str(i + 1), [], "`continue` statement not allowed outside of a loop")
                 continue
-            except StatementReturn as e:
-                if function:
-                    return e.value
-                raise
             except FlowControl: #Allow other control-directives to pass.
                 raise
             except ExecutionError as e:
@@ -763,14 +1026,6 @@ class StatementContinue(FlowControl):
     Indicates that a ``continue`` statement was encountered.
     """
     
-class StatementExit(FlowControl):
-    """
-    Indicates that an ``exit`` statement was encountered.
-    """
-    value = None
-    def __init__(self, value):
-        self.value = value
-        
 class StatementReturn(FlowControl):
     """
     Indicates that a ``return`` statement was encountered.
@@ -779,3 +1034,14 @@ class StatementReturn(FlowControl):
     def __init__(self, value):
         self.value = value
         
+    def __repr__(self):
+        return repr(self.value)
+        
+    def __str__(self):
+        return str(self.value)
+        
+class StatementExit(StatementReturn):
+    """
+    Indicates that an ``exit`` statement was encountered.
+    """
+    
