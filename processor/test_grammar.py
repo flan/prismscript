@@ -54,6 +54,7 @@ if __name__ == '__main__':
       unittest.TestLoader().loadTestsFromTestCase(structure.ExpressionListTestCase),
       unittest.TestLoader().loadTestsFromTestCase(structure.ConditionalTestCase),
       unittest.TestLoader().loadTestsFromTestCase(structure.WhileTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(structure.ForTestCase),
      )),
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(realistic.TheoreticalTestCase),

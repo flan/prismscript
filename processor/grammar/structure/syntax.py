@@ -37,6 +37,7 @@ COND_IF = 20
 COND_ELIF = 21
 COND_ELSE = 22
 COND_WHILE = 23
+COND_FOR = 24
 TERM_IDENTIFIER_LOCAL = 30
 TERM_IDENTIFIER_SCOPED = 31
 TERM_NONE = 32
@@ -148,6 +149,7 @@ def p_expressionlist(p):
     r"""
     expressionlist : expressionlist conditional
                    | expressionlist while
+                   | expressionlist for
                    | expressionlist assignment SEMICOLON
                    | expressionlist statement SEMICOLON
                    | expressionlist expression SEMICOLON
@@ -189,6 +191,12 @@ def p_while(p):
     while : WHILE LPAREN expression RPAREN LCURLY expressionlist RCURLY
     """
     p[0] = (COND_WHILE, p[3], p[6])
+    
+def p_for(p):
+    r"""
+    for : FOR LPAREN identifier_local IN expression RPAREN LCURLY expressionlist RCURLY
+    """
+    p[0] = (COND_FOR, p[3], p[5], p[8])
     
 def p_assignment(p):
     r"""

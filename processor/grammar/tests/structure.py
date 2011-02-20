@@ -196,3 +196,36 @@ class WhileTestCase(unittest.TestCase):
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
+class ForTestCase(unittest.TestCase):
+    def test_while(self):
+        source = get_source('for')
+        (nodes, functions) = get_digest('for')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
+        
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
+    def test_while_break(self):
+        source = get_source('for_break')
+        (nodes, functions) = get_digest('for_break')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
+        
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
+    def test_while_continue(self):
+        source = get_source('for_continue')
+        (nodes, functions) = get_digest('for_continue')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
+        
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        
+    def test_while_nested(self):
+        source = get_source('for_nested')
+        (nodes, functions) = get_digest('for_nested')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
+        
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+

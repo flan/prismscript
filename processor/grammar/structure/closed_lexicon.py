@@ -29,6 +29,7 @@ reserved = {
  'elif': 'ELIF',
  'else': 'ELSE',
  'while': 'WHILE',
+ 'for': 'FOR',
  #states
  'None': 'NONE',
  #literals
@@ -47,6 +48,8 @@ reserved = {
  #qualifiers
  'global': 'QUALIFIER_GLOBAL',
  'local': 'QUALIFIER_LOCAL',
+ #meta
+ 'in': 'IN',
 }
 
 tokens = [
