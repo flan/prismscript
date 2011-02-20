@@ -94,6 +94,12 @@ Before attempting to modify this module, make sure you are well-versed in corout
 to respect that model will lead to pain. Lots of it. You will cry and people will hate you. It will
 be bad.
 
+David Beazley's articles on the subject (and a number of other topics) are pretty comprehensive and
+may prove to be a good place to start: http://www.dabeaz.com/coroutines/
+
+He is also, by pure coincidence, the author of the library that handles parsing of the language's
+grammar.
+
 Meta
 ----
 :Authors:
