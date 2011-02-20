@@ -93,6 +93,34 @@ If calling a function directly::
         return_value = e.value
         
         
+External functions
+------------------
+For the most part, designing an external function for registration is a simple process: just write
+a function as you normally would, give it descriptive parameter-names, and pass it into
+`Interpreter.register_scoped_functions()`. You can return a value if you want, including a tuple or
+list.
+
+If you want to make use of the coroutine architecture, things are a bit more complex, but they're
+not too bad.
+
+In this case, your function needs to be a generator, so it has to ``yield`` a prompt so the
+controller knows what to do in response. The identifier used to register your function will
+automatically be exposed, so the origin is given for free.
+
+Your function will receive a response to its ``yield`` using ``send()``, which can be used to decide
+how to proceed. Upon completion, your function may either end without doing anything (implicit
+``None`` return) or it can raise an instance of this module's ``StatementReturn`` exception, in the
+following way: ``raise prismscript.processor.interpreter.StatementReturn('Your Return Value')``,
+which will cause the given value to be returned.
+
+You may return a generator object using the ``StatementReturn`` method, but you cannot return one
+using the ``return`` method.
+
+
+Consider using the ``discover_functions`` module to easily build a big list of functions that can be
+quickly passed to every new interpreter instance in a sensible format.
+
+
 Warning
 -------
 Before attempting to modify this module, make sure you are well-versed in coroutine theory. Failure
@@ -137,7 +165,7 @@ class Interpreter:
     
     _log = None #A high-level execution log to aid debugging
     
-    _loop_limit = 100000 #Limit loop-iterations to 100,000 by default, to hard-break infinite loops.
+    _loop_limit = 100000 #Limit loop-iterations to 100,000 by default, to hard-break infinite loops
     
     def __init__(self, script):
         """
@@ -725,10 +753,13 @@ class Interpreter:
         the function's return-value is in its ``value`` attribute.
         """
         result = None
-        if expression[0] == parser.FUNCTIONCALL_LOCAL:
-            result = self._execute_local_function(expression[1], expression[2], _locals)
-        elif expression[0] == parser.FUNCTIONCALL_SCOPED:
-            result = self._execute_scoped_function(expression[1], expression[2], _locals)
+        try:
+            if expression[0] == parser.FUNCTIONCALL_LOCAL:
+                result = self._execute_local_function(expression[1], expression[2], _locals)
+            elif expression[0] == parser.FUNCTIONCALL_SCOPED:
+                result = self._execute_scoped_function(expression[1], expression[2], _locals)
+        except StatementReturn as e:
+            raise StatementReturn(self._marshall_type(e.value))
             
         if type(result) == types.GeneratorType:
             try:
