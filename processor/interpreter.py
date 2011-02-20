@@ -15,7 +15,7 @@ At various points in this module, the following anti-pattern will appear::
     for prompt in generator:
         generator.send(yield prompt)
         
-Another anti-pattern, in the form of flow-control through exceptions manifests itself for handling
+Another anti-pattern, in the form of flow-control through exceptions, manifests itself for handling
 messages that need to transcend scope. Fortunately, they do not pervade outside of this module, and
 they are used quite consistently within. They are necessary because it is impossible to both yield
 to a co-routine and return an explicit value, so it came down to either having a loose standard of
