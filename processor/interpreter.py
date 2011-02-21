@@ -258,7 +258,9 @@ class Interpreter:
             raise
         except StatementReturn as e: #Not actually legal, but suppressing it would be bad.
             self._log.append("Warning: exit-statement inferred from top-level return.")
-            raise StatementExit(e.value)
+            if e.value is None:
+                raise StatementExit('')
+            raise StatementExit(str(e.value))
         except ExecutionError as e:
             raise ExecutionError(node_name, e.location_path, e.message)
         except Exception as e:
@@ -1017,6 +1019,8 @@ class Interpreter:
                                 x = yield prompt
                                 generator.send(x)
                         except StatementReturn as e: #Expected: occurs in lieu of a return
+                            if e.value is None:
+                                raise StatementExit('')
                             raise StatementExit(str(e.value))
                     else:
                         try:

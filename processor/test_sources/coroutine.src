@@ -1,8 +1,28 @@
 coroutine{
     exit test.coroutine();
 }
-
 coroutine(){
     return test.coroutine();
+}
+
+coroutine_noexit{
+    test.coroutine();
+}
+coroutine_noreturn(){
+    test.coroutine();
+}
+
+coroutine_passive{
+    exit test.coroutine_passive();
+}
+coroutine_passive(){
+    return test.coroutine_passive();
+}
+
+coroutine_passive_noexit{
+    test.coroutine_passive();
+}
+coroutine_passive_noreturn(){
+    test.coroutine_passive();
 }
 

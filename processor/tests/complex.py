@@ -125,7 +125,13 @@ class CoroutineTestCase(unittest.TestCase):
             x = yield "Hello!"
             raise StatementReturn(x)
             
-        self._interpreter.register_scoped_functions([('test.coroutine', coroutine)])
+        def passive_coroutine():
+            x = yield "Hello!"
+            
+        self._interpreter.register_scoped_functions([
+         ('test.coroutine', coroutine),
+         ('test.coroutine_passive', passive_coroutine),
+        ])
         
     def test_coroutine_node(self):
         try:
@@ -137,6 +143,16 @@ class CoroutineTestCase(unittest.TestCase):
         else:
             self.fail("StatementExit not received")
             
+    def test_coroutine_node_noexit(self):
+        try:
+            generator = self._interpreter.execute_node('coroutine_noexit')
+            self.assertEquals(next(generator), ('test.coroutine', 'Hello!'))
+            generator.send('goodbye')
+        except StatementExit as e:
+            self.assertEquals(e.value, '')
+        else:
+            self.fail("StatementExit not received")
+            
     def test_coroutine_function(self):
         try:
             generator = self._interpreter.execute_function('coroutine', {})
@@ -144,6 +160,56 @@ class CoroutineTestCase(unittest.TestCase):
             generator.send('goodbye')
         except StatementReturn as e:
             self.assertEquals(e.value, 'goodbye')
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_coroutine_function_noreturn(self):
+        try:
+            generator = self._interpreter.execute_function('coroutine_noreturn', {})
+            self.assertEquals(next(generator), ('test.coroutine', 'Hello!'))
+            generator.send('goodbye')
+        except StatementReturn as e:
+            self.assertIsNone(e.value)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_coroutine_passive_node(self):
+        try:
+            generator = self._interpreter.execute_node('coroutine_passive')
+            self.assertEquals(next(generator), ('test.coroutine_passive', 'Hello!'))
+            generator.send('goodbye')
+        except StatementExit as e:
+            self.assertEquals(e.value, '')
+        else:
+            self.fail("StatementExit not received")
+            
+    def test_coroutine_passive_node_noexit(self):
+        try:
+            generator = self._interpreter.execute_node('coroutine_passive_noexit')
+            self.assertEquals(next(generator), ('test.coroutine_passive', 'Hello!'))
+            generator.send('goodbye')
+        except StatementExit as e:
+            self.assertEquals(e.value, '')
+        else:
+            self.fail("StatementExit not received")
+            
+    def test_coroutine_passive_function(self):
+        try:
+            generator = self._interpreter.execute_function('coroutine_passive', {})
+            self.assertEquals(next(generator), ('test.coroutine_passive', 'Hello!'))
+            generator.send('goodbye')
+        except StatementReturn as e:
+            self.assertIsNone(e.value)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_coroutine_passive_function_noreturn(self):
+        try:
+            generator = self._interpreter.execute_function('coroutine_passive_noreturn', {})
+            self.assertEquals(next(generator), ('test.coroutine_passive', 'Hello!'))
+            generator.send('goodbye')
+        except StatementReturn as e:
+            self.assertIsNone(e.value)
         else:
             self.fail("StatementReturn not received")
             
