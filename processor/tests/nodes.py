@@ -22,6 +22,7 @@ import unittest
 
 from . import (
  get_interpreter, execute_no_yield,
+ StatementExit,
 )
 
 class SimpleTestCase(unittest.TestCase):
@@ -31,17 +32,55 @@ class SimpleTestCase(unittest.TestCase):
         self._interpreter = get_interpreter('nodes')
         
     def test_simple(self):
-        self.assertIsNone(self._interpreter.execute_node('simple'))
+        self.assertEquals(execute_no_yield(self._interpreter.execute_node('simple')), None)
         
     def test_goto(self):
-        self.assertIsNone(self._interpreter.execute_node('goto'))
+        self.assertEquals(execute_no_yield(self._interpreter.execute_node('goto')), None)
         
     def test_local_function(self):
-        self.assertIsNone(self._interpreter.execute_node('local_function'))
+        self.assertEquals(execute_no_yield(self._interpreter.execute_node('local_function')), None)
         
     def test_scoped_function(self):
-        self.assertIsNone(self._interpreter.execute_node('scoped_function'))
+        self.assertEquals(execute_no_yield(self._interpreter.execute_node('scoped_function')), None)
         
     def test_local_function_goto(self):
-        self.assertIsNone(self._interpreter.execute_node('local_function_goto'))
+        self.assertEquals(execute_no_yield(self._interpreter.execute_node('local_function_goto')), None)
         
+class ExitTestCase(unittest.TestCase):
+    _interpreter = None
+    
+    def setUp(self):
+        self._interpreter = get_interpreter('nodes_exit')
+        
+    def test_exit(self):
+        try:
+            execute_no_yield(self._interpreter.execute_node('n_exit'))
+        except StatementExit as e:
+            self.assertEquals(e.value, 'test')
+        else:
+            self.fail("StatementExit not received")
+            
+    def test_goto_exit(self):
+        try:
+            execute_no_yield(self._interpreter.execute_node('goto_exit'))
+        except StatementExit as e:
+            self.assertEquals(e.value, 'test')
+        else:
+            self.fail("StatementExit not received")
+            
+    def test_function_exit(self):
+        try:
+            execute_no_yield(self._interpreter.execute_node('function_exit'))
+        except StatementExit as e:
+            self.assertEquals(e.value, 'test')
+        else:
+            self.fail("StatementExit not received")
+            
+    def test_function_goto_exit(self):
+        try:
+            execute_no_yield(self._interpreter.execute_node('goto_exit'))
+        except StatementExit as e:
+            self.assertEquals(e.value, 'test')
+        else:
+            self.fail("StatementExit not received")
+            

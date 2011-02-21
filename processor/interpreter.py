@@ -69,8 +69,6 @@ If calling a node directly::
                 node.send(prompt[1]) #What you send back is up to your function's needs.
     except StatementExit as e:
         #Not guaranteed to occur; if not encountered, no ``exit`` statement was reached.
-        #Node-level ``return`` statements will trigger this, too, for the sake of C/Java
-        #programmers.
         exit_value = e.value
         
 If calling a function directly::
@@ -82,10 +80,6 @@ If calling a function directly::
             if prompt == ('scope.subscope.function', 1): #Some function, somewhere, wants data.
                 node.send(prompt[1]) #What you send back is up to your function's needs.
     except StatementExit as e:
-        #This is a subclass of `StatementReturn`, so it can be omitted to munge exit-statement
-        #values into the return-value. However, it does have different semantic meaning, in that
-        #it indicates an exit statement was reached, rather than a top-level return.
-        #
         #This is not guaranteed to occur; if not encountered, no ``exit`` statement was reached
         print(exit_value)
     except StatementReturn as e:
@@ -115,6 +109,9 @@ which will cause the given value to be returned.
 
 You may return a generator object using the ``StatementReturn`` method, but you cannot return one
 using the ``return`` method.
+
+You also have access to ``StatementExit`` to halt execution, but that should generally be left to
+script-writers.
 
 
 Consider using the ``discover_functions`` module to easily build a big list of functions that can be
@@ -212,7 +209,6 @@ class Interpreter:
             for prompt in generator:
                 x = yield prompt
                 generator.send(x)
-            raise StatementReturn(prompt)
         except FlowControl:
             raise
         except ExecutionError as e:
@@ -221,7 +217,8 @@ class Interpreter:
             raise ExecutionError(container_name, [], "An unexpected error occurred: %(error)s" % {
              'error': str(e),
             })
-            
+        raise StatementReturn(None)
+        
     def execute_node(self, node_name):
         """
         Begins execution of the named node.
@@ -242,13 +239,15 @@ class Interpreter:
             raise NodeNotFoundError(node_name, "Node not defined")
             
         try:
-            self._process_statements(node)
+            generator = self._process_statements(node)
             for prompt in generator:
                 x = yield prompt
                 generator.send(x)
+            raise StatementExit('') #The end of any node signifies a dead end.
         except StatementExit:
             raise
-        except StatementReturn as e:
+        except StatementReturn as e: #Not actually legal, but suppressing it would be bad.
+            self._log.append("Warning: exit-statement inferred from top-level return.")
             raise StatementExit(e.value)
         except ExecutionError as e:
             raise ExecutionError(node_name, e.location_path, e.message)
@@ -847,7 +846,7 @@ class Interpreter:
         `StatementExit` will occur if an ``exit`` statement is encountered or control is returned
         after a ``goto`` statement.
         """
-        if not while_expression is None and not foreach_iterable is None:
+        if not while_expression is None and foreach_identifier:
             raise ValueError("A while-loop cannot also be a foreach-loop. This is a design issue.")
             
         if not while_expression is None:
@@ -928,18 +927,10 @@ class Interpreter:
                             generator.send(x)
                         #`_evaluate_expression` is guaranteed to raise `StatementReturn`, so nothing needs to be done here
                     elif statement_type == parser.STMT_GOTO:
-                        self.execute_node(statement[1])
-                        try:
-                            for prompt in generator: #Coroutine boilerplate
-                                x = yield prompt
-                                generator.send(x)
-                        except StatementReturn as e: #Returns from nodes are treated as exits.
-                            raise StatementExit(e.value)
-                        #If control returns to this point, processing has to end, since a goto is a
-                        #break.
-                        #Gotos cannot be made non-nested because of the nature of the recursive
-                        #message-passing infrastructure needed to support the coroutine model.
-                        raise StatementExit('')
+                        generator = self.execute_node(statement[1])
+                        for prompt in generator: #Coroutine boilerplate
+                            x = yield prompt
+                            generator.send(x)
                     elif statement_type == parser.COND_IF:
                         generator = self._evaluate_conditional(statement[1:], _locals)
                         for prompt in generator: #Coroutine boilerplate
@@ -982,14 +973,16 @@ class Interpreter:
                         except StatementReturn as e: #Expected, since `_evaluate_expression` always raises one, but it doesn't do anything in this case.
                             pass
             except StatementBreak:
-                if not while_expression:
+                if not while_expression and not foreach_identifier:
                     raise ExecutionError(str(i + 1), [], "`break` statement not allowed outside of a loop")
                 break
             except StatementContinue:
-                if not while_expression:
+                if not while_expression and not foreach_identifier:
                     raise ExecutionError(str(i + 1), [], "`continue` statement not allowed outside of a loop")
                 continue
-            except FlowControl: #Allow other control-directives to pass.
+            except StatementReturn:
+                raise
+            except StatementExit: #Allow exits to pass.
                 raise
             except ExecutionError as e:
                 raise ExecutionError(str(i + 1), e.location_path, e.message)
@@ -1002,7 +995,7 @@ class Interpreter:
                  'globals': sorted(self._globals.items()),
                 })
                 
-            if not while_expression: #It's not actually a loop, so kill it.
+            if not while_expression: #It's not actually a loop, so kill it. This is benign in the case of a foreach.
                 _while_expression = (parser.TERM_BOOL, False)
             iteration_count += 1
             
@@ -1088,6 +1081,12 @@ class Sequence(list):
         """
         return self[index]
         
+    def insert(self, index, item):
+        """
+        Inserts an item into an arbitrary position in the list.
+        """
+        self.insert(index, item)
+        
     def _get_size(self):
         """
         Returns the current number of elements in the sequence.
@@ -1101,6 +1100,12 @@ class Sequence(list):
         """
         return self.pop(0)
         
+    def pop_item(self, index):
+        """
+        Removes and retrieves the value of the specified item in the list.
+        """
+        return self.pop(index)
+        
     def pop_tail(self):
         """
         Pops an element from the end of the list.
@@ -1113,6 +1118,11 @@ class Sequence(list):
         """
         self.insert(0, item)
         
+    def remove(self, index):
+        """
+        Removes the specified item from the list.
+        """
+        del self[index]
         
 class Error(Exception):
     """
@@ -1186,9 +1196,9 @@ class StatementContinue(FlowControl):
     Indicates that a ``continue`` statement was encountered.
     """
     
-class StatementReturn(FlowControl):
+class _StatementCede(FlowControl):
     """
-    Indicates that a ``return`` statement was encountered.
+    Indicates that a scope-altering statement was encountered.
     """
     value = None
     def __init__(self, value):
@@ -1200,7 +1210,12 @@ class StatementReturn(FlowControl):
     def __str__(self):
         return str(self.value)
         
-class StatementExit(StatementReturn):
+class StatementReturn(_StatementCede):
+    """
+    Indicates that a ``return`` statement was encountered.
+    """
+    
+class StatementExit(_StatementCede):
     """
     Indicates that an ``exit`` statement was encountered.
     """

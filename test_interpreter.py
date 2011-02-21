@@ -28,10 +28,10 @@ from processor.tests import complex
 
 if __name__ == '__main__':
     all_tests = unittest.TestSuite((
-     #unittest.TestSuite((
-     # unittest.TestLoader().loadTestsFromTestCase(nodes.SimpleTestCase),
-     # unittest.TestLoader().loadTestsFromTestCase(nodes.ReferenceTestCase),
-     #)),
+     unittest.TestSuite((
+      #unittest.TestLoader().loadTestsFromTestCase(nodes.SimpleTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(nodes.ExitTestCase),
+     )),
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(functions.MathTestCase),
      )),
@@ -41,20 +41,4 @@ if __name__ == '__main__':
     ))
     unittest.TextTestRunner().run(all_tests)
     
-"""
-import prismscript.interpreter
-i = prismscript.interpreter.Interpreter(open('quickcall.src').read())
-print(i.list_nodes())
-print(i.list_functions())
-
-print()
-
-i.execute_node('setup')
-
-print()
-
-print(i._globals)
-for l in i.get_log():
-    print('\t' + l)
-"""
 
