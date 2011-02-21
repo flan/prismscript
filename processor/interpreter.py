@@ -1083,26 +1083,26 @@ class Sequence(list):
     
     Objects of this type may be passed back to any Python function that expects a sequence.
     """
-    def append(self, item):
+    def append(self, item, **kwargs):
         """
         Appends `item` at the end of the sequence.
         """
-        list.append(self, item)
+        list.append(self, item, **kwargs)
         
-    def copy(self):
+    def copy(self, **kwargs):
         """
         Returns a shallow copy of this Sequence's items in their current order, so that `sort` and
         `reverse` operations can occur without being destructive.
         """
         return Sequence(self)
         
-    def get(self, index):
+    def get(self, index, **kwargs):
         """
         Returns the item at the specified `index`.
         """
         return self[index]
         
-    def insert(self, index, item):
+    def insert(self, index, item, **kwargs):
         """
         Inserts an item into an arbitrary position in the list.
         """
@@ -1115,31 +1115,31 @@ class Sequence(list):
         return len(self)
     length = property(_get_size)
     
-    def pop_head(self):
+    def pop_head(self, **kwargs):
         """
         Pops an element from the head of the list.
         """
         return self.pop(0)
         
-    def pop_item(self, index):
+    def pop_item(self, index, **kwargs):
         """
         Removes and retrieves the value of the specified item in the list.
         """
         return self.pop(index)
         
-    def pop_tail(self):
+    def pop_tail(self, **kwargs):
         """
         Pops an element from the end of the list.
         """
         return self.pop()
         
-    def prepend(self, item):
+    def prepend(self, item, **kwargs):
         """
         Inserts `item` at the head of the sequence.
         """
         self.insert(0, item)
         
-    def remove(self, index):
+    def remove(self, index, **kwargs):
         """
         Removes the specified item from the list.
         """
