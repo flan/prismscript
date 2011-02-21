@@ -770,6 +770,11 @@ class Interpreter:
             except StatementReturn as e: #Guaranteed to happen
                 arguments[argument] = e.value
                 
+        self._log.append("Invoking function '%(name)s(%(args)s)'..." % {
+         'name': expression[1],
+         'args': ', '.join(sorted(arguments.keys())),
+        })
+        
         result = None
         try:
             if expression[0] == parser.FUNCTIONCALL_LOCAL:
@@ -845,8 +850,15 @@ class Interpreter:
         if not while_expression is None and not foreach_iterable is None:
             raise ValueError("A while-loop cannot also be a foreach-loop. This is a design issue.")
             
-        self._log.append("Executing statements...")
-        
+        if not while_expression is None:
+            self._log.append("Entering while-loop...")
+        elif not foreach_iterable is None:
+            self._log.append("Entering foreach-loop...")
+        elif function:
+            self._log.append("Entering function...")
+        else:
+            self._log.append("Entering node...")
+            
         _locals = {} #A namespace for local variables
         if not scope_locals is None: #This scope is bridged with another, so they should share the same local variables
             _locals = scope_locals
@@ -868,7 +880,7 @@ class Interpreter:
                 })
                 break
                 
-            if _foreach_iterable and foreach_identifier:
+            if _foreach_iterable and foreach_identifier: #Definitely a foreach-loop
                 try:
                     generator = self._assign(foreach_identifier, next(_foreach_iterable), _locals, evaluate_expression=False)
                     for prompt in generator: #Coroutine boilerplate
@@ -876,7 +888,7 @@ class Interpreter:
                         generator.send(x)
                 except StopIteration:
                     break
-            else:
+            else: #Possibly a while-loop
                 generator = self._evaluate_expression(_while_expression, _locals)
                 try: #Resolve the while-loop's term
                     for prompt in generator:
