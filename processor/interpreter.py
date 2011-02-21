@@ -102,10 +102,10 @@ controller knows what to do in response. The identifier used to register your fu
 automatically be exposed, so the origin is given for free.
 
 Your function will receive a response to its ``yield`` using ``send()``, which can be used to decide
-how to proceed. Upon completion, your function may either end without doing anything (implicit
-``None`` return) or it can raise an instance of this module's ``StatementReturn`` exception, in the
-following way: ``raise prismscript.processor.interpreter.StatementReturn('Your Return Value')``,
-which will cause the given value to be returned.
+how to proceed. Upon completion, your function may raise an instance of this module's
+``StatementReturn`` exception, in the following way:
+``raise prismscript.processor.interpreter.StatementReturn('Your Return Value')``, which will cause
+the given value to be returned.
 
 You may return a generator object using the ``StatementReturn`` method, but you cannot return one
 using the ``return`` method.
@@ -213,9 +213,11 @@ class Interpreter:
         try:
             prompt = None
             generator = self._process_statements(function, seed_locals=arguments, function=True)
-            for prompt in generator:
+            for prompt in generator: #Coroutine boilerplate
                 x = yield prompt
                 generator.send(x)
+        except StatementsEnd:
+            raise StatementReturn(None)
         except FlowControl:
             raise
         except ExecutionError as e:
@@ -247,9 +249,10 @@ class Interpreter:
             
         try:
             generator = self._process_statements(node)
-            for prompt in generator:
+            for prompt in generator: #Coroutine boilerplate
                 x = yield prompt
                 generator.send(x)
+        except StatementsEnd:
             raise StatementExit('') #The end of any node signifies a dead end.
         except StatementExit:
             raise
@@ -351,7 +354,7 @@ class Interpreter:
         if evaluate_expression: #Resolve the term
             try:
                 generator = self._evaluate_expression(expression, _locals)
-                for prompt in generator:
+                for prompt in generator: #Coroutine boilerplate
                     x = yield prompt
                     generator.send(x)
             except StatementReturn as e:
@@ -383,7 +386,7 @@ class Interpreter:
         if evaluate_expression: #Resolve the term
             try:
                 generator = self._evaluate_expression(expression, _locals)
-                for prompt in generator:
+                for prompt in generator: #Coroutine boilerplate
                     x = yield prompt
                     generator.send(x)
             except StatementReturn as e:
@@ -435,7 +438,7 @@ class Interpreter:
         if evaluate_expression:
             try: #Resolve the sequence
                 generator = self._evaluate_expression(source_expression, _locals)
-                for prompt in generator:
+                for prompt in generator: #Coroutine boilerplate
                     x = yield prompt
                     generator.send(x)
             except StatementReturn as e: #Expected: occurs in lieu of a return
@@ -492,7 +495,7 @@ class Interpreter:
         result_left = result_right = None
         try: #Resolve the left-hand side
             generator = self._evaluate_expression(expression_left, _locals)
-            for prompt in generator:
+            for prompt in generator: #Coroutine boilerplate
                 x = yield prompt
                 generator.send(x)
         except StatementReturn as e: #Expected: occurs in lieu of a return
@@ -506,7 +509,7 @@ class Interpreter:
                 
             try: #Resolve the right-hand side
                 generator = self._evaluate_expression(expression_right, _locals)
-                for prompt in generator:
+                for prompt in generator: #Coroutine boilerplate
                     x = yield prompt
                     generator.send(x)
             except StatementReturn as e: #Expected: occurs in lieu of a return
@@ -514,7 +517,7 @@ class Interpreter:
         else: #Lazy evaluation's not a useful option, so evaluate right upfront
             try: #Resolve the right-hand side
                 generator = self._evaluate_expression(expression_right, _locals)
-                for prompt in generator:
+                for prompt in generator: #Coroutine boilerplate
                     x = yield prompt
                     generator.send(x)
             except StatementReturn as e: #Expected: occurs in lieu of a return
@@ -552,14 +555,14 @@ class Interpreter:
         result_left = result_right = None
         try: #Resolve the left-hand side
             generator = self._evaluate_expression(expression_left, _locals)
-            for prompt in generator:
+            for prompt in generator: #Coroutine boilerplate
                 x = yield prompt
                 generator.send(x)
         except StatementReturn as e: #Expected: occurs in lieu of a return
             result_left = e.value
         try: #Resolve the right-hand side
             generator = self._evaluate_expression(expression_right, _locals)
-            for prompt in generator:
+            for prompt in generator: #Coroutine boilerplate
                 x = yield prompt
                 generator.send(x)
         except StatementReturn as e: #Expected: occurs in lieu of a return
@@ -604,7 +607,7 @@ class Interpreter:
         allow = None
         generator = self._evaluate_expression(statement[0][0], _locals)
         try: #Resolve the if-condition's term
-            for prompt in generator:
+            for prompt in generator: #Coroutine boilerplate
                 x = yield prompt
                 generator.send(x)
         except StatementReturn as e: #Expected: occurs in lieu of a return
@@ -617,7 +620,7 @@ class Interpreter:
                 if substatement[0] == parser.COND_ELIF:
                     generator = self._evaluate_expression(substatement[1], _locals)
                     try: #Resolve the elif-condition's term
-                        for prompt in generator:
+                        for prompt in generator: #Coroutine boilerplate
                             x = yield prompt
                             generator.send(x)
                     except StatementReturn as e: #Expected: occurs in lieu of a return
@@ -665,7 +668,7 @@ class Interpreter:
          parser.MATH_MOD, parser.MATH_AND, parser.MATH_OR, parser.MATH_XOR
         ):
             generator = self._compute(expression[1], expression[2], expression_type, _locals)
-            for prompt in generator: #Generator is guaranteed to raise a StatementReturn at its end
+            for prompt in generator: #Coroutine boilerplate; generator is guaranteed to raise a StatementReturn at its end
                 x = yield prompt
                 generator.send(x)
         elif expression_type in (
@@ -674,12 +677,12 @@ class Interpreter:
          parser.TEST_BOOL_OR, parser.TEST_BOOL_AND
         ):
             generator = self._compare(expression[1], expression[2], expression_type, _locals)
-            for prompt in generator: #Generator is guaranteed to raise a StatementReturn at its end
+            for prompt in generator: #Coroutine boilerplate; generator is guaranteed to raise a StatementReturn at its end
                 x = yield prompt
                 generator.send(x)
         elif expression_type in (parser.FUNCTIONCALL_LOCAL, parser.FUNCTIONCALL_SCOPED):
             generator = self._invoke_function(expression, _locals)
-            for prompt in generator: #Generator is guaranteed to raise a StatementReturn at its end
+            for prompt in generator: #Coroutine boilerplate; generator is guaranteed to raise a StatementReturn at its end
                 x = yield prompt
                 generator.send(x)
         elif expression_type == parser.SEQUENCE:
@@ -687,7 +690,7 @@ class Interpreter:
             for e in expression[1]:
                 generator = self._evaluate_expression(e, _locals)
                 try:
-                    for prompt in generator:
+                    for prompt in generator: #Coroutine boilerplate
                         x = yield prompt
                         generator.send(x)
                 except StatementReturn as e:
@@ -815,9 +818,11 @@ class Interpreter:
             
         if type(result) == types.GeneratorType:
             try:
-                for prompt in result:
+                for prompt in result: #Coroutine boilerplate
                     x = yield (expression[1], prompt) #Construct a tuple with the identifier of the function in the first slot.
                     result.send(x)
+            except StopIteration: #Let None be returned.
+                pass
             except StatementReturn as e: #The function is expected to raise a `StatementReturn` if it has a value
                 raise StatementReturn(self._marshall_type(e.value))
             raise StatementReturn(None) #None is the standard otherwise.
@@ -916,21 +921,21 @@ class Interpreter:
                 break
                 
             if _foreach_iterable and foreach_identifier: #Definitely a foreach-loop
+                generator = None
                 try:
-                    generator = None
                     if foreach_identifier[0] == parser.SEQUENCE:
                         generator = self._assign_sequence(foreach_identifier[1], next(_foreach_iterable), _locals, evaluate_expression=False)
                     else:
                         generator = self._assign(foreach_identifier, next(_foreach_iterable), _locals, evaluate_expression=False)
-                    for prompt in generator: #Coroutine boilerplate
-                        x = yield prompt
-                        generator.send(x)
                 except StopIteration:
                     break
+                for prompt in generator: #Coroutine boilerplate
+                    x = yield prompt
+                    generator.send(x)
             else: #Possibly a while-loop
                 generator = self._evaluate_expression(_while_expression, _locals)
                 try: #Resolve the while-loop's term
-                    for prompt in generator:
+                    for prompt in generator: #Coroutine boilerplate
                         x = yield prompt
                         generator.send(x)
                 except StatementReturn as e: #Expected: occurs in lieu of a return
@@ -972,26 +977,35 @@ class Interpreter:
                             x = yield prompt
                             generator.send(x)
                     elif statement_type == parser.COND_IF:
-                        generator = self._evaluate_conditional(statement[1:], _locals)
-                        for prompt in generator: #Coroutine boilerplate
-                            x = yield prompt
-                            generator.send(x)
-                    elif statement_type == parser.COND_WHILE:
-                        generator = self._process_statements(statement[2], while_expression=statement[1], scope_locals=_locals)
-                        for prompt in generator: #Coroutine boilerplate
-                            x = yield prompt
-                            generator.send(x)
-                    elif statement_type == parser.COND_FOR:
-                        generator = self._evaluate_expression(statement[2], _locals)
                         try:
+                            generator = self._evaluate_conditional(statement[1:], _locals)
                             for prompt in generator: #Coroutine boilerplate
                                 x = yield prompt
                                 generator.send(x)
-                        except StatementReturn as e: #Guaranteed to be raised by `_evaluate_expression`
-                            generator = self._process_statements(statement[3], foreach_identifier=statement[1], foreach_iterable=e.value, scope_locals=_locals)
+                        except StatementsEnd:
+                            pass
+                    elif statement_type == parser.COND_WHILE:
+                        try:
+                            generator = self._process_statements(statement[2], while_expression=statement[1], scope_locals=_locals)
                             for prompt in generator: #Coroutine boilerplate
                                 x = yield prompt
                                 generator.send(x)
+                        except StatementsEnd:
+                            pass
+                    elif statement_type == parser.COND_FOR:
+                        try:
+                            generator = self._evaluate_expression(statement[2], _locals)
+                            try:
+                                for prompt in generator: #Coroutine boilerplate
+                                    x = yield prompt
+                                    generator.send(x)
+                            except StatementReturn as e: #Guaranteed to be raised by `_evaluate_expression`
+                                generator = self._process_statements(statement[3], foreach_identifier=statement[1], foreach_iterable=e.value, scope_locals=_locals)
+                                for prompt in generator: #Coroutine boilerplate
+                                    x = yield prompt
+                                    generator.send(x)
+                        except StatementsEnd:
+                            pass
                     elif statement_type == parser.STMT_BREAK:
                         raise StatementBreak()
                     elif statement_type == parser.STMT_CONTINUE:
@@ -1039,6 +1053,8 @@ class Interpreter:
                 _while_expression = (parser.TERM_BOOL, False)
             iteration_count += 1
             
+        raise StatementsEnd()
+        
     def _resolve_local_identifier(self, identifier, _locals, scope=parser.TERM_IDENTIFIER_LOCAL):
         """
         Provides the value of a local identifier by first looking in the local scope, then the
@@ -1195,5 +1211,10 @@ class StatementReturn(_StatementCede):
 class StatementExit(_StatementCede):
     """
     Indicates that an ``exit`` statement was encountered.
+    """
+    
+class StatementsEnd(FlowControl):
+    """
+    Indicates that the current statement-block has been exhausted normally.
     """
     
