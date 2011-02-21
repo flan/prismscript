@@ -245,6 +245,14 @@ class SequenceTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_sequence_assign(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_assign', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1, 2, 3))
+        else:
+            self.fail("StatementReturn not received")
+            
 class TestsTestCase(unittest.TestCase):
     _interpreter = None
     

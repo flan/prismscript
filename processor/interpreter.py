@@ -453,11 +453,17 @@ class Interpreter:
             ):
                 raise ValueError("Unable to assign value to non-variable in sequence-unpack")
                 
-            self._assign(identifier, value, _locals, evaluate_expression=False)
-            
+            generator = self._assign(identifier, value, _locals, evaluate_expression=False)
+            for prompt in generator: #Coroutine boilerplate
+                x = yield prompt
+                generator.send(x)
+                
         for identifier in unbound_locals: #Set anything that was trimmed in the unpack to None to avoid resolution errors
-            self._assign(identifier, None, _locals, evaluate_expression=False)
-            
+            generator = self._assign(identifier, None, _locals, evaluate_expression=False)
+            for prompt in generator: #Coroutine boilerplate
+                x = yield prompt
+                generator.send(x)
+                
     def _compare(self, expression_left, expression_right, method, _locals):
         """
         Compares two expressions for logical equality.

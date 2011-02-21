@@ -73,7 +73,10 @@ sequence_remove(){
     x.remove(index=1);
     return x;
 }
-
+sequence_assign(){
+    [x, global y, local z] = [1, 2, 3];
+    return [x, y, z];
+}
 
 equality(){
     return 1 == 2;
