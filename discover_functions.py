@@ -31,7 +31,9 @@ def scan(target, base_name, recursive=True, function_list=None):
     module-references should be crawled recursively (this is good if you want to expose a whole
     package).
     
-    `function_list` is used internally by recursion. Do not set this value.
+    `function_list` may be a well-formed list of (name, function) pairs. If scanning multiple
+    sources sequentially, you may provide the output of one scan as input to another to build a
+    single list.
     
     The returned value is a list of (name, function) tuples.
     """
