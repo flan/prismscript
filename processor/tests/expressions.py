@@ -1,9 +1,9 @@
 """
-tests.complex
+tests.expressions
 =================
 Purpose
 -------
-Offers support for testing complex structures.
+Offers support for testing expressions.
 
 Meta
 ----
@@ -242,6 +242,22 @@ class SequenceTestCase(unittest.TestCase):
             execute_no_yield(self._interpreter.execute_function('sequence_remove', {}))
         except StatementReturn as e:
             self.assertSequenceEqual(e.value, (1, 3))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_reverse(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_reverse', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1, 2, 3))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_sort(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_sort', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1, 2, 3))
         else:
             self.fail("StatementReturn not received")
             

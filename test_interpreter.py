@@ -25,6 +25,7 @@ import unittest
 from processor.tests import expressions
 from processor.tests import nodes
 from processor.tests import functions
+from processor.tests import conditionals
 from processor.tests import complex
 
 if __name__ == '__main__':
@@ -41,6 +42,11 @@ if __name__ == '__main__':
      )),
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(functions.MathTestCase),
+     )),
+     unittest.TestSuite((
+      unittest.TestLoader().loadTestsFromTestCase(conditionals.IfTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(conditionals.WhileTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(conditionals.ForTestCase),
      )),
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(complex.NestedTestCase),

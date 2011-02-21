@@ -73,6 +73,16 @@ sequence_remove(){
     x.remove(index=1);
     return x;
 }
+sequence_reverse(){
+    x = [3, 2, 1];
+    x.reverse();
+    return x;
+}
+sequence_sort(){
+    x = [3, 2, 1];
+    x.sort();
+    return x;
+}
 sequence_assign(){
     [x, global y, local z] = [1, 2, 3];
     return [x, y, z];
@@ -180,5 +190,4 @@ scoped_local_auto2(){
     y = [1, 2];
     return y.length;
 }
-
 
