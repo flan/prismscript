@@ -47,7 +47,7 @@ def scan(target, base_name, recursive=True, function_list=None):
         }
         
         element = getattr(target, element_name)
-        if isinstance(element, types.FunctionType):
+        if type(element) in (types.FunctionType, types.MethodType):
             function_list.append((augmented_name, element))
         elif type(element) == types.ModuleType and recursive:
             scan_module(element, augmented_name, recursive=recursive, function_list=function_list)
