@@ -136,7 +136,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 0.9.0 : Feb. 20, 2011
+:Version: 1.0.0 : Feb. 20, 2011
 
 
 Legal
@@ -1082,6 +1082,10 @@ class Sequence(list):
     consistent with Java-like languages and to bypass the lack of access to Python's builtins.
     
     Objects of this type may be passed back to any Python function that expects a sequence.
+    
+    Supported-but-undefined functions:
+        .reverse()
+        .sort()
     """
     def append(self, item, **kwargs):
         """
