@@ -1,66 +1,26 @@
-add(x, y){
-    return x + y;
+simple{
 }
 
-subtract(x, y){
-    return x - y;
+_goto{
+    goto simple;
 }
 
-multiply(x, y){
-    return x * y;
+local_function{
+    function();
 }
 
-divide(x, y){
-    return x / y;
+function(){
 }
 
-int_divide(x, y){
-    return x \ y;
+scoped_function{
+    test.test();
 }
 
-mod(x, y){
-    return x % y;
+local_function_goto{
+    function_goto();
 }
 
-_and(x, y){
-    return x and y;
-}
-
-_or(x, y){
-    return x or y;
-}
-
-_xor(x, y){
-    return x xor y;
-}
-
-assign_add(x, y){
-    x += y;
-    return x;
-}
-
-assign_subtract(x, y){
-    x -= y;
-    return x;
-}
-
-assign_multiply(x, y){
-    x *= y;
-    return x;
-}
-
-assign_divide(x, y){
-    x /= y;
-    return x;
-}
-
-assign_int_divide(x, y){
-    x \= y;
-    return x;
-}
-
-assign_mod(x, y){
-    x %= y;
-    return x;
+function_goto(){
+    goto simple;
 }
 

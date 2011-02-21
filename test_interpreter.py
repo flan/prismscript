@@ -29,7 +29,7 @@ from processor.tests import complex
 if __name__ == '__main__':
     all_tests = unittest.TestSuite((
      unittest.TestSuite((
-      #unittest.TestLoader().loadTestsFromTestCase(nodes.SimpleTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(nodes.SimpleTestCase),
       unittest.TestLoader().loadTestsFromTestCase(nodes.ExitTestCase),
      )),
      unittest.TestSuite((

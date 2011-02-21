@@ -31,21 +31,51 @@ class SimpleTestCase(unittest.TestCase):
     def setUp(self):
         self._interpreter = get_interpreter('nodes')
         
+        def test():
+            pass
+            
+        self._interpreter.register_scoped_functions([('test.test', test)])
+        
     def test_simple(self):
-        self.assertEquals(execute_no_yield(self._interpreter.execute_node('simple')), None)
+        try:
+            execute_no_yield(self._interpreter.execute_node('simple'))
+        except StatementExit as e:
+            self.assertEquals(e.value, '')
+        else:
+            self.fail("StatementExit not received")
         
     def test_goto(self):
-        self.assertEquals(execute_no_yield(self._interpreter.execute_node('goto')), None)
-        
+        try:
+            execute_no_yield(self._interpreter.execute_node('_goto'))
+        except StatementExit as e:
+            self.assertEquals(e.value, '')
+        else:
+            self.fail("StatementExit not received")
+            
     def test_local_function(self):
-        self.assertEquals(execute_no_yield(self._interpreter.execute_node('local_function')), None)
-        
+        try:
+            execute_no_yield(self._interpreter.execute_node('local_function'))
+        except StatementExit as e:
+            self.assertEquals(e.value, '')
+        else:
+            self.fail("StatementExit not received")
+            
     def test_scoped_function(self):
-        self.assertEquals(execute_no_yield(self._interpreter.execute_node('scoped_function')), None)
-        
+        try:
+            execute_no_yield(self._interpreter.execute_node('scoped_function'))
+        except StatementExit as e:
+            self.assertEquals(e.value, '')
+        else:
+            self.fail("StatementExit not received")
+            
     def test_local_function_goto(self):
-        self.assertEquals(execute_no_yield(self._interpreter.execute_node('local_function_goto')), None)
-        
+        try:
+            execute_no_yield(self._interpreter.execute_node('local_function_goto'))
+        except StatementExit as e:
+            self.assertEquals(e.value, '')
+        else:
+            self.fail("StatementExit not received")
+            
 class ExitTestCase(unittest.TestCase):
     _interpreter = None
     
