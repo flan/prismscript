@@ -195,6 +195,7 @@ def p_while(p):
 def p_for(p):
     r"""
     for : FOR LPAREN identifier_local IN expression RPAREN LCURLY expressionlist RCURLY
+        | FOR LPAREN sequence IN expression RPAREN LCURLY expressionlist RCURLY
     """
     p[0] = (COND_FOR, p[3], p[5], p[8])
     

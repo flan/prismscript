@@ -204,6 +204,14 @@ class ForTestCase(unittest.TestCase):
         (digest_nodes, digest_functions) = parser.parse(source)
         
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        
+    def test_for_sequence(self):
+        source = get_source('for_sequence')
+        (nodes, functions) = get_digest('for_sequence')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
+        
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
     def test_for_break(self):
         source = get_source('for_break')
