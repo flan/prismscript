@@ -198,7 +198,7 @@ class SequenceTestCase(unittest.TestCase):
         try:
             execute_no_yield(self._interpreter.execute_function('sequence_contains', {}))
         except StatementReturn as e:
-            self.assertEquals(e.value, True)
+            self.assertEquals(e.value, True )
         else:
             self.fail("StatementReturn not received")
             
@@ -300,6 +300,142 @@ class SequenceTestCase(unittest.TestCase):
             self.assertSequenceEqual(e.value, (1, 2, 3))
         else:
             self.fail("StatementReturn not received")
+            
+class DictionaryTestCase(unittest.TestCase):
+    _interpreter = None
+    
+    def setUp(self):
+        self._interpreter = get_interpreter('expressions')
+        
+    def test_dictionary(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary', {}))
+        except StatementReturn as e:
+            self.assertDictEqual(e.value, {1: 2})
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary2', {}))
+        except StatementReturn as e:
+            self.assertDictEqual(e.value, {1: 2})
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary3(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary3', {}))
+        except StatementReturn as e:
+            self.assertDictEqual(e.value, {1: 2})
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_contains(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_contains', {}))
+        except StatementReturn as e:
+            self.assertTrue(e.value)
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_contains2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_contains2', {}))
+        except StatementReturn as e:
+            self.assertFalse(e.value)
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_copy(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_copy', {}))
+        except StatementReturn as e:
+            self.assertDictEqual(e.value[0], {1: 2})
+            self.assertDictEqual(e.value[1], {1: 2, 3:4})
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_get(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_get', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 2)
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_get2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_get2', {}))
+        except StatementReturn as e:
+            self.assertIsNone(e.value)
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_get3(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_get3', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 5)
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_get_items(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_get_items', {}))
+        except StatementReturn as e:
+            self.assertEquals(len(e.value), 1)
+            self.assertSequenceEqual(e.value[0], (1, 2))
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_get_keys(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_get_keys', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1,))
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_get_values(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_get_values', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (2,))
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_length(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_length', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 2)
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_put(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_put', {}))
+        except StatementReturn as e:
+            self.assertDictEqual(e.value, {1: 2})
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_remove(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_remove', {}))
+        except StatementReturn as e:
+            self.assertDictEqual(e.value, {})
+        else:
+            self.fail("StatementReturn not received")  
+            
+    def test_dictionary_remove2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('dictionary_remove2', {}))
+        except StatementReturn as e:
+            self.assertDictEqual(e.value, {1: 2})
+        else:
+            self.fail("StatementReturn not received")  
             
 class TestsTestCase(unittest.TestCase):
     _interpreter = None

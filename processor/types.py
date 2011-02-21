@@ -48,7 +48,8 @@ class Dictionary(dict, _Container):
         items = Sequence()
         for item in self.items():
             items.append(Sequence(item))
-            
+        return items
+        
     def get_keys(self, **kwargs):
         return Sequence(self.keys())
         

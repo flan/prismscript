@@ -21,6 +21,76 @@ none(){
     return None;
 }
 
+dictionary(){
+    x = types.Dictionary();
+    x.put(key=1, value=2);
+    return x;
+}
+dictionary2(){
+    return types.Dictionary(items=[[1, 2]]);
+}
+dictionary3(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return types.Dictionary(items=x);
+}
+dictionary_contains(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.contains(item=1);
+}
+dictionary_contains2(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.contains(item=2);
+}
+dictionary_copy(){
+    x = types.Dictionary(items=[[1, 2]]);
+    y = x.copy();
+    y.put(key=3, value=4);
+    return [x, y];
+}
+dictionary_get(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get(key=1);
+}
+dictionary_get2(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get(key=2);
+}
+dictionary_get3(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get(key=2, default=5);
+}
+dictionary_get_items(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get_items();
+}
+dictionary_get_keys(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get_keys();
+}
+dictionary_get_values(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get_values();
+}
+dictionary_length(){
+    x = types.Dictionary(items=[[1, 2], [3, 4]]);
+    return x.length;
+}
+dictionary_put(){
+    x = types.Dictionary();
+    x.put(key=1, value=2);
+    return x;
+}
+dictionary_remove(){
+    x = types.Dictionary(items=[[1, 2]]);
+    x.remove(key=1);
+    return x;
+}
+dictionary_remove2(){
+    x = types.Dictionary(items=[[1, 2]]);
+    x.remove(key=2);
+    return x;
+}
+
 sequence(){
     return [1, 'b', 3.45];
 }
