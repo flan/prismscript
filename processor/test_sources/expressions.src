@@ -1,0 +1,132 @@
+bool(){
+    return True;
+}
+bool2(){
+    return False;
+}
+
+string(){
+    return 'hello';
+}
+
+integer(){
+    return -5134;
+}
+
+float(){
+    return 6.23;
+}
+
+none(){
+    return None;
+}
+
+sequence(){
+    return [1, 'b', 3.45];
+}
+
+
+equality(){
+    return 1 == 2;
+}
+equality2(){
+    return 1 == 1;
+}
+
+inequality(){
+    return 1 != 1;
+}
+inequality2(){
+    return 1 != 2;
+}
+
+greater_equal(){
+    return 1 >= 2;
+}
+greater_equal2(){
+    return 1 >= 1;
+}
+
+greater(){
+    return 1 > 1;
+}
+greater2(){
+    return 1 > 0;
+}
+
+lesser_equal(){
+    return 1 <= 0;
+}
+lesser_equal2(){
+    return 1 <= 1;
+}
+
+lesser(){
+    return 1 < 1;
+}
+lesser2(){
+    return 1 < 2;
+}
+
+bool_or(){
+    return False || False;
+}
+bool_or2(){
+    return True || False;
+}
+bool_or3(){
+    return False || True;
+}
+bool_or4(){
+    return True || True;
+}
+
+bool_and(){
+    return False && False;
+}
+bool_and2(){
+    return True && False;
+}
+bool_and3(){
+    return False && True;
+}
+bool_and4(){
+    return True && True;
+}
+
+
+setup_scopes{
+    global x = 5;
+    global y = [1, 2, 3];
+}
+
+local_auto(){
+    return x;
+}
+local_auto2(){
+    x = 4;
+    return x;
+}
+
+local_local(){
+    x = 4;
+    return local x;
+}
+
+local_global(){
+    return global x;
+}
+local_global2(){
+    x = 4;
+    return global x;
+}
+
+scoped_local_auto(){
+    return y.length;
+}
+scoped_local_auto2(){
+    y = [1, 2];
+    return y.length;
+}
+
+

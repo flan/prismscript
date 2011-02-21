@@ -662,7 +662,16 @@ class Interpreter:
                 x = yield prompt
                 generator.send(x)
         elif expression_type == parser.SEQUENCE:
-            raise StatementReturn(Sequence([self._evaluate_expression(e, _locals) for e in expression[1]]))
+            sequence = []
+            for e in expression[1]:
+                generator = self._evaluate_expression(e, _locals)
+                try:
+                    for prompt in generator:
+                        x = yield prompt
+                        generator.send(x)
+                except StatementReturn as e:
+                    sequence.append(e.value)
+            raise StatementReturn(Sequence(sequence))
             
         raise ValueError("Unknown expression encountered: %(expression)r" % {
          'expression': expression,
@@ -1048,7 +1057,7 @@ class Interpreter:
             variable = self._resolve_local_identifier(elements[0], _locals)
         except VariableNotFoundError:
             raise ScopedVariableNotFoundError(identifier, "Unable to resolve scoped identifier: root is not a bound local variable")
-        if variable is None or type(variable) in (bool, str, int, float, Sequence):
+        if variable is None or type(variable) in (bool, str, int, float):
             raise ScopedVariableNotFoundError(identifier, "Unable to resolve scoped identifier: found a primitive data-type as a local referent")
             
         try:

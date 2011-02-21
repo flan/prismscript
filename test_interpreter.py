@@ -22,12 +22,18 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 import unittest
 
+from processor.tests import expressions
 from processor.tests import nodes
 from processor.tests import functions
 from processor.tests import complex
 
 if __name__ == '__main__':
     all_tests = unittest.TestSuite((
+     unittest.TestSuite((
+      unittest.TestLoader().loadTestsFromTestCase(expressions.ScopesTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.TypesTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.TestsTestCase),
+     )),
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(nodes.SimpleTestCase),
       unittest.TestLoader().loadTestsFromTestCase(nodes.ExitTestCase),
