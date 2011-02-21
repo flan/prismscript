@@ -91,6 +91,72 @@ dictionary_remove2(){
     return x;
 }
 
+set(){
+    x = types.Set();
+    x.add(item=1);
+    return x;
+}
+set2(){
+    return types.Set(items=[1]);
+}
+set3(){
+    x = types.Set(items=[1]);
+    return types.Set(items=x);
+}
+set_add(){
+    x = types.Set();
+    x.add(item=1);
+    return x;
+}
+set_add2(){
+    x = types.Set(items=[1]);
+    x.add(item=1);
+    return x;
+}
+set_contains(){
+    x = types.Set(items=[1]);
+    return x.contains(item=1);
+}
+set_contains2(){
+    x = types.Set(items=[1]);
+    return x.contains(item=2);
+}
+set_copy(){
+    x = types.Set(items=[1]);
+    y = x.copy();
+    y.add(item=2);
+    return [x, y];
+}
+set_difference(){
+    x = types.Set(items=[1, 2]);
+    y = types.Set(items=[2, 3]);
+    return x.difference(other_set=y);
+}
+set_get_items(){
+    x = types.Set(items=[1]);
+    return x.get_items();
+}
+set_intersection(){
+    x = types.Set(items=[1, 2]);
+    y = types.Set(items=[2, 3]);
+    return x.intersection(other_set=y);
+}
+set_remove(){
+    x = types.Set(items=[1]);
+    x.remove(item=1);
+    return x;
+}
+set_remove2(){
+    x = types.Set(items=[1]);
+    x.remove(item=2);
+    return x;
+}
+set_union(){
+    x = types.Set(items=[1, 2]);
+    y = types.Set(items=[2, 3]);
+    return x.union(other_set=y);
+}
+
 sequence(){
     return [1, 'b', 3.45];
 }

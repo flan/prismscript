@@ -76,25 +76,19 @@ class Set(set, _Container):
         set.add(self, item)
         
     def difference(self, other_set, **kwargs):
-        return _Set(set.difference(self, other_set))
+        return Set(set.difference(self, other_set))
+        
+    def get_items(self, **kwargs):
+        return Sequence(self)
         
     def intersection(self, other_set, **kwargs):
-        return _Set(set.intersection(self, other_set))
-        
-    def is_subset(self, other_set, **kwargs):
-        return set.issubset(self, other_set)
-        
-    def is_superset(self, other_set, **kwargs):
-        return _Set(set.issuperset(self, other_set))
+        return Set(set.intersection(self, other_set))
         
     def remove(self, item, **kwargs):
         set.discard(self, item)
         
-    def to_sequence(self, **kwargs):
-        return Sequence(self)
-        
     def union(self, other_set, **kwargs):
-        return _Set(set.union(self, other_set))
+        return Set(set.union(self, other_set))
         
 class Sequence(list, _Container):
     """

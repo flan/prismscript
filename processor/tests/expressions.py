@@ -437,6 +437,125 @@ class DictionaryTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")  
             
+class SetTestCase(unittest.TestCase):
+    _interpreter = None
+    
+    def setUp(self):
+        self._interpreter = get_interpreter('expressions')
+        
+    def test_set(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set', {}))
+        except StatementReturn as e:
+            self.assertSetEqual(e.value, set([1]))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set2', {}))
+        except StatementReturn as e:
+            self.assertSetEqual(e.value, set([1]))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set3(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set3', {}))
+        except StatementReturn as e:
+            self.assertSetEqual(e.value, set([1]))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set_add(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set_add', {}))
+        except StatementReturn as e:
+            self.assertSetEqual(e.value, set([1]))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set_add2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set_add2', {}))
+        except StatementReturn as e:
+            self.assertSetEqual(e.value, set([1]))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set_contains(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set_contains', {}))
+        except StatementReturn as e:
+            self.assertTrue(e.value)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set_contains2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set_contains2', {}))
+        except StatementReturn as e:
+            self.assertFalse(e.value)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set_copy(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set_copy', {}))
+        except StatementReturn as e:
+            self.assertSetEqual(e.value[0], set([1]))
+            self.assertSetEqual(e.value[1], set([1, 2]))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set_difference(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set_difference', {}))
+        except StatementReturn as e:
+            self.assertSetEqual(e.value, set([1]))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set_get_items(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set_get_items', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1,))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set_intersection(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set_intersection', {}))
+        except StatementReturn as e:
+            self.assertSetEqual(e.value, set([2]))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set_remove(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set_remove', {}))
+        except StatementReturn as e:
+            self.assertSetEqual(e.value, set())
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set_remove2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set_remove2', {}))
+        except StatementReturn as e:
+            self.assertSetEqual(e.value, set([1]))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_set_union(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('set_union', {}))
+        except StatementReturn as e:
+            self.assertSetEqual(e.value, set([1, 2, 3]))
+        else:
+            self.fail("StatementReturn not received")
+            
 class TestsTestCase(unittest.TestCase):
     _interpreter = None
     
