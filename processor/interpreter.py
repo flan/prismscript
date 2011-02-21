@@ -149,7 +149,7 @@ import collections
 import re
 import types
 
-from .types import (
+from .local_types import (
  Dictionary, Set, Sequence,
 )
 from .grammar import parser
@@ -408,7 +408,7 @@ class Interpreter:
         elif method == parser.ASSIGN_MOD:
             scope[identifier[1]] %= expression_result
             
-    def _assign_sequence(self, destination, source_expression, _locals):
+    def _assign_sequence(self, destination, source_expression, _locals, evaluate_expression=True):
         """
         Unpacks a Sequence into a series of bound variables.
         
@@ -427,17 +427,21 @@ class Interpreter:
         `source_expression` is the expression to be evaluated, which must resolve to a Sequence.
         
         `_locals` is the scope's local variable store.
+        
+        `evaluate_expression` may be set to ``False`` if `source_expression` is already a resolved
+        sequence.
         """
-        source = None
-        try: #Resolve the sequence
-            generator = self._evaluate_expression(source_expression, _locals)
-            for prompt in generator:
-                x = yield prompt
-                generator.send(x)
-        except StatementReturn as e: #Expected: occurs in lieu of a return
-            source = e.value
-            
-        if not type(source) == Sequence:
+        source = source_expression
+        if evaluate_expression:
+            try: #Resolve the sequence
+                generator = self._evaluate_expression(source_expression, _locals)
+                for prompt in generator:
+                    x = yield prompt
+                    generator.send(x)
+            except StatementReturn as e: #Expected: occurs in lieu of a return
+                source = e.value
+                
+        if not isinstance(source, collections.Sequence):
             raise ValueError("Attempted to unpack non-sequence")
             
         unbound_locals = [] #Unpack-target variable-slots that extend beyond the size of the source
@@ -913,7 +917,11 @@ class Interpreter:
                 
             if _foreach_iterable and foreach_identifier: #Definitely a foreach-loop
                 try:
-                    generator = self._assign(foreach_identifier, next(_foreach_iterable), _locals, evaluate_expression=False)
+                    generator = None
+                    if foreach_identifier[0] == parser.SEQUENCE:
+                        generator = self._assign_sequence(foreach_identifier[1], next(_foreach_iterable), _locals, evaluate_expression=False)
+                    else:
+                        generator = self._assign(foreach_identifier, next(_foreach_iterable), _locals, evaluate_expression=False)
                     for prompt in generator: #Coroutine boilerplate
                         x = yield prompt
                         generator.send(x)

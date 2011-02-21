@@ -141,6 +141,13 @@ _for(){
     }
     return x;
 }
+_for_sequence(){
+    x = [];
+    for([i, j] in [[1, 2], [3, 4]]){
+        x.append(item=i * j);
+    }
+    return x;
+}
 
 
 if_exit{
