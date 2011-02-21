@@ -161,6 +161,22 @@ class SequenceTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_sequence2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence2', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1, 'b', 3.45))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence3(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence3', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1, 'b', 3.45))
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_sequence_append(self):
         try:
             execute_no_yield(self._interpreter.execute_function('sequence_append', {'v': 3}))
@@ -175,6 +191,22 @@ class SequenceTestCase(unittest.TestCase):
         except StatementReturn as e:
             self.assertSequenceEqual(e.value[1], (1, 2, 3))
             self.assertSequenceEqual(e.value[0], (1, 2, 3, 4))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_contains(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_contains', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, True)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_contains2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_contains2', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, False)
         else:
             self.fail("StatementReturn not received")
             

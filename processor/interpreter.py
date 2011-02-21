@@ -149,6 +149,9 @@ import collections
 import re
 import types
 
+from .types import (
+ Dictionary, Set, Sequence,
+)
 from .grammar import parser
 
 class Interpreter:
@@ -171,7 +174,11 @@ class Interpreter:
         If the script is invalid, an exception is raised.
         """
         (self._nodes, self._functions) = parser.parse(script)
-        self._scoped_functions = {}
+        self._scoped_functions = {
+         'types.Dictionary': Dictionary,
+         'types.Set': Set,
+         'types.Sequence': Sequence,
+        }
         self._globals = {}
         self._log = []
         
@@ -821,6 +828,12 @@ class Interpreter:
         if not type(data) == Sequence and isinstance(data, collections.Sequence):
             #Python sequences -> Sequence
             return Sequence(data)
+        elif not type(data) == Dictionary and isinstance(data, collections.Mapping):
+            #Python mappings -> Dictionary
+            return Dictionary(data)
+        elif not type(data) == Set and isinstance(data, collections.Set):
+            #Python sets -> Set
+            return Set(data)
         return data
         
     def _process_statements(self,
@@ -1080,79 +1093,6 @@ class Interpreter:
             })
             
             
-class Sequence(list):
-    """
-    An extension-only subclass of the Python ``list`` type, intended to expose behaviour more
-    consistent with Java-like languages and to bypass the lack of access to Python's builtins.
-    
-    Objects of this type may be passed back to any Python function that expects a sequence.
-    
-    Supported-but-undefined functions:
-        .reverse()
-        .sort()
-    """
-    def append(self, item, **kwargs):
-        """
-        Appends `item` at the end of the sequence.
-        """
-        list.append(self, item, **kwargs)
-        
-    def copy(self, **kwargs):
-        """
-        Returns a shallow copy of this Sequence's items in their current order, so that `sort` and
-        `reverse` operations can occur without being destructive.
-        """
-        return Sequence(self)
-        
-    def get(self, index, **kwargs):
-        """
-        Returns the item at the specified `index`.
-        """
-        return self[index]
-        
-    def insert(self, index, item, **kwargs):
-        """
-        Inserts an item into an arbitrary position in the list.
-        """
-        list.insert(self, index, item)
-        
-    def _get_size(self):
-        """
-        Returns the current number of elements in the sequence.
-        """
-        return len(self)
-    length = property(_get_size)
-    
-    def pop_head(self, **kwargs):
-        """
-        Pops an element from the head of the list.
-        """
-        return self.pop(0)
-        
-    def pop_item(self, index, **kwargs):
-        """
-        Removes and retrieves the value of the specified item in the list.
-        """
-        return self.pop(index)
-        
-    def pop_tail(self, **kwargs):
-        """
-        Pops an element from the end of the list.
-        """
-        return self.pop()
-        
-    def prepend(self, item, **kwargs):
-        """
-        Inserts `item` at the head of the sequence.
-        """
-        self.insert(0, item)
-        
-    def remove(self, index, **kwargs):
-        """
-        Removes the specified item from the list.
-        """
-        del self[index]
-        
 class Error(Exception):
     """
     The base exception from which all exceptions native to this module inherit.

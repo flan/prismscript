@@ -24,6 +24,16 @@ none(){
 sequence(){
     return [1, 'b', 3.45];
 }
+sequence2(){
+    x = types.Sequence();
+    x.append(item=1);
+    x.append(item='b');
+    x.append(item=3.45);
+    return x;
+}
+sequence3(){
+    return types.Sequence(items=[1, 'b', 3.45]);
+}
 sequence_append(v){
     x = [1, 2];
     x.append(item=v);
@@ -34,6 +44,14 @@ sequence_copy(){
     y = x.copy();
     y.append(item=4);
     return [y, x];
+}
+sequence_contains(){
+    x = [1, 2, 3];
+    return x.contains(item=2);
+}
+sequence_contains2(){
+    x = [1, 3];
+    return x.contains(item=2);
 }
 sequence_get(){
     x = [1, 2, 3];
