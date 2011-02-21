@@ -52,6 +52,7 @@ if __name__ == '__main__':
      )),
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(complex.NestedTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(complex.CoroutineTestCase),
      ))
     ))
     unittest.TextTestRunner().run(all_tests)

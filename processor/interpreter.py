@@ -829,7 +829,7 @@ class Interpreter:
         Coerces `data` received from external sources into equivalent, Prismscript-compatible
         formats.
         """
-        if not type(data) == Sequence and isinstance(data, collections.Sequence):
+        if not isinstance(data, str) and not type(data) == Sequence and isinstance(data, collections.Sequence):
             #Python sequences -> Sequence
             return Sequence(data)
         elif not type(data) == Dictionary and isinstance(data, collections.Mapping):

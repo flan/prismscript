@@ -1,0 +1,8 @@
+coroutine{
+    exit test.coroutine();
+}
+
+coroutine(){
+    return test.coroutine();
+}
+

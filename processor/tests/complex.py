@@ -22,7 +22,7 @@ import unittest
 
 from . import (
  get_interpreter, execute_no_yield,
- StatementReturn,
+ StatementReturn, StatementExit,
 )
 from stdlib import lang
 import discover_functions
@@ -112,6 +112,38 @@ class NestedTestCase(unittest.TestCase):
             }))
         except StatementReturn as e:
             self.assertEquals(e.value, 21)
+        else:
+            self.fail("StatementReturn not received")
+            
+class CoroutineTestCase(unittest.TestCase):
+    _interpreter = None
+    
+    def setUp(self):
+        self._interpreter = get_interpreter('coroutine')
+        
+        def coroutine():
+            x = yield "Hello!"
+            raise StatementReturn(x)
+            
+        self._interpreter.register_scoped_functions([('test.coroutine', coroutine)])
+        
+    def test_coroutine_node(self):
+        try:
+            generator = self._interpreter.execute_node('coroutine')
+            self.assertEquals(next(generator), ('test.coroutine', 'Hello!'))
+            generator.send('goodbye')
+        except StatementExit as e:
+            self.assertEquals(e.value, 'goodbye')
+        else:
+            self.fail("StatementExit not received")
+            
+    def test_coroutine_function(self):
+        try:
+            generator = self._interpreter.execute_function('coroutine', {})
+            self.assertEquals(next(generator), ('test.coroutine', 'Hello!'))
+            generator.send('goodbye')
+        except StatementReturn as e:
+            self.assertEquals(e.value, 'goodbye')
         else:
             self.fail("StatementReturn not received")
             
