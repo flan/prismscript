@@ -64,6 +64,17 @@ class MathTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_add_sequence(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('add', {
+             'x': [1, 2, 3],
+             'y': [4, 5, 6],
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, [1, 2, 3, 4, 5, 6])
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_add(self):
         try:
             execute_no_yield(self._interpreter.execute_function('add', {
@@ -193,6 +204,17 @@ class MathTestCase(unittest.TestCase):
             }))
         except StatementReturn as e:
             self.assertEquals(e.value, '5spam')
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_assign_add_sequence(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('assign_add', {
+             'x': [1, 2, 3],
+             'y': [4, 5, 6],
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, [1, 2, 3, 4, 5, 6])
         else:
             self.fail("StatementReturn not received")
             

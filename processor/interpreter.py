@@ -385,6 +385,8 @@ class Interpreter:
         if method == parser.ASSIGN_ADD:
             if isinstance(scope[identifier[1]], str) or isinstance(expression_result, str): #Special handling for strings
                 scope[identifier[1]] = ''.join((str(scope[identifier[1]]), str(expression_result)))
+            elif type(scope[identifier[1]]) == Sequence and type(expression_result) == Sequence: #Special handling for sequences
+                scope[identifier[1]] = Sequence(scope[identifier[1]] + expression_result)
             else:
                 scope[identifier[1]] += expression_result
         elif method == parser.ASSIGN_SUBTRACT:
@@ -555,6 +557,8 @@ class Interpreter:
         if method == parser.MATH_ADD:
             if isinstance(result_left, str) or isinstance(result_right, str): #Special handling for strings
                 raise StatementReturn(''.join((str(result_left), str(result_right))))
+            elif type(result_left) == Sequence and type(result_right) == Sequence: #Special handling for sequences
+                raise StatementReturn(Sequence(result_left + result_right))
             else:
                 raise StatementReturn(result_left + result_right)
         elif method == parser.MATH_SUBTRACT:
