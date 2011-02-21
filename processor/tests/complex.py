@@ -24,12 +24,16 @@ from . import (
  get_interpreter, execute_no_yield,
  StatementReturn,
 )
+from stdlib import lang
+import discover_functions
 
 class NestedTestCase(unittest.TestCase):
     _interpreter = None
     
     def setUp(self):
         self._interpreter = get_interpreter('complex')
+        functions = discover_functions.scan(lang, 'lang')
+        self._interpreter.register_scoped_functions(functions)
         
     def test_iteration_no_conditional(self):
         try:
@@ -99,7 +103,7 @@ class NestedTestCase(unittest.TestCase):
         try:
             execute_no_yield(self._interpreter.execute_function('conditionals_in_loop', {
              'iterations': 2,
-             'else_iterations': 5,
+             'else_iterations': 6,
              'x': 2, 'y': 3,
              'break_on_if': False,
              'break_on_elif_1': False,

@@ -691,12 +691,16 @@ class Interpreter:
         try:
             function = self._resolve_local_identifier(function_name, _locals)
             if isinstance(function, collections.Callable):
-                return function(arguments)
+                return function(**arguments)
             else:
                 raise VariableNotFoundError(function_name, "Local identifier is not a bound function")
         except VariableNotFoundError:
             return self.execute_function(function_name, arguments)
-            
+        raise FunctionNotFoundError("Unable to find local function %(name)s(%(parameters)s)" % {
+         'name': function_name,
+         'parameters': ', '.join(arguments.keys()),
+        })
+        
     def _execute_scoped_function(self, function_name, arguments, _locals):
         """
         Attempts to execute the named function with the given `arguments`, which take the form
@@ -721,15 +725,19 @@ class Interpreter:
         try:
             function = self._resolve_scoped_identifier(function_name, _locals)
             if isinstance(function, collections.Callable):
-                return function(arguments)
+                return function(**arguments)
             else:
                 raise ScopedVariableNotFoundError(function_name, "Scoped identifier is not a bound function")
         except ScopedVariableNotFoundError:
             function = self._scoped_functions.get(function_name)
             if not function:
                 raise ScopedFunctionNotFoundError(function_name, "Function not registered")
-            return function(arguments)
-            
+            return function(**arguments)
+        raise ScopedFunctionNotFoundError("Unable to find scoped function %(name)s(%(parameters)s)" % {
+         'name': function_name,
+         'parameters': ', '.join(arguments.keys()),
+        })
+        
     def _get_assignment_scope(self, scope_identifier, _locals):
         """
         Returns the scope-variable-store for assignment indicated by the given identifier.
@@ -752,12 +760,22 @@ class Interpreter:
         ``StatementReturn`` is raised after any coroutine execution has completed. This is normal;
         the function's return-value is in its ``value`` attribute.
         """
+        arguments = {}
+        for (argument, expr) in expression[2].items():
+            generator = self._evaluate_expression(expr, _locals)
+            try:
+                for prompt in generator: #Coroutine boilerplate
+                    x = yield prompt
+                    generator.send(x)
+            except StatementReturn as e: #Guaranteed to happen
+                arguments[argument] = e.value
+                
         result = None
         try:
             if expression[0] == parser.FUNCTIONCALL_LOCAL:
-                result = self._execute_local_function(expression[1], expression[2], _locals)
+                result = self._execute_local_function(expression[1], arguments, _locals)
             elif expression[0] == parser.FUNCTIONCALL_SCOPED:
-                result = self._execute_scoped_function(expression[1], expression[2], _locals)
+                result = self._execute_scoped_function(expression[1], arguments, _locals)
         except StatementReturn as e:
             raise StatementReturn(self._marshall_type(e.value))
             
@@ -777,14 +795,16 @@ class Interpreter:
         Coerces `data` received from external sources into equivalent, Prismscript-compatible
         formats.
         """
-        if not type(data) == Sequence and isinstance(result, collections.Sequence):
+        if not type(data) == Sequence and isinstance(data, collections.Sequence):
             #Python sequences -> Sequence
-            return Sequence(result)
-        return result
+            return Sequence(data)
+        return data
         
     def _process_statements(self,
      statement_list,
-     function=False, while_expression=None,
+     function=False,
+     foreach_identifier=None, foreach_iterable=None,
+     while_expression=None,
      scope_locals=None, seed_locals=None
     ):
         """
@@ -796,7 +816,14 @@ class Interpreter:
         `function` indicates whether this statement-body is directly below a function, meaning that
         a returned value is expected.
         
-        `while_expression`, if set, causes a while-loop to be executed until it fails to hold true.
+        `foreach_identifier` is a local identifier to which the next item from `foreach_iterable`
+        will be assigned. If ``None`` (the default), a foreach-loop will not be executed.
+        
+        `foreach_iterable` is an iterable that will be consumed for assignment into the
+        `foreach_identifier`. If ``None`` (the default), a foreach-loop will not be executed.
+        
+        `while_expression`, if set, causes a while-loop or foreach-loop to be executed until it
+        fails to hold true or it has been exhausted.
         
         `scope_locals` is an optional dictionary that, if provided, will be used as this scope's
         local variable store, rather than having a new one defined. This is generally expected
@@ -815,6 +842,9 @@ class Interpreter:
         `StatementExit` will occur if an ``exit`` statement is encountered or control is returned
         after a ``goto`` statement.
         """
+        if not while_expression is None and not foreach_iterable is None:
+            raise ValueError("A while-loop cannot also be a foreach-loop. This is a design issue.")
+            
         self._log.append("Executing statements...")
         
         _locals = {} #A namespace for local variables
@@ -823,9 +853,12 @@ class Interpreter:
         if not seed_locals is None: #Values were provided to be added to the local variables
             _locals.update(seed_locals)
             
-        _goto_flag = False #True if a goto was encountered, meaning processing should end.
+        _foreach_iterable = None
+        if not foreach_iterable is None:
+            _foreach_iterable = iter(foreach_iterable)
+            
         _while_expression = while_expression
-        if not while_expression: #Let the loop execute; this is inverted at the end.
+        if while_expression is None: #Let the loop execute; this is inverted at the end.
             _while_expression = (parser.TERM_BOOL, True)
         iteration_count = 0
         while True:
@@ -835,15 +868,24 @@ class Interpreter:
                 })
                 break
                 
-            generator = self._evaluate_expression(_while_expression, _locals)
-            try: #Resolve the while-loop's term
-                for prompt in generator:
-                    x = yield prompt
-                    generator.send(x)
-            except StatementReturn as e: #Expected: occurs in lieu of a return
-                if not bool(e.value):
+            if _foreach_iterable and foreach_identifier:
+                try:
+                    generator = self._assign(foreach_identifier, next(_foreach_iterable), _locals, evaluate_expression=False)
+                    for prompt in generator: #Coroutine boilerplate
+                        x = yield prompt
+                        generator.send(x)
+                except StopIteration:
                     break
-                    
+            else:
+                generator = self._evaluate_expression(_while_expression, _locals)
+                try: #Resolve the while-loop's term
+                    for prompt in generator:
+                        x = yield prompt
+                        generator.send(x)
+                except StatementReturn as e: #Expected: occurs in lieu of a return
+                    if not bool(e.value):
+                        break
+                        
             i = 0 #Statement-enumerator for exception-tracing.
             try:
                 for (i, statement) in enumerate(statement_list):
@@ -896,6 +938,17 @@ class Interpreter:
                         for prompt in generator: #Coroutine boilerplate
                             x = yield prompt
                             generator.send(x)
+                    elif statement_type == parser.COND_FOR:
+                        generator = self._evaluate_expression(statement[2], _locals)
+                        try:
+                            for prompt in generator: #Coroutine boilerplate
+                                x = yield prompt
+                                generator.send(x)
+                        except StatementReturn as e: #Guaranteed to be raised by `_evaluate_expression`
+                            generator = self._process_statements(statement[3], foreach_identifier=statement[1], foreach_iterable=e.value, scope_locals=_locals)
+                            for prompt in generator: #Coroutine boilerplate
+                                x = yield prompt
+                                generator.send(x)
                     elif statement_type == parser.STMT_BREAK:
                         raise StatementBreak()
                     elif statement_type == parser.STMT_CONTINUE:
@@ -931,8 +984,10 @@ class Interpreter:
             except Error as e:
                 raise ExecutionError(str(i + 1), [], str(e))
             except Exception as e:
-                raise ExecutionError(str(i + 1), [], "An unexpected error occurred: %(error)s" % {
+                raise ExecutionError(str(i + 1), [], "An unexpected error occurred: %(error)s | locals: %(locals)r | globals: %(globals)r" % {
                  'error': str(e),
+                 'locals': sorted(_locals.items()),
+                 'globals': sorted(self._globals.items()),
                 })
                 
             if not while_expression: #It's not actually a loop, so kill it.
