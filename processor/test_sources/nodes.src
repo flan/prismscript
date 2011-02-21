@@ -6,14 +6,22 @@ _goto{
 }
 
 local_function{
-    function();
+    exit function();
 }
 
 function(){
+    return 5.67;
+}
+
+bound_function{
+    x = [];
+    x.append(item='b');
+    x.append(item="c");
+    exit x.length;
 }
 
 scoped_function{
-    test.test();
+    exit test.test();
 }
 
 local_function_goto{

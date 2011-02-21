@@ -32,6 +32,7 @@ if __name__ == '__main__':
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(expressions.ScopesTestCase),
       unittest.TestLoader().loadTestsFromTestCase(expressions.TypesTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.SequenceTestCase),
       unittest.TestLoader().loadTestsFromTestCase(expressions.TestsTestCase),
      )),
      unittest.TestSuite((

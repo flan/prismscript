@@ -1077,6 +1077,12 @@ class Sequence(list):
     
     Objects of this type may be passed back to any Python function that expects a sequence.
     """
+    def append(self, item):
+        """
+        Appends `item` at the end of the sequence.
+        """
+        list.append(self, item)
+        
     def copy(self):
         """
         Returns a shallow copy of this Sequence's items in their current order, so that `sort` and
@@ -1094,7 +1100,7 @@ class Sequence(list):
         """
         Inserts an item into an arbitrary position in the list.
         """
-        self.insert(index, item)
+        list.insert(self, index, item)
         
     def _get_size(self):
         """

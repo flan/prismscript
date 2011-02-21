@@ -24,6 +24,55 @@ none(){
 sequence(){
     return [1, 'b', 3.45];
 }
+sequence_append(v){
+    x = [1, 2];
+    x.append(item=v);
+    return x;
+}
+sequence_copy(){
+    x = [1, 2, 3];
+    y = x.copy();
+    y.append(item=4);
+    return [y, x];
+}
+sequence_get(){
+    x = [1, 2, 3];
+    return x.get(index=1);
+}
+sequence_insert(v){
+    x = [1, 3];
+    x.insert(index=1, item=v);
+    return x;
+}
+sequence_length(){
+    x = [1, 2, 3];
+    return x.length;
+}
+sequence_pop_head(){
+    x = [1, 2, 3];
+    y = x.pop_head();
+    return [y, x];
+}
+sequence_pop_item(){
+    x = [1, 2, 3];
+    y = x.pop_item(index=1);
+    return [y, x];
+}
+sequence_pop_tail(){
+    x = [1, 2, 3];
+    y = x.pop_tail();
+    return [y, x];
+}
+sequence_prepend(v){
+    x = [2, 3];
+    x.prepend(item=v);
+    return x;
+}
+sequence_remove(){
+    x = [1, 2, 3];
+    x.remove(index=1);
+    return x;
+}
 
 
 equality(){

@@ -32,7 +32,7 @@ class SimpleTestCase(unittest.TestCase):
         self._interpreter = get_interpreter('nodes')
         
         def test():
-            pass
+            return 82
             
         self._interpreter.register_scoped_functions([('test.test', test)])
         
@@ -56,7 +56,15 @@ class SimpleTestCase(unittest.TestCase):
         try:
             execute_no_yield(self._interpreter.execute_node('local_function'))
         except StatementExit as e:
-            self.assertEquals(e.value, '')
+            self.assertEquals(e.value, '5.67')
+        else:
+            self.fail("StatementExit not received")
+            
+    def test_bound_function(self):
+        try:
+            execute_no_yield(self._interpreter.execute_node('bound_function'))
+        except StatementExit as e:
+            self.assertEquals(e.value, '2')
         else:
             self.fail("StatementExit not received")
             
@@ -64,7 +72,7 @@ class SimpleTestCase(unittest.TestCase):
         try:
             execute_no_yield(self._interpreter.execute_node('scoped_function'))
         except StatementExit as e:
-            self.assertEquals(e.value, '')
+            self.assertEquals(e.value, '82')
         else:
             self.fail("StatementExit not received")
             

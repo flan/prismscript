@@ -147,11 +147,101 @@ class TypesTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+class SequenceTestCase(unittest.TestCase):
+    _interpreter = None
+    
+    def setUp(self):
+        self._interpreter = get_interpreter('expressions')
+        
     def test_sequence(self):
         try:
             execute_no_yield(self._interpreter.execute_function('sequence', {}))
         except StatementReturn as e:
             self.assertSequenceEqual(e.value, (1, 'b', 3.45))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_append(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_append', {'v': 3}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1, 2, 3))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_copy(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_copy', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value[1], (1, 2, 3))
+            self.assertSequenceEqual(e.value[0], (1, 2, 3, 4))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_get(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_get', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 2)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_insert(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_insert', {'v': 2}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1, 2, 3))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_length(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_length', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 3)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_pop_head(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_pop_head', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value[1], (2, 3))
+            self.assertEquals(e.value[0], 1)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_pop_item(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_pop_item', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value[1], (1, 3))
+            self.assertEquals(e.value[0], 2)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_pop_tail(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_pop_tail', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value[1], (1, 2))
+            self.assertEquals(e.value[0], 3)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_prepend(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_prepend', {'v': 1}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1, 2, 3))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_remove(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_remove', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1, 3))
         else:
             self.fail("StatementReturn not received")
             
