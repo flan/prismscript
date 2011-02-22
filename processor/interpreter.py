@@ -688,7 +688,7 @@ class Interpreter:
                     break
                     
         if statement_list:
-            generator = self._process_statements(statement_list, scope_locals=_locals)
+            generator = self._process_statements(statement_list, scope_locals=_locals, conditional=True)
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
                 while generator.gi_frame:
@@ -929,6 +929,7 @@ class Interpreter:
      function=False,
      foreach_identifier=None, foreach_iterable=None,
      while_expression=None,
+     conditional=False,
      scope_locals=None, seed_locals=None
     ):
         """
@@ -948,6 +949,8 @@ class Interpreter:
         
         `while_expression`, if set, causes a while-loop or foreach-loop to be executed until it
         fails to hold true or it has been exhausted.
+        
+        `conditional` indicates whether this is running in a conditional context.
         
         `scope_locals` is an optional dictionary that, if provided, will be used as this scope's
         local variable store, rather than having a new one defined. This is generally expected
@@ -1159,11 +1162,11 @@ class Interpreter:
                         except StatementReturn as e:
                             pass
             except StatementBreak:
-                if not while_expression and not foreach_identifier:
+                if not while_expression and not foreach_identifier and not conditional:
                     raise ExecutionError(str(i + 1), [], "`break` statement not allowed outside of a loop")
                 break
             except StatementContinue:
-                if not while_expression and not foreach_identifier:
+                if not while_expression and not foreach_identifier and not conditional:
                     raise ExecutionError(str(i + 1), [], "`continue` statement not allowed outside of a loop")
                 continue
             except StatementReturn:
