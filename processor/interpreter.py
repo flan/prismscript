@@ -12,20 +12,23 @@ event of an exception.
 Notes
 -----
 At various points in this module, the following anti-pattern will appear::
-    generator = <some-generator>
-    for prompt in generator:
-        x = yield prompt
-        generator.send(x)
+    try:
+        prompt = <some-generator>.send(None) #Coroutine boilerplate
+        while <some-generator>.gi_frame:
+            x = yield prompt
+            prompt = <some-generator>.send(x)
+    except StopIteration:
+        pass #or bail
         
 This is needed to support the coroutine-oriented design of the language this reference interpreter
 is meant to provide. The reason for this is that externally registered functions may need to block
 for asynchronous events and it's necessary to retain the state of the interpreter's environment
 until the event has completed. Building a recursive message-passing chain using generators as
 coroutine-handlers seemed like the most externally clean and structurally sound method, but it
-added a lot of seemingly duplicated code (that three-line chunk) that, as far as I can fathom,
-cannot be simplified, since the generator's evaluation has to take place within the scope of the
-executing function. It seems like an acceptable tradeoff, though, since the language will be
-primarily extended through library-injection, not syntax/semantics augmentation (automatic Python
+added a lot of seemingly duplicated code (that chunk) that, as far as I can fathom, cannot be
+simplified, since the generator's evaluation has to take place within the scope of the executing
+function. It seems like an acceptable tradeoff, though, since the language will be primarily
+extended through library-injection, not syntax/semantics augmentation (automatic Python
 type-marshalling makes it easy to define new data-structures and access-methods as language
 extensions), so only one or two dedicated maintance programmers will ever be touching this file at a
 time.
@@ -63,29 +66,28 @@ If calling a node directly::
     node = interpreter.execute_node('my_sweet_node')
     exit_value = None
     try:
-        for prompt in node:
-            #This could be a series of calls made over a long period of time, rather than a loop.
-            if prompt == ('scope.subscope.function', 1): #Some function, somewhere, wants data.
-                node.send(prompt[1]) #What you send back is up to your function's needs.
+        prompt = node.send(None)
+        while node.gi_frame: #You could spread this out, rather than making it a solid loop
+            x = yield prompt
+            prompt = node.send(x)
     except StatementExit as e:
-        #Not guaranteed to occur; if not encountered, no ``exit`` statement was reached.
+        #Guaranteed to occur.
         exit_value = e.value
         
 If calling a function directly::
     function = interpreter.execute_function('my_awesome_function', {'l33t': 1337,})
     return_value = None
     try:
-        for prompt in function:
-            #This could be a series of calls made over a long period of time, rather than a loop.
-            if prompt == ('scope.subscope.function', 1): #Some function, somewhere, wants data.
-                node.send(prompt[1]) #What you send back is up to your function's needs.
+        prompt = function.send(None)
+        while function.gi_frame: #You could spread this out, rather than making it a solid loop
+            x = yield prompt
+            prompt = function.send(x)
     except StatementExit as e:
         #This is not guaranteed to occur; if not encountered, no ``exit`` statement was reached
         print(exit_value)
     except StatementReturn as e:
         #This, however, will always occur, unless ``StatementExit`` is encountered.
         return_value = e.value
-        
         
 External functions
 ------------------
@@ -136,7 +138,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 1.0.0 : Feb. 20, 2011
+:Version: 1.0.0 : Feb. 21, 2011
 
 
 Legal
@@ -213,9 +215,10 @@ class Interpreter:
         try:
             prompt = None
             generator = self._process_statements(function, seed_locals=arguments, function=True)
-            for prompt in generator: #Coroutine boilerplate
+            prompt = generator.send(None) #Coroutine boilerplate
+            while generator.gi_frame:
                 x = yield prompt
-                generator.send(x)
+                prompt = generator.send(x)
         except StatementsEnd:
             raise StatementReturn(None)
         except FlowControl:
@@ -249,9 +252,10 @@ class Interpreter:
             
         try:
             generator = self._process_statements(node)
-            for prompt in generator: #Coroutine boilerplate
+            prompt = generator.send(None) #Coroutine boilerplate
+            while generator.gi_frame:
                 x = yield prompt
-                generator.send(x)
+                prompt = generator.send(x)
         except StatementsEnd:
             raise StatementExit('') #The end of any node signifies a dead end.
         except StatementExit:
@@ -356,9 +360,13 @@ class Interpreter:
         if evaluate_expression: #Resolve the term
             try:
                 generator = self._evaluate_expression(expression, _locals)
-                for prompt in generator: #Coroutine boilerplate
-                    x = yield prompt
-                    generator.send(x)
+                try:
+                    prompt = generator.send(None) #Coroutine boilerplate
+                    while generator.gi_frame:
+                        x = yield prompt
+                        prompt = generator.send(x)
+                except StopIteration:
+                    raise ValueError("Expression did not resolve to a term")
             except StatementReturn as e:
                 value = e.value
         scope[identifier[1]] = value
@@ -388,9 +396,13 @@ class Interpreter:
         if evaluate_expression: #Resolve the term
             try:
                 generator = self._evaluate_expression(expression, _locals)
-                for prompt in generator: #Coroutine boilerplate
-                    x = yield prompt
-                    generator.send(x)
+                try:
+                    prompt = generator.send(None) #Coroutine boilerplate
+                    while generator.gi_frame:
+                        x = yield prompt
+                        prompt = generator.send(x)
+                except StopIteration:
+                    raise ValueError("Expression did not resolve to a term")
             except StatementReturn as e:
                 expression_result = e.value
                 
@@ -440,9 +452,13 @@ class Interpreter:
         if evaluate_expression:
             try: #Resolve the sequence
                 generator = self._evaluate_expression(source_expression, _locals)
-                for prompt in generator: #Coroutine boilerplate
-                    x = yield prompt
-                    generator.send(x)
+                try:
+                    prompt = generator.send(None) #Coroutine boilerplate
+                    while generator.gi_frame:
+                        x = yield prompt
+                        prompt = generator.send(x)
+                except StopIteration:
+                    raise ValueError("Expression did not resolve to a term")
             except StatementReturn as e: #Expected: occurs in lieu of a return
                 source = e.value
                 
@@ -472,15 +488,23 @@ class Interpreter:
                 raise ValueError("Unable to assign value to non-variable in sequence-unpack")
                 
             generator = self._assign(identifier, value, _locals, evaluate_expression=False)
-            for prompt in generator: #Coroutine boilerplate
-                x = yield prompt
-                generator.send(x)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while generator.gi_frame:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                pass
                 
         for identifier in unbound_locals: #Set anything that was trimmed in the unpack to None to avoid resolution errors
             generator = self._assign(identifier, None, _locals, evaluate_expression=False)
-            for prompt in generator: #Coroutine boilerplate
-                x = yield prompt
-                generator.send(x)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while generator.gi_frame:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                pass
                 
     def _compare(self, expression_left, expression_right, method, _locals):
         """
@@ -497,9 +521,13 @@ class Interpreter:
         result_left = result_right = None
         try: #Resolve the left-hand side
             generator = self._evaluate_expression(expression_left, _locals)
-            for prompt in generator: #Coroutine boilerplate
-                x = yield prompt
-                generator.send(x)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while generator.gi_frame:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                raise ValueError("Expression did not resolve to a term")
         except StatementReturn as e: #Expected: occurs in lieu of a return
             result_left = e.value
             
@@ -511,17 +539,25 @@ class Interpreter:
                 
             try: #Resolve the right-hand side
                 generator = self._evaluate_expression(expression_right, _locals)
-                for prompt in generator: #Coroutine boilerplate
-                    x = yield prompt
-                    generator.send(x)
+                try:
+                    prompt = generator.send(None) #Coroutine boilerplate
+                    while generator.gi_frame:
+                        x = yield prompt
+                        prompt = generator.send(x)
+                except StopIteration:
+                    raise ValueError("Expression did not resolve to a term")
             except StatementReturn as e: #Expected: occurs in lieu of a return
                 raise StatementReturn(bool(e.value))
         else: #Lazy evaluation's not a useful option, so evaluate right upfront
             try: #Resolve the right-hand side
                 generator = self._evaluate_expression(expression_right, _locals)
-                for prompt in generator: #Coroutine boilerplate
-                    x = yield prompt
-                    generator.send(x)
+                try:
+                    prompt = generator.send(None) #Coroutine boilerplate
+                    while generator.gi_frame:
+                        x = yield prompt
+                        prompt = generator.send(x)
+                except StopIteration:
+                    raise ValueError("Expression did not resolve to a term")
             except StatementReturn as e: #Expected: occurs in lieu of a return
                 result_right = e.value
                 
@@ -557,16 +593,24 @@ class Interpreter:
         result_left = result_right = None
         try: #Resolve the left-hand side
             generator = self._evaluate_expression(expression_left, _locals)
-            for prompt in generator: #Coroutine boilerplate
-                x = yield prompt
-                generator.send(x)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while generator.gi_frame:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                raise ValueError("Expression did not resolve to a term")
         except StatementReturn as e: #Expected: occurs in lieu of a return
             result_left = e.value
         try: #Resolve the right-hand side
             generator = self._evaluate_expression(expression_right, _locals)
-            for prompt in generator: #Coroutine boilerplate
-                x = yield prompt
-                generator.send(x)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while generator.gi_frame:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                raise ValueError("Expression did not resolve to a term")
         except StatementReturn as e: #Expected: occurs in lieu of a return
             result_right = e.value
             
@@ -609,9 +653,13 @@ class Interpreter:
         allow = None
         generator = self._evaluate_expression(statement[0][0], _locals)
         try: #Resolve the if-condition's term
-            for prompt in generator: #Coroutine boilerplate
-                x = yield prompt
-                generator.send(x)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while generator.gi_frame:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                raise ValueError("Expression did not resolve to a term")
         except StatementReturn as e: #Expected: occurs in lieu of a return
             allow = e.value
             
@@ -622,9 +670,13 @@ class Interpreter:
                 if substatement[0] == parser.COND_ELIF:
                     generator = self._evaluate_expression(substatement[1], _locals)
                     try: #Resolve the elif-condition's term
-                        for prompt in generator: #Coroutine boilerplate
-                            x = yield prompt
-                            generator.send(x)
+                        try:
+                            prompt = generator.send(None) #Coroutine boilerplate
+                            while generator.gi_frame:
+                                x = yield prompt
+                                prompt = generator.send(x)
+                        except StopIteration:
+                            raise ValueError("Expression did not resolve to a term")
                     except StatementReturn as e: #Expected: occurs in lieu of a return
                         allow = e.value
                         
@@ -637,9 +689,13 @@ class Interpreter:
                     
         if statement_list:
             generator = self._process_statements(statement_list, scope_locals=_locals)
-            for prompt in generator: #Coroutine boilerplate
-                x = yield prompt
-                generator.send(x)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while generator.gi_frame:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                pass
                 
     def _evaluate_expression(self, expression, _locals):
         """
@@ -670,31 +726,47 @@ class Interpreter:
          parser.MATH_MOD, parser.MATH_AND, parser.MATH_OR, parser.MATH_XOR
         ):
             generator = self._compute(expression[1], expression[2], expression_type, _locals)
-            for prompt in generator: #Coroutine boilerplate; generator is guaranteed to raise a StatementReturn at its end
-                x = yield prompt
-                generator.send(x)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while generator.gi_frame:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                raise ValueError("StatementReturn not received")
         elif expression_type in (
          parser.TEST_EQUALITY, parser.TEST_INEQUALITY,
          parser.TEST_GREATER_EQUAL, parser.TEST_GREATER, parser.TEST_LESSER_EQUAL, parser.TEST_LESSER,
          parser.TEST_BOOL_OR, parser.TEST_BOOL_AND
         ):
             generator = self._compare(expression[1], expression[2], expression_type, _locals)
-            for prompt in generator: #Coroutine boilerplate; generator is guaranteed to raise a StatementReturn at its end
-                x = yield prompt
-                generator.send(x)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while generator.gi_frame:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                raise ValueError("StatementReturn not received")
         elif expression_type in (parser.FUNCTIONCALL_LOCAL, parser.FUNCTIONCALL_SCOPED):
             generator = self._invoke_function(expression, _locals)
-            for prompt in generator: #Coroutine boilerplate; generator is guaranteed to raise a StatementReturn at its end
-                x = yield prompt
-                generator.send(x)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while generator.gi_frame:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                raise ValueError("StatementReturn not received")
         elif expression_type == parser.SEQUENCE:
             sequence = []
             for e in expression[1]:
                 generator = self._evaluate_expression(e, _locals)
                 try:
-                    for prompt in generator: #Coroutine boilerplate
-                        x = yield prompt
-                        generator.send(x)
+                    try:
+                        prompt = generator.send(None) #Coroutine boilerplate
+                        while generator.gi_frame:
+                            x = yield prompt
+                            prompt = generator.send(x)
+                    except StopIteration:
+                        raise ValueError("Expression did not resolve to a term")
                 except StatementReturn as e:
                     sequence.append(e.value)
             raise StatementReturn(Sequence(sequence))
@@ -798,9 +870,13 @@ class Interpreter:
         for (argument, expr) in expression[2].items():
             generator = self._evaluate_expression(expr, _locals)
             try:
-                for prompt in generator: #Coroutine boilerplate
-                    x = yield prompt
-                    generator.send(x)
+                try:
+                    prompt = generator.send(None) #Coroutine boilerplate
+                    while generator.gi_frame:
+                        x = yield prompt
+                        prompt = generator.send(x)
+                except StopIteration:
+                    raise ValueError("Argument-expression did not resolve to a term")
             except StatementReturn as e: #Guaranteed to happen
                 arguments[argument] = e.value
                 
@@ -820,9 +896,10 @@ class Interpreter:
             
         if type(result) == types.GeneratorType:
             try:
-                for prompt in result: #Coroutine boilerplate
-                    x = yield (expression[1], prompt) #Construct a tuple with the identifier of the function in the first slot.
-                    result.send(x)
+                prompt = result.send(None) #Coroutine boilerplate
+                while result.gi_frame:
+                    x = yield prompt
+                    prompt = result.send(x)
             except StopIteration: #Let None be returned.
                 pass
             except StatementReturn as e: #The function is expected to raise a `StatementReturn` if it has a value
@@ -929,17 +1006,25 @@ class Interpreter:
                         generator = self._assign_sequence(foreach_identifier[1], next(_foreach_iterable), _locals, evaluate_expression=False)
                     else:
                         generator = self._assign(foreach_identifier, next(_foreach_iterable), _locals, evaluate_expression=False)
-                except StopIteration:
+                except StopIteration: #Iterator's exhausted
                     break
-                for prompt in generator: #Coroutine boilerplate
-                    x = yield prompt
-                    generator.send(x)
+                try:
+                    prompt = generator.send(None) #Coroutine boilerplate
+                    while generator.gi_frame:
+                        x = yield prompt
+                        prompt = generator.send(x)
+                except StopIteration:
+                    pass
             else: #Possibly a while-loop
                 generator = self._evaluate_expression(_while_expression, _locals)
                 try: #Resolve the while-loop's term
-                    for prompt in generator: #Coroutine boilerplate
-                        x = yield prompt
-                        generator.send(x)
+                    try:
+                        prompt = generator.send(None) #Coroutine boilerplate
+                        while generator.gi_frame:
+                            x = yield prompt
+                            prompt = generator.send(x)
+                    except StopIteration:
+                        pass
                 except StatementReturn as e: #Expected: occurs in lieu of a return
                     if not bool(e.value):
                         break
@@ -951,61 +1036,96 @@ class Interpreter:
                     
                     if statement_type == parser.ASSIGN:
                         generator = self._assign(statement[1], statement[2], _locals)
-                        for prompt in generator: #Coroutine boilerplate
-                            x = yield prompt
-                            generator.send(x)
+                        try:
+                            prompt = generator.send(None) #Coroutine boilerplate
+                            while generator.gi_frame:
+                                x = yield prompt
+                                prompt = generator.send(x)
+                        except StopIteration:
+                            pass
                     elif statement_type in (
                      parser.ASSIGN_ADD, parser.ASSIGN_SUBTRACT, parser.ASSIGN_MULTIPLY,
                      parser.ASSIGN_DIVIDE, parser.ASSIGN_DIVIDE_INTEGER, parser.ASSIGN_MOD,
                     ):
                         generator = self._assign_augment(statement[1], statement[2], statement_type, _locals)
-                        for prompt in generator: #Coroutine boilerplate
-                            x = yield prompt
-                            generator.send(x)
+                        try:
+                            prompt = generator.send(None) #Coroutine boilerplate
+                            while generator.gi_frame:
+                                x = yield prompt
+                                prompt = generator.send(x)
+                        except StopIteration:
+                            pass
                     elif statement_type == parser.ASSIGN_SEQUENCE:
                         generator = self._assign_sequence(statement[1][1], statement[2], _locals)
-                        for prompt in generator: #Coroutine boilerplate
-                            x = yield prompt
-                            generator.send(x)
+                        try:
+                            prompt = generator.send(None) #Coroutine boilerplate
+                            while generator.gi_frame:
+                                x = yield prompt
+                                prompt = generator.send(x)
+                        except StopIteration:
+                            pass
                     elif statement_type == parser.STMT_RETURN:
                         generator = self._evaluate_expression(statement[1], _locals)
-                        for prompt in generator: #Coroutine boilerplate
-                            x = yield prompt
-                            generator.send(x)
-                        #`_evaluate_expression` is guaranteed to raise `StatementReturn`, so nothing needs to be done here
+                        try:
+                            prompt = generator.send(None) #Coroutine boilerplate
+                            while generator.gi_frame:
+                                x = yield prompt
+                                prompt = generator.send(x)
+                        except StopIteration:
+                            raise ValueError("StatementReturn not received")
                     elif statement_type == parser.STMT_GOTO:
                         generator = self.execute_node(statement[1])
-                        for prompt in generator: #Coroutine boilerplate
-                            x = yield prompt
-                            generator.send(x)
+                        try:
+                            prompt = generator.send(None) #Coroutine boilerplate
+                            while generator.gi_frame:
+                                x = yield prompt
+                                prompt = generator.send(x)
+                        except StopIteration:
+                            raise StatementExit('')
                     elif statement_type == parser.COND_IF:
                         try:
                             generator = self._evaluate_conditional(statement[1:], _locals)
-                            for prompt in generator: #Coroutine boilerplate
-                                x = yield prompt
-                                generator.send(x)
+                            try:
+                                prompt = generator.send(None) #Coroutine boilerplate
+                                while generator.gi_frame:
+                                    x = yield prompt
+                                    prompt = generator.send(x)
+                            except StopIteration:
+                                pass
                         except StatementsEnd:
                             pass
                     elif statement_type == parser.COND_WHILE:
                         try:
                             generator = self._process_statements(statement[2], while_expression=statement[1], scope_locals=_locals)
-                            for prompt in generator: #Coroutine boilerplate
-                                x = yield prompt
-                                generator.send(x)
+                            try:
+                                prompt = generator.send(None) #Coroutine boilerplate
+                                while generator.gi_frame:
+                                    x = yield prompt
+                                    prompt = generator.send(x)
+                            except StopIteration:
+                                pass
                         except StatementsEnd:
                             pass
                     elif statement_type == parser.COND_FOR:
                         try:
                             generator = self._evaluate_expression(statement[2], _locals)
                             try:
-                                for prompt in generator: #Coroutine boilerplate
-                                    x = yield prompt
-                                    generator.send(x)
-                            except StatementReturn as e: #Guaranteed to be raised by `_evaluate_expression`
+                                try:
+                                    prompt = generator.send(None) #Coroutine boilerplate
+                                    while generator.gi_frame:
+                                        x = yield prompt
+                                        prompt = generator.send(x)
+                                except StopIteration:
+                                    raise ValueError("StatementReturn not received")
+                            except StatementReturn as e:
                                 generator = self._process_statements(statement[3], foreach_identifier=statement[1], foreach_iterable=e.value, scope_locals=_locals)
-                                for prompt in generator: #Coroutine boilerplate
-                                    x = yield prompt
-                                    generator.send(x)
+                                try:
+                                    prompt = generator.send(None) #Coroutine boilerplate
+                                    while generator.gi_frame:
+                                        x = yield prompt
+                                        prompt = generator.send(x)
+                                except StopIteration:
+                                    pass
                         except StatementsEnd:
                             pass
                     elif statement_type == parser.STMT_BREAK:
@@ -1015,20 +1135,28 @@ class Interpreter:
                     elif statement_type == parser.STMT_EXIT:
                         try:
                             generator = self._evaluate_expression(statement[1], _locals)
-                            for prompt in generator: #Coroutine boilerplate
-                                x = yield prompt
-                                generator.send(x)
-                        except StatementReturn as e: #Expected: occurs in lieu of a return
+                            try:
+                                prompt = generator.send(None) #Coroutine boilerplate
+                                while generator.gi_frame:
+                                    x = yield prompt
+                                    prompt = generator.send(x)
+                            except StopIteration:
+                                raise ValueError("StatementReturn not received")
+                        except StatementReturn as e:
                             if e.value is None:
                                 raise StatementExit('')
                             raise StatementExit(str(e.value))
                     else:
                         try:
                             generator = self._evaluate_expression(statement, _locals)
-                            for prompt in generator: #Coroutine boilerplate
-                                x = yield prompt
-                                generator.send(x)
-                        except StatementReturn as e: #Expected, since `_evaluate_expression` always raises one, but it doesn't do anything in this case.
+                            try:
+                                prompt = generator.send(None) #Coroutine boilerplate
+                                while generator.gi_frame:
+                                    x = yield prompt
+                                    prompt = generator.send(x)
+                            except StopIteration:
+                                raise ValueError("StatementReturn not received")
+                        except StatementReturn as e:
                             pass
             except StatementBreak:
                 if not while_expression and not foreach_identifier:

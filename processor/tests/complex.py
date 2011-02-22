@@ -136,7 +136,7 @@ class CoroutineTestCase(unittest.TestCase):
     def test_coroutine_node(self):
         try:
             generator = self._interpreter.execute_node('coroutine')
-            self.assertEquals(next(generator), ('test.coroutine', 'Hello!'))
+            self.assertEquals(next(generator), 'Hello!')
             generator.send('goodbye')
         except StatementExit as e:
             self.assertEquals(e.value, 'goodbye')
@@ -146,7 +146,7 @@ class CoroutineTestCase(unittest.TestCase):
     def test_coroutine_node_noexit(self):
         try:
             generator = self._interpreter.execute_node('coroutine_noexit')
-            self.assertEquals(next(generator), ('test.coroutine', 'Hello!'))
+            self.assertEquals(next(generator), 'Hello!')
             generator.send('goodbye')
         except StatementExit as e:
             self.assertEquals(e.value, '')
@@ -156,7 +156,7 @@ class CoroutineTestCase(unittest.TestCase):
     def test_coroutine_function(self):
         try:
             generator = self._interpreter.execute_function('coroutine', {})
-            self.assertEquals(next(generator), ('test.coroutine', 'Hello!'))
+            self.assertEquals(next(generator), 'Hello!')
             generator.send('goodbye')
         except StatementReturn as e:
             self.assertEquals(e.value, 'goodbye')
@@ -166,7 +166,7 @@ class CoroutineTestCase(unittest.TestCase):
     def test_coroutine_function_noreturn(self):
         try:
             generator = self._interpreter.execute_function('coroutine_noreturn', {})
-            self.assertEquals(next(generator), ('test.coroutine', 'Hello!'))
+            self.assertEquals(next(generator), 'Hello!')
             generator.send('goodbye')
         except StatementReturn as e:
             self.assertIsNone(e.value)
@@ -176,7 +176,7 @@ class CoroutineTestCase(unittest.TestCase):
     def test_coroutine_passive_node(self):
         try:
             generator = self._interpreter.execute_node('coroutine_passive')
-            self.assertEquals(next(generator), ('test.coroutine_passive', 'Hello!'))
+            self.assertEquals(next(generator), 'Hello!')
             generator.send('goodbye')
         except StatementExit as e:
             self.assertEquals(e.value, '')
@@ -186,7 +186,7 @@ class CoroutineTestCase(unittest.TestCase):
     def test_coroutine_passive_node_noexit(self):
         try:
             generator = self._interpreter.execute_node('coroutine_passive_noexit')
-            self.assertEquals(next(generator), ('test.coroutine_passive', 'Hello!'))
+            self.assertEquals(next(generator), 'Hello!')
             generator.send('goodbye')
         except StatementExit as e:
             self.assertEquals(e.value, '')
@@ -196,7 +196,7 @@ class CoroutineTestCase(unittest.TestCase):
     def test_coroutine_passive_function(self):
         try:
             generator = self._interpreter.execute_function('coroutine_passive', {})
-            self.assertEquals(next(generator), ('test.coroutine_passive', 'Hello!'))
+            self.assertEquals(next(generator), 'Hello!')
             generator.send('goodbye')
         except StatementReturn as e:
             self.assertIsNone(e.value)
@@ -206,7 +206,7 @@ class CoroutineTestCase(unittest.TestCase):
     def test_coroutine_passive_function_noreturn(self):
         try:
             generator = self._interpreter.execute_function('coroutine_passive_noreturn', {})
-            self.assertEquals(next(generator), ('test.coroutine_passive', 'Hello!'))
+            self.assertEquals(next(generator), 'Hello!')
             generator.send('goodbye')
         except StatementReturn as e:
             self.assertIsNone(e.value)
