@@ -24,7 +24,7 @@ from . import (
  get_interpreter, execute_no_yield,
  StatementReturn, StatementExit,
 )
-from stdlib import lang
+import stdlib
 import discover_functions
 
 class NestedTestCase(unittest.TestCase):
@@ -32,7 +32,7 @@ class NestedTestCase(unittest.TestCase):
     
     def setUp(self):
         self._interpreter = get_interpreter('complex')
-        functions = discover_functions.scan(lang, 'lang')
+        functions = discover_functions.scan(stdlib, '')
         self._interpreter.register_scoped_functions(functions)
         
     def test_iteration_no_conditional(self):

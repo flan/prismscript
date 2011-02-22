@@ -41,8 +41,9 @@ def scan(target, base_name, recursive=True, function_list=None):
         function_list = []
         
     for element_name in [name for name in dir(target) if not name.startswith('_')]:
-        augmented_name = "%(base)s.%(element)s" % {
+        augmented_name = "%(base)s%(delimiter)s%(element)s" % {
          'base': base_name,
+         'delimiter': base_name and '.' or '',
          'element': element_name,
         }
         
@@ -50,6 +51,6 @@ def scan(target, base_name, recursive=True, function_list=None):
         if type(element) in (types.FunctionType, types.MethodType):
             function_list.append((augmented_name, element))
         elif type(element) == types.ModuleType and recursive:
-            scan_module(element, augmented_name, recursive=recursive, function_list=function_list)
+            scan(element, augmented_name, recursive=recursive, function_list=function_list)
     return function_list
     
