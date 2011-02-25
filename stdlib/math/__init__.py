@@ -47,6 +47,12 @@ def floor(v, **kwargs):
 def round(v, digits, **kwargs):
     return float(_round(v, digits))
     
+def max(s, **kwargs):
+    return max(s)
+    
+def min(s, **kwargs):
+    return min(s)
+    
 def mean(items, **kwargs):
     total = sum(items)
     return total / len(items)

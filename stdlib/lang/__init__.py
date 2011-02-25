@@ -19,7 +19,6 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
 from . import convert
-from . import math
 from . import string
 
 def build_range(stop, start=0, step=1, **kwargs):
@@ -28,10 +27,4 @@ def build_range(stop, start=0, step=1, **kwargs):
     use in forloops that need to run a fixed number of times.
     """
     return range(start, stop, step)
-    
-def max(s, **kwargs):
-    return max(s)
-    
-def min(s, **kwargs):
-    return min(s)
     
