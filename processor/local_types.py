@@ -104,11 +104,17 @@ class Sequence(list, _Container):
     def append(self, item, **kwargs):
         list.append(self, item, **kwargs)
         
+    def prepend(self, item, **kwargs):
+        self.insert(0, item)
+        
     def get(self, index, **kwargs):
         return self[index]
         
     def insert(self, index, item, **kwargs):
         list.insert(self, index, item)
+        
+    def remove(self, index, **kwargs):
+        del self[index]
         
     def pop_head(self, **kwargs):
         return self.pop(0)
@@ -119,17 +125,14 @@ class Sequence(list, _Container):
     def pop_tail(self, **kwargs):
         return self.pop()
         
-    def prepend(self, item, **kwargs):
-        self.insert(0, item)
-        
-    def remove(self, index, **kwargs):
-        del self[index]
-        
     def reverse(self, **kwargs):
         list.reverse(self)
         
     def shuffle(self, **kwargs):
         random.shuffle(self)
+        
+    def sort(self, **kwargs):
+        list.sort(self)
         
     def slice(self, start=None, end=None, **kwargs):
         if not start is None and not end is None:
@@ -141,6 +144,3 @@ class Sequence(list, _Container):
         else:
             return self.copy()
             
-    def sort(self, **kwargs):
-        list.sort(self)
-        
