@@ -67,7 +67,7 @@ If calling a node directly::
     exit_value = None
     try:
         prompt = node.send(None)
-        while node.gi_frame: #You could spread this out, rather than making it a solid loop
+        while True: #You could spread this out, rather than making it a solid loop
             x = yield prompt
             prompt = node.send(x)
     except StatementExit as e:
@@ -79,7 +79,7 @@ If calling a function directly::
     return_value = None
     try:
         prompt = function.send(None)
-        while function.gi_frame: #You could spread this out, rather than making it a solid loop
+        while True: #You could spread this out, rather than making it a solid loop
             x = yield prompt
             prompt = function.send(x)
     except StatementExit as e:
