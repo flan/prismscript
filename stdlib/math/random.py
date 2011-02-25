@@ -20,11 +20,11 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 import random as _random
 
+def randfloat(low=0.0, high=1.0, **kwargs):
+    return _random.uniform(low, high)
+    
 def randint(high, low=0, **kwargs):
     return _random.randint(low, high)
-    
-def uniform(low=0.0, high=1.0, **kwargs):
-    return _random.uniform(low, high)
     
 def choose(items, **kwargs):
     return _random.choice(items)
