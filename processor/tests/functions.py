@@ -141,6 +141,17 @@ class MathTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_mod2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('mod', {
+             'x': 3.5,
+             'y': 1.25,
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 1.0)
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_and(self):
         try:
             execute_no_yield(self._interpreter.execute_function('_and', {
@@ -281,6 +292,17 @@ class MathTestCase(unittest.TestCase):
             }))
         except StatementReturn as e:
             self.assertEquals(e.value, 1)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_assign_mod2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('assign_mod', {
+             'x': 3.5,
+             'y': 1.25,
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 1.0)
         else:
             self.fail("StatementReturn not received")
             

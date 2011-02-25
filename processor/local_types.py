@@ -18,6 +18,8 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unpo
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or send a
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
+import random
+
 class _Container:
     """
     A generic data-type for any structure that has a variable length.
@@ -126,6 +128,19 @@ class Sequence(list, _Container):
     def reverse(self, **kwargs):
         list.reverse(self)
         
+    def shuffle(self, **kwargs):
+        random.shuffle(self)
+        
+    def slice(self, start=None, end=None, **kwargs):
+        if not start is None and not end is None:
+            return self[start:end]
+        elif not start is None:
+            return self[start:]
+        elif not end is None:
+            return self[:end]
+        else:
+            return self.copy()
+            
     def sort(self, **kwargs):
         list.sort(self)
         

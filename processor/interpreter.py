@@ -148,6 +148,7 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
 import collections
+import math
 import re
 import types
 
@@ -423,8 +424,11 @@ class Interpreter:
             scope[identifier[1]] //= expression_result
             scope[identifier[1]] = int(scope[identifier[1]])
         elif method == parser.ASSIGN_MOD:
-            scope[identifier[1]] %= expression_result
-            
+            if type(scope[identifier[1]]) == float or type(expression_result) == float:
+                scope[identifier[1]] = math.fmod(scope[identifier[1]], expression_result)
+            else:
+                scope[identifier[1]] %= expression_result
+                
     def _assign_sequence(self, destination, source_expression, _locals, evaluate_expression=True):
         """
         Unpacks a Sequence into a series of bound variables.
@@ -630,6 +634,8 @@ class Interpreter:
         elif method == parser.MATH_DIVIDE_INTEGER:
             raise StatementReturn(int(result_left // result_right))
         elif method == parser.MATH_MOD:
+            if type(result_left) == float or type(result_right) == float:
+                raise StatementReturn(math.fmod(result_left, result_right))
             raise StatementReturn(result_left % result_right)
         elif method == parser.MATH_AND:
             raise StatementReturn(result_left & result_right)

@@ -1,16 +1,16 @@
 """
-stdlib.lang.parse
-=================
+stdlib.lang.convert
+===================
 Purpose
 -------
-Provides core parsing features for Prismscript.
+Provides core primitive-conversion features for Prismscript.
 
 Meta
 ----
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: Feb. 20, 2011
+:Version: Feb. 24, 2011
 
 Legal
 -----
@@ -20,20 +20,19 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 _int = int
 _float = float
-_str = str
 
-def float(val, **kwargs):
+def float(v, **kwargs):
     try:
-        return _float(val)
+        return _float(v)
     except Exception:
         return 0.0
         
-def int(val, **kwargs):
+def int(v, **kwargs):
     try:
-        return _int(val)
+        return _int(v)
     except Exception:
         return 0
         
-def str(val, **kwargs):
-    return _str(val)
+def string(v, **kwargs):
+    return str(v)
     

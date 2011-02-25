@@ -285,6 +285,46 @@ class SequenceTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_sequence_shuffle(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_shuffle', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(sorted(e.value), (1, 2, 3))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_slice(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_slice', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (2,))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_slice2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_slice2', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (2, 3))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_slice3(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_slice3', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1, 2))
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_sequence_slice4(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('sequence_slice4', {}))
+        except StatementReturn as e:
+            self.assertSequenceEqual(e.value, (1, 2, 3))
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_sequence_sort(self):
         try:
             execute_no_yield(self._interpreter.execute_function('sequence_sort', {}))
@@ -297,7 +337,7 @@ class SequenceTestCase(unittest.TestCase):
         try:
             execute_no_yield(self._interpreter.execute_function('sequence_assign', {}))
         except StatementReturn as e:
-            self.assertSequenceEqual(e.value, (1, 2, 3))
+            self.assertSequenceEqual(e.value, (1, 2, 4))
         else:
             self.fail("StatementReturn not received")
             

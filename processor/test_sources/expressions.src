@@ -232,13 +232,34 @@ sequence_reverse(){
     x.reverse();
     return x;
 }
+sequence_shuffle(){
+    x = [1, 2, 3];
+    x.shuffle();
+    return x;
+}
+sequence_slice(){
+    x = [1, 2, 3];
+    return x.slice(start=1, end=2);
+}
+sequence_slice2(){
+    x = [1, 2, 3];
+    return x.slice(start=1);
+}
+sequence_slice3(){
+    x = [1, 2, 3];
+    return x.slice(end=2);
+}
+sequence_slice4(){
+    x = [1, 2, 3];
+    return x.slice();
+}
 sequence_sort(){
     x = [3, 2, 1];
     x.sort();
     return x;
 }
 sequence_assign(){
-    [x, global y, local z] = [1, 2, 3];
+    [x, global y, None, local z] = [1, 2, 3, 4];
     return [x, y, z];
 }
 
