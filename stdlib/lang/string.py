@@ -84,5 +84,5 @@ def is_digit(s, **kwargs):
     return s.isdigit()
     
 def is_number(s, **kwargs):
-    return bool(_re.match('^[-+]?\d+(?:\.\d+)?$', s))
+    return bool(_re.match('^[-]?\d+(?:\.\d+)?$', s))
     
