@@ -77,17 +77,17 @@ class Set(set, _Container):
     def add(self, item, **kwargs):
         set.add(self, item)
         
-    def difference(self, other_set, **kwargs):
-        return Set(set.difference(self, other_set))
+    def remove(self, item, **kwargs):
+        set.discard(self, item)
         
     def get_items(self, **kwargs):
         return Sequence(self)
         
+    def difference(self, other_set, **kwargs):
+        return Set(set.difference(self, other_set))
+        
     def intersection(self, other_set, **kwargs):
         return Set(set.intersection(self, other_set))
-        
-    def remove(self, item, **kwargs):
-        set.discard(self, item)
         
     def union(self, other_set, **kwargs):
         return Set(set.union(self, other_set))
