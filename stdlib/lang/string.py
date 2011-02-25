@@ -53,10 +53,10 @@ def split(s, delimiter=' ', limit=0, from_left=True, **kwargs):
         return split_function(delimiter, limit)
     return split_function(delimiter)
     
-def endswith(s, end, **kwargs):
+def ends_with(s, end, **kwargs):
     return s.endswith(end)
     
-def startswith(s, start, **kwargs):
+def starts_with(s, start, **kwargs):
     return s.startswith(start)
     
 def filter(s, unwanted, **kwargs):
