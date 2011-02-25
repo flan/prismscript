@@ -26,9 +26,9 @@ def randint(high, low=0, **kwargs):
 def uniform(low=0.0, high=1.0, **kwargs):
     return _random.uniform(low, high)
     
-def sample(items, sample_size, **kwargs):
-    return _random.sample(items, sample_size)
-    
 def choose(items, **kwargs):
     return _random.choice(items)
+    
+def sample(items, sample_size, **kwargs):
+    return _random.sample(items, sample_size)
     
