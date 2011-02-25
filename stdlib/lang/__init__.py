@@ -22,9 +22,5 @@ from . import convert
 from . import string
 
 def build_range(stop, start=0, step=1, **kwargs):
-    """
-    Provides an iterator from `start` to `stop`, in increments of `range`, intended primarily for
-    use in forloops that need to run a fixed number of times.
-    """
     return range(start, stop, step)
     
