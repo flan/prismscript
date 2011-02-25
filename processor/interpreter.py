@@ -103,11 +103,13 @@ In this case, your function needs to be a generator, so it has to ``yield`` a pr
 controller knows what to do in response. The identifier used to register your function will
 automatically be exposed, so the origin is given for free.
 
-Your function will receive a response to its ``yield`` using ``send()``, which can be used to decide
-how to proceed. Upon completion, your function may raise an instance of this module's
-``StatementReturn`` exception, in the following way:
+Your function will receive a response, from the calling context (so it's up to you) to its
+``yield`` using ``send()``, which can be used to decide how to proceed. Upon completion, your
+function may raise an instance of this module's ``StatementReturn`` exception, in the following
+way:
 ``raise prismscript.processor.interpreter.StatementReturn('Your Return Value')``, which will cause
-the given value to be returned.
+the given value to be returned. Raising ``StopIteration`` is equivalent to raising
+``StatementReturn(None)``.
 
 You may return a generator object using the ``StatementReturn`` method, but you cannot return one
 using the ``return`` method.
