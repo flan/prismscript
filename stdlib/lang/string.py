@@ -32,8 +32,8 @@ def rstrip(s, **kwargs):
     return s.rstrip()
 rtrim = rstrip
 
-def contains(s, substr, **kwargs):
-    return substr in s
+def contains(s, substring, **kwargs):
+    return substring in s
     
 def count(s, substring, **kwargs):
     return s.count(substring)
