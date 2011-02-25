@@ -262,8 +262,10 @@ class Interpreter:
                 prompt = generator.send(x)
         except StatementsEnd:
             raise StatementExit('') #The end of any node signifies a dead end.
-        except StatementExit:
-            raise
+        except StatementExit as e:
+            if e.value is None:
+                raise StatementExit('')
+            raise StatementExit(str(e.value))
         except StatementReturn as e: #Not actually legal, but suppressing it would be bad.
             self._log.append("Warning: exit-statement inferred from top-level return.")
             if e.value is None:
