@@ -46,6 +46,13 @@ class Dictionary(dict, _Container):
     def get(self, key, default=None, **kwargs):
         return dict.get(self, key, default)
         
+    def put(self, key, value, **kwargs):
+        self[key] = value
+        
+    def remove(self, key, **kwargs):
+        if key in self:
+            del self[key]
+            
     def get_items(self, **kwargs):
         items = Sequence()
         for item in self.items():
@@ -58,13 +65,6 @@ class Dictionary(dict, _Container):
     def get_values(self, **kwargs):
         return Sequence(self.values())
         
-    def put(self, key, value, **kwargs):
-        self[key] = value
-        
-    def remove(self, key, **kwargs):
-        if key in self:
-            del self[key]
-            
 class Set(set, _Container):
     """
     A Prismscript-friendly wrapper around a set.
