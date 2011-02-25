@@ -68,8 +68,8 @@ If calling a node directly::
     try:
         prompt = node.send(None)
         while True: #You could spread this out, rather than making it a solid loop
-            x = yield prompt
-            prompt = node.send(x)
+            data = None
+            prompt = node.send(data)
     except StatementExit as e:
         #Guaranteed to occur.
         exit_value = e.value
@@ -80,11 +80,12 @@ If calling a function directly::
     try:
         prompt = function.send(None)
         while True: #You could spread this out, rather than making it a solid loop
-            x = yield prompt
-            prompt = function.send(x)
+            data = None
+            prompt = function.send(data)
     except StatementExit as e:
         #This is not guaranteed to occur; if not encountered, no ``exit`` statement was reached
-        print(exit_value)
+        print(e.value)
+        return
     except StatementReturn as e:
         #This, however, will always occur, unless ``StatementExit`` is encountered.
         return_value = e.value
