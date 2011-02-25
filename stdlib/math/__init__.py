@@ -47,11 +47,11 @@ def floor(v, **kwargs):
 def round(v, digits, **kwargs):
     return float(_round(v, digits))
     
-def max(s, **kwargs):
-    return max(s)
+def max(items, **kwargs):
+    return max(items)
     
-def min(s, **kwargs):
-    return min(s)
+def min(items, **kwargs):
+    return min(items)
     
 def mean(items, **kwargs):
     total = sum(items)
