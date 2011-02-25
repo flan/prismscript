@@ -25,13 +25,13 @@ def float(v, **kwargs):
     try:
         return _float(v)
     except Exception:
-        return 0.0
+        return None
         
 def int(v, **kwargs):
     try:
         return _int(v)
     except Exception:
-        return 0
+        return None
         
 def string(v, **kwargs):
     return str(v)
