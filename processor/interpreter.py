@@ -14,7 +14,7 @@ Notes
 At various points in this module, the following anti-pattern will appear::
     try:
         prompt = <some-generator>.send(None) #Coroutine boilerplate
-        while <some-generator>.gi_frame:
+        while True:
             x = yield prompt
             prompt = <some-generator>.send(x)
     except StopIteration:
@@ -220,7 +220,7 @@ class Interpreter:
             prompt = None
             generator = self._process_statements(function, seed_locals=arguments, function=True)
             prompt = generator.send(None) #Coroutine boilerplate
-            while generator.gi_frame:
+            while True:
                 x = yield prompt
                 prompt = generator.send(x)
         except StatementsEnd:
@@ -257,7 +257,7 @@ class Interpreter:
         try:
             generator = self._process_statements(node)
             prompt = generator.send(None) #Coroutine boilerplate
-            while generator.gi_frame:
+            while True:
                 x = yield prompt
                 prompt = generator.send(x)
         except StatementsEnd:
@@ -368,7 +368,7 @@ class Interpreter:
                 generator = self._evaluate_expression(expression, _locals)
                 try:
                     prompt = generator.send(None) #Coroutine boilerplate
-                    while generator.gi_frame:
+                    while True:
                         x = yield prompt
                         prompt = generator.send(x)
                 except StopIteration:
@@ -404,7 +404,7 @@ class Interpreter:
                 generator = self._evaluate_expression(expression, _locals)
                 try:
                     prompt = generator.send(None) #Coroutine boilerplate
-                    while generator.gi_frame:
+                    while True:
                         x = yield prompt
                         prompt = generator.send(x)
                 except StopIteration:
@@ -463,7 +463,7 @@ class Interpreter:
                 generator = self._evaluate_expression(source_expression, _locals)
                 try:
                     prompt = generator.send(None) #Coroutine boilerplate
-                    while generator.gi_frame:
+                    while True:
                         x = yield prompt
                         prompt = generator.send(x)
                 except StopIteration:
@@ -499,7 +499,7 @@ class Interpreter:
             generator = self._assign(identifier, value, _locals, evaluate_expression=False)
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
-                while generator.gi_frame:
+                while True:
                     x = yield prompt
                     prompt = generator.send(x)
             except StopIteration:
@@ -509,7 +509,7 @@ class Interpreter:
             generator = self._assign(identifier, None, _locals, evaluate_expression=False)
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
-                while generator.gi_frame:
+                while True:
                     x = yield prompt
                     prompt = generator.send(x)
             except StopIteration:
@@ -532,7 +532,7 @@ class Interpreter:
             generator = self._evaluate_expression(expression_left, _locals)
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
-                while generator.gi_frame:
+                while True:
                     x = yield prompt
                     prompt = generator.send(x)
             except StopIteration:
@@ -550,7 +550,7 @@ class Interpreter:
                 generator = self._evaluate_expression(expression_right, _locals)
                 try:
                     prompt = generator.send(None) #Coroutine boilerplate
-                    while generator.gi_frame:
+                    while True:
                         x = yield prompt
                         prompt = generator.send(x)
                 except StopIteration:
@@ -562,7 +562,7 @@ class Interpreter:
                 generator = self._evaluate_expression(expression_right, _locals)
                 try:
                     prompt = generator.send(None) #Coroutine boilerplate
-                    while generator.gi_frame:
+                    while True:
                         x = yield prompt
                         prompt = generator.send(x)
                 except StopIteration:
@@ -604,7 +604,7 @@ class Interpreter:
             generator = self._evaluate_expression(expression_left, _locals)
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
-                while generator.gi_frame:
+                while True:
                     x = yield prompt
                     prompt = generator.send(x)
             except StopIteration:
@@ -615,7 +615,7 @@ class Interpreter:
             generator = self._evaluate_expression(expression_right, _locals)
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
-                while generator.gi_frame:
+                while True:
                     x = yield prompt
                     prompt = generator.send(x)
             except StopIteration:
@@ -666,7 +666,7 @@ class Interpreter:
         try: #Resolve the if-condition's term
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
-                while generator.gi_frame:
+                while True:
                     x = yield prompt
                     prompt = generator.send(x)
             except StopIteration:
@@ -683,7 +683,7 @@ class Interpreter:
                     try: #Resolve the elif-condition's term
                         try:
                             prompt = generator.send(None) #Coroutine boilerplate
-                            while generator.gi_frame:
+                            while True:
                                 x = yield prompt
                                 prompt = generator.send(x)
                         except StopIteration:
@@ -702,7 +702,7 @@ class Interpreter:
             generator = self._process_statements(statement_list, scope_locals=_locals, conditional=True)
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
-                while generator.gi_frame:
+                while True:
                     x = yield prompt
                     prompt = generator.send(x)
             except StopIteration:
@@ -739,7 +739,7 @@ class Interpreter:
             generator = self._compute(expression[1], expression[2], expression_type, _locals)
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
-                while generator.gi_frame:
+                while True:
                     x = yield prompt
                     prompt = generator.send(x)
             except StopIteration:
@@ -752,7 +752,7 @@ class Interpreter:
             generator = self._compare(expression[1], expression[2], expression_type, _locals)
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
-                while generator.gi_frame:
+                while True:
                     x = yield prompt
                     prompt = generator.send(x)
             except StopIteration:
@@ -761,7 +761,7 @@ class Interpreter:
             generator = self._invoke_function(expression, _locals)
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
-                while generator.gi_frame:
+                while True:
                     x = yield prompt
                     prompt = generator.send(x)
             except StopIteration:
@@ -773,7 +773,7 @@ class Interpreter:
                 try:
                     try:
                         prompt = generator.send(None) #Coroutine boilerplate
-                        while generator.gi_frame:
+                        while True:
                             x = yield prompt
                             prompt = generator.send(x)
                     except StopIteration:
@@ -883,7 +883,7 @@ class Interpreter:
             try:
                 try:
                     prompt = generator.send(None) #Coroutine boilerplate
-                    while generator.gi_frame:
+                    while True:
                         x = yield prompt
                         prompt = generator.send(x)
                 except StopIteration:
@@ -908,7 +908,7 @@ class Interpreter:
         if type(result) == types.GeneratorType:
             try:
                 prompt = result.send(None) #Coroutine boilerplate
-                while result.gi_frame:
+                while True:
                     x = yield prompt
                     prompt = result.send(x)
             except StopIteration: #Let None be returned.
@@ -1024,7 +1024,7 @@ class Interpreter:
                     break
                 try:
                     prompt = generator.send(None) #Coroutine boilerplate
-                    while generator.gi_frame:
+                    while True:
                         x = yield prompt
                         prompt = generator.send(x)
                 except StopIteration:
@@ -1034,7 +1034,7 @@ class Interpreter:
                 try: #Resolve the while-loop's term
                     try:
                         prompt = generator.send(None) #Coroutine boilerplate
-                        while generator.gi_frame:
+                        while True:
                             x = yield prompt
                             prompt = generator.send(x)
                     except StopIteration:
@@ -1052,7 +1052,7 @@ class Interpreter:
                         generator = self._assign(statement[1], statement[2], _locals)
                         try:
                             prompt = generator.send(None) #Coroutine boilerplate
-                            while generator.gi_frame:
+                            while True:
                                 x = yield prompt
                                 prompt = generator.send(x)
                         except StopIteration:
@@ -1064,7 +1064,7 @@ class Interpreter:
                         generator = self._assign_augment(statement[1], statement[2], statement_type, _locals)
                         try:
                             prompt = generator.send(None) #Coroutine boilerplate
-                            while generator.gi_frame:
+                            while True:
                                 x = yield prompt
                                 prompt = generator.send(x)
                         except StopIteration:
@@ -1073,7 +1073,7 @@ class Interpreter:
                         generator = self._assign_sequence(statement[1][1], statement[2], _locals)
                         try:
                             prompt = generator.send(None) #Coroutine boilerplate
-                            while generator.gi_frame:
+                            while True:
                                 x = yield prompt
                                 prompt = generator.send(x)
                         except StopIteration:
@@ -1082,7 +1082,7 @@ class Interpreter:
                         generator = self._evaluate_expression(statement[1], _locals)
                         try:
                             prompt = generator.send(None) #Coroutine boilerplate
-                            while generator.gi_frame:
+                            while True:
                                 x = yield prompt
                                 prompt = generator.send(x)
                         except StopIteration:
@@ -1091,7 +1091,7 @@ class Interpreter:
                         generator = self.execute_node(statement[1])
                         try:
                             prompt = generator.send(None) #Coroutine boilerplate
-                            while generator.gi_frame:
+                            while True:
                                 x = yield prompt
                                 prompt = generator.send(x)
                         except StopIteration:
@@ -1101,7 +1101,7 @@ class Interpreter:
                             generator = self._evaluate_conditional(statement[1:], _locals)
                             try:
                                 prompt = generator.send(None) #Coroutine boilerplate
-                                while generator.gi_frame:
+                                while True:
                                     x = yield prompt
                                     prompt = generator.send(x)
                             except StopIteration:
@@ -1113,7 +1113,7 @@ class Interpreter:
                             generator = self._process_statements(statement[2], while_expression=statement[1], scope_locals=_locals)
                             try:
                                 prompt = generator.send(None) #Coroutine boilerplate
-                                while generator.gi_frame:
+                                while True:
                                     x = yield prompt
                                     prompt = generator.send(x)
                             except StopIteration:
@@ -1126,7 +1126,7 @@ class Interpreter:
                             try:
                                 try:
                                     prompt = generator.send(None) #Coroutine boilerplate
-                                    while generator.gi_frame:
+                                    while True:
                                         x = yield prompt
                                         prompt = generator.send(x)
                                 except StopIteration:
@@ -1135,7 +1135,7 @@ class Interpreter:
                                 generator = self._process_statements(statement[3], foreach_identifier=statement[1], foreach_iterable=e.value, scope_locals=_locals)
                                 try:
                                     prompt = generator.send(None) #Coroutine boilerplate
-                                    while generator.gi_frame:
+                                    while True:
                                         x = yield prompt
                                         prompt = generator.send(x)
                                 except StopIteration:
@@ -1151,7 +1151,7 @@ class Interpreter:
                             generator = self._evaluate_expression(statement[1], _locals)
                             try:
                                 prompt = generator.send(None) #Coroutine boilerplate
-                                while generator.gi_frame:
+                                while True:
                                     x = yield prompt
                                     prompt = generator.send(x)
                             except StopIteration:
@@ -1165,7 +1165,7 @@ class Interpreter:
                             generator = self._evaluate_expression(statement, _locals)
                             try:
                                 prompt = generator.send(None) #Coroutine boilerplate
-                                while generator.gi_frame:
+                                while True:
                                     x = yield prompt
                                     prompt = generator.send(x)
                             except StopIteration:
