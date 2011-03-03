@@ -18,7 +18,10 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unpo
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or send a
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
-import re as _re
+import re
+__no_recurse = (
+ re,
+)
 
 def strip(s, **kwargs):
     return s.strip()
@@ -84,5 +87,5 @@ def is_digit(s, **kwargs):
     return s.isdigit()
     
 def is_number(s, **kwargs):
-    return bool(_re.match('^[-]?\d+(?:\.\d+)?$', s))
+    return bool(re.match('^[-]?\d+(?:\.\d+)?$', s))
     

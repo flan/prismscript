@@ -18,7 +18,10 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unpo
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or send a
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
-import math as _math
+import math
+__no_recurse = (
+ math,
+)
 
 from . import random
 from . import trig
@@ -27,22 +30,22 @@ _abs = abs
 _round = round
 
 def get_e(**kwargs):
-    return _math.e
+    return math.e
     
 def get_pi(**kwargs):
-    return _math.pi
+    return math.pi
     
 def abs(v, **kwargs):
     if type(v) == int:
         return _abs(v)
-    return _math.fabs(v)
+    return math.fabs(v)
     
 def ceil(v, **kwargs):
-    return int(_math.ceil(v))
+    return int(math.ceil(v))
 ceiling = ceil
 
 def floor(v, **kwargs):
-    return int(_math.floor(v))
+    return int(math.floor(v))
     
 def round(v, digits, **kwargs):
     return float(_round(v, digits))
@@ -76,16 +79,16 @@ def mode(items, **kwargs):
     return b
     
 def pow(v, exponent, **kwargs):
-    return _math.pow(v, exponent)
+    return math.pow(v, exponent)
     
 def sqrt(v, **kwargs):
-    return _math.sqrt(v)
+    return math.sqrt(v)
     
 def factorial(v, **kwargs):
-    return _math.factorial(v)
+    return math.factorial(v)
     
 def log(v, base, **kwargs):
     if base == 10:
-        return _math.log10(v)
-    return _math.log(v, base)
+        return math.log10(v)
+    return math.log(v, base)
     
