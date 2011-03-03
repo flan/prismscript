@@ -542,9 +542,9 @@ class Interpreter:
             
         if method in (parser.TEST_BOOL_OR, parser.TEST_BOOL_AND):
             if method == parser.TEST_BOOL_OR and bool(result_left):
-                raise StatementReturn(True)
+                raise StatementReturn(result_left)
             elif method == parser.TEST_BOOL_AND and not bool(result_left):
-                raise StatementReturn(False)
+                raise StatementReturn(result_left)
                 
             try: #Resolve the right-hand side
                 generator = self._evaluate_expression(expression_right, _locals)
@@ -556,7 +556,7 @@ class Interpreter:
                 except StopIteration:
                     raise ValueError("Expression did not resolve to a term")
             except StatementReturn as e: #Expected: occurs in lieu of a return
-                raise StatementReturn(bool(e.value))
+                raise StatementReturn(e.value)
         else: #Lazy evaluation's not a useful option, so evaluate right upfront
             try: #Resolve the right-hand side
                 generator = self._evaluate_expression(expression_right, _locals)
