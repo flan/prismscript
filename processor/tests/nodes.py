@@ -40,7 +40,7 @@ class SimpleTestCase(unittest.TestCase):
         try:
             execute_no_yield(self._interpreter.execute_node('simple'))
         except StatementExit as e:
-            self.assertEquals(e.value, '')
+            self.assertIsNone(e.value)
         else:
             self.fail("StatementExit not received")
         
@@ -48,7 +48,7 @@ class SimpleTestCase(unittest.TestCase):
         try:
             execute_no_yield(self._interpreter.execute_node('_goto'))
         except StatementExit as e:
-            self.assertEquals(e.value, '')
+            self.assertIsNone(e.value)
         else:
             self.fail("StatementExit not received")
             
@@ -56,7 +56,7 @@ class SimpleTestCase(unittest.TestCase):
         try:
             execute_no_yield(self._interpreter.execute_node('local_function'))
         except StatementExit as e:
-            self.assertEquals(e.value, '5.67')
+            self.assertEquals(e.value, 5.67)
         else:
             self.fail("StatementExit not received")
             
@@ -64,7 +64,7 @@ class SimpleTestCase(unittest.TestCase):
         try:
             execute_no_yield(self._interpreter.execute_node('bound_function'))
         except StatementExit as e:
-            self.assertEquals(e.value, '2')
+            self.assertEquals(e.value, 2)
         else:
             self.fail("StatementExit not received")
             
@@ -72,7 +72,7 @@ class SimpleTestCase(unittest.TestCase):
         try:
             execute_no_yield(self._interpreter.execute_node('scoped_function'))
         except StatementExit as e:
-            self.assertEquals(e.value, '82')
+            self.assertEquals(e.value, 82)
         else:
             self.fail("StatementExit not received")
             
@@ -80,7 +80,7 @@ class SimpleTestCase(unittest.TestCase):
         try:
             execute_no_yield(self._interpreter.execute_node('local_function_goto'))
         except StatementExit as e:
-            self.assertEquals(e.value, '')
+            self.assertIsNone(e.value)
         else:
             self.fail("StatementExit not received")
             

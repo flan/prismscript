@@ -149,7 +149,7 @@ class CoroutineTestCase(unittest.TestCase):
             self.assertEquals(next(generator), 'Hello!')
             generator.send('goodbye')
         except StatementExit as e:
-            self.assertEquals(e.value, '')
+            self.assertIsNone(e.value)
         else:
             self.fail("StatementExit not received")
             
@@ -179,7 +179,7 @@ class CoroutineTestCase(unittest.TestCase):
             self.assertEquals(next(generator), 'Hello!')
             generator.send('goodbye')
         except StatementExit as e:
-            self.assertEquals(e.value, '')
+            self.assertIsNone(e.value)
         else:
             self.fail("StatementExit not received")
             
@@ -189,7 +189,7 @@ class CoroutineTestCase(unittest.TestCase):
             self.assertEquals(next(generator), 'Hello!')
             generator.send('goodbye')
         except StatementExit as e:
-            self.assertEquals(e.value, '')
+            self.assertIsNone(e.value)
         else:
             self.fail("StatementExit not received")
             

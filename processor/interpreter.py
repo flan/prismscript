@@ -202,7 +202,7 @@ class Interpreter:
         If a problem occurs, an `ExecutionError` is raised.
         
         If execution terminates with an ``exit`` statement, `StatementExit` is raised and the
-        exit-value string may be obtained from its `value` attribute.
+        exit-value may be obtained from its `value` attribute.
         """
         container_name = "%(name)s(%(args)s)" % {
          'name': function_name,
@@ -244,7 +244,7 @@ class Interpreter:
         If a problem occurs, an `ExecutionError` is raised.
         
         If execution terminates with an ``exit`` statement, `StatementExit` is raised and the
-        exit-value string may be obtained from its `value` attribute.
+        exit-value may be obtained from its `value` attribute.
         """
         self._log.append("Executing node '%(name)s'..." % {
          'name': node_name,
@@ -261,16 +261,12 @@ class Interpreter:
                 x = yield prompt
                 prompt = generator.send(x)
         except StatementsEnd:
-            raise StatementExit('') #The end of any node signifies a dead end.
+            raise StatementExit(None) #The end of any node signifies a dead end.
         except StatementExit as e:
-            if e.value is None:
-                raise StatementExit('')
-            raise StatementExit(str(e.value))
+            raise StatementExit(e.value)
         except StatementReturn as e: #Not actually legal, but suppressing it would be bad.
             self._log.append("Warning: exit-statement inferred from top-level return.")
-            if e.value is None:
-                raise StatementExit('')
-            raise StatementExit(str(e.value))
+            raise StatementExit(e.value)
         except ExecutionError as e:
             raise ExecutionError(node_name, e.location_path, e.message)
         except Exception as e:
@@ -1095,7 +1091,7 @@ class Interpreter:
                                 x = yield prompt
                                 prompt = generator.send(x)
                         except StopIteration:
-                            raise StatementExit('')
+                            raise StatementsEnd()
                     elif statement_type == parser.COND_IF:
                         try:
                             generator = self._evaluate_conditional(statement[1:], _locals)
@@ -1157,9 +1153,7 @@ class Interpreter:
                             except StopIteration:
                                 raise ValueError("StatementReturn not received")
                         except StatementReturn as e:
-                            if e.value is None:
-                                raise StatementExit('')
-                            raise StatementExit(str(e.value))
+                            raise StatementExit(e.value)
                     else:
                         try:
                             generator = self._evaluate_expression(statement, _locals)
@@ -1200,7 +1194,7 @@ class Interpreter:
             iteration_count += 1
             
         raise StatementsEnd()
-        
+            
     def _resolve_local_identifier(self, identifier, _locals, scope=parser.TERM_IDENTIFIER_LOCAL):
         """
         Provides the value of a local identifier by first looking in the local scope, then the
