@@ -20,6 +20,24 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 import random
 
+def convert_bool(v, **kwargs):
+    return bool(v)
+    
+def convert_float(v, **kwargs):
+    try:
+        return float(v)
+    except Exception:
+        return None
+        
+def convert_int(v, **kwargs):
+    try:
+        return int(v)
+    except Exception:
+        return None
+        
+def convert_string(v, **kwargs):
+    return str(v)
+    
 class _Container:
     """
     A generic data-type for any structure that has a variable length.

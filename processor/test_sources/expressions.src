@@ -21,6 +21,51 @@ none(){
     return None;
 }
 
+
+convert_bool(){
+    return types.bool(v=1);
+}
+convert_bool2(){
+    return types.bool(v=0);
+}
+
+convert_float(){
+    return types.float(v='5.65');
+}
+convert_float2(){
+    return types.float(v='-5.65');
+}
+convert_float3(){
+    return types.float(v='whee');
+}
+
+convert_integer(){
+    return types.int(v='5');
+}
+convert_integer2(){
+    return types.int(v=-5.1);
+}
+convert_integer3(){
+    return types.int(v='Whee');
+}
+
+convert_string(){
+    return types.string(v=True);
+}
+convert_string2(){
+    return types.string(v=-65);
+}
+convert_string3(){
+    return types.string(v=5.65);
+}
+convert_string4(){
+    return types.string(v=None);
+}
+convert_string5(){
+    return types.string(v='whee');
+}
+
+            
 dictionary(){
     x = types.Dictionary();
     x.put(key=1, value=2);

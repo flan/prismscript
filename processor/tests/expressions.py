@@ -146,6 +146,116 @@ class TypesTestCase(unittest.TestCase):
             self.assertEquals(e.value, None)
         else:
             self.fail("StatementReturn not received")
+
+class ConversionTestCase(unittest.TestCase):
+    _interpreter = None
+    
+    def setUp(self):
+        self._interpreter = get_interpreter('expressions')
+        
+    def test_bool(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_bool', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, True)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_bool2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_bool2', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, False)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_float(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_float', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 5.65)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_float2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_float2', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, -5.65)
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_float3(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_float3', {}))
+        except StatementReturn as e:
+            self.assertIsNone(e.value)
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_integer(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_integer', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 5)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_integer2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_integer2', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, -5)
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_integer3(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_integer3', {}))
+        except StatementReturn as e:
+            self.assertIsNone(e.value)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_string(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_string', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 'True')
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_string2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_string2', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, '-65')
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_string3(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_string3', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, '5.65')
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_string4(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_string4', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 'None')
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_string5(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_string5', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 'whee')
+        else:
+            self.fail("StatementReturn not received")
             
 class SequenceTestCase(unittest.TestCase):
     _interpreter = None

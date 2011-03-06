@@ -156,6 +156,7 @@ import re
 import types
 
 from .local_types import (
+ convert_bool, convert_float, convert_int, convert_string,
  Dictionary, Set, Sequence,
 )
 from .grammar import parser
@@ -181,6 +182,10 @@ class Interpreter:
         """
         (self._nodes, self._functions) = parser.parse(script)
         self._scoped_functions = {
+         'types.bool': convert_bool,
+         'types.float': convert_float,
+         'types.int': convert_int,
+         'types.string': convert_string,
          'types.Dictionary': Dictionary,
          'types.Set': Set,
          'types.Sequence': Sequence,

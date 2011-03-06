@@ -23,7 +23,6 @@ try:
 except ImportError:
     from processor.local_types import Sequence
 
-from . import convert
 from . import string
 
 _zip = zip
