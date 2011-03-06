@@ -11,7 +11,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 1.0.0 : Oct. 17, 2010
+:Version: 1.0.1 : Mar. 06, 2011
 
 Legal
 -----
@@ -356,5 +356,13 @@ class TestsTestCase(unittest.TestCase):
 
         (digest_nodes, digest_functions) = parser.parse(source)
 
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+
+    def test_not(self):
+        source = get_source('test_not')
+        (nodes, functions) = get_digest('test_not')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
+        
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         

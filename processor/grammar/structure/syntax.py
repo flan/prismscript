@@ -15,7 +15,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 1.0.0 : Oct. 17, 2010
+:Version: 1.0.1 : Mar. 06, 2011
 
 Legal
 -----
@@ -56,6 +56,7 @@ TEST_LESSER_EQUAL = 54
 TEST_LESSER = 55
 TEST_BOOL_OR = 56
 TEST_BOOL_AND = 57
+TEST_NOT = 58
 MATH_MULTIPLY = 70
 MATH_DIVIDE = 71
 MATH_DIVIDE_INTEGER = 72
@@ -82,6 +83,7 @@ precedence = (
    'EQUALITY', 'INEQUALITY', 'GREATER_EQUAL', 'GREATER', 'LESSER_EQUAL', 'LESSER',
    'AND', 'OR', 'XOR',
  ),
+ ('right', 'NOT'),
  ('left', 'ADD', 'SUBTRACT',),
  ('left', 'MULTIPLY', 'DIVIDE', 'DIVIDE_INTEGER', 'MOD',),
  ('left', 'BOOL_OR', 'BOOL_AND',),
@@ -316,6 +318,7 @@ def p_expression_test(p):
                | expression LESSER expression
                | expression BOOL_OR expression
                | expression BOOL_AND expression
+               | NOT expression
     """
     if p[2] == '==':
         p[0] = (TEST_EQUALITY, p[1], p[3])
@@ -333,6 +336,8 @@ def p_expression_test(p):
         p[0] = (TEST_BOOL_OR, p[1], p[3])
     elif p[2] == '&&':
         p[0] = (TEST_BOOL_AND, p[1], p[3])
+    elif p[1] == '!':
+        p[0] = (TEST_NOT, p[2])
         
 def p_sequence(p):
     r"""

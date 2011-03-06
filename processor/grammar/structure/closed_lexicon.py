@@ -13,7 +13,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 1.0.0 : Oct. 17, 2010
+:Version: 1.0.1 : Mar. 06, 2011
 
 Legal
 -----
@@ -68,6 +68,7 @@ tokens = [
  'LESSER',
  'BOOL_AND',
  'BOOL_OR',
+ 'NOT',
  #assignments
  'ASSIGN',
  'ASSIGN_ADD',
@@ -138,6 +139,7 @@ t_LESSER_EQUAL = r'<='
 t_LESSER = r'<'
 t_BOOL_AND = r'\&\&'
 t_BOOL_OR = r'\|\|'
+t_NOT = r'!'
 
 t_ASSIGN = r'='
 t_ASSIGN_ADD = r'\+='

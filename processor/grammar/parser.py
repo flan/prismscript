@@ -14,7 +14,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 1.0.0 : Oct. 17, 2010
+:Version: 1.0.1 : Mar. 06, 2011
 
 Legal
 -----
@@ -38,6 +38,7 @@ from .structure.syntax import (
  
  TEST_EQUALITY, TEST_INEQUALITY, TEST_GREATER_EQUAL, TEST_GREATER, TEST_LESSER_EQUAL, TEST_LESSER,
  TEST_BOOL_OR, TEST_BOOL_AND,
+ TEST_NOT,
  
  MATH_MULTIPLY, MATH_DIVIDE, MATH_DIVIDE_INTEGER, MATH_ADD, MATH_SUBTRACT, MATH_MOD,
  MATH_AND, MATH_OR, MATH_XOR,
