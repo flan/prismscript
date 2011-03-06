@@ -83,10 +83,10 @@ precedence = (
    'EQUALITY', 'INEQUALITY', 'GREATER_EQUAL', 'GREATER', 'LESSER_EQUAL', 'LESSER',
    'AND', 'OR', 'XOR',
  ),
- ('right', 'NOT'),
  ('left', 'ADD', 'SUBTRACT',),
  ('left', 'MULTIPLY', 'DIVIDE', 'DIVIDE_INTEGER', 'MOD',),
  ('left', 'BOOL_OR', 'BOOL_AND',),
+ ('right', 'NOT'),
 )
 
 start = 'nodelist'
