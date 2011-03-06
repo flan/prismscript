@@ -141,7 +141,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 1.0.0 : Feb. 21, 2011
+:Version: 1.0.1 : Mar. 06, 2011
 
 
 Legal
@@ -758,6 +758,17 @@ class Interpreter:
                     prompt = generator.send(x)
             except StopIteration:
                 raise ValueError("StatementReturn not received")
+        elif expression_type == parser.TEST_NOT:
+            generator = self._evaluate_expression(expression[1], _locals)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while True:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                raise ValueError("StatementReturn not received")
+            except StatementReturn as e:
+                raise StatementReturn(not e.value)
         elif expression_type in (parser.FUNCTIONCALL_LOCAL, parser.FUNCTIONCALL_SCOPED):
             generator = self._invoke_function(expression, _locals)
             try:

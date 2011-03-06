@@ -376,6 +376,16 @@ bool_and4(){
     return True && True;
 }
 
+not(){
+    return !False;
+}
+not2(){
+    return !(5 == 5);
+}
+not3(){
+    return !'';
+}
+
 
 setup_scopes{
     global x = 5;
