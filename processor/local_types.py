@@ -29,35 +29,40 @@ def convert_float(v, **kwargs):
     except Exception:
         return None
         
-def convert_int(v, base=None, **kwargs):
+def convert_int(v, base=None, is_char=False, **kwargs):
     try:
-        if not base:
+        if base:
+            return int(v, base)
+        elif is_char:
+            return ord(v)
+        else:
             return int(v)
-        return int(v, base)
     except Exception:
         return None
         
-def convert_string(v, int_base=None, **kwargs):
-    if not int_base:
+def convert_string(v, int_base=None, is_char=False, **kwargs):
+    if int_base:
+        if not 2 <= int_base <= 36:
+            raise ValueError("Integer base must be between 2 and 36, inclusive, not %(i)r" % {
+             'i': int_base,
+            })
+        if not type(v) == int:
+            raise ValueError("Unable to process non-integer value %(i)r" % {
+             'i': v,
+            })
+        num_base = 48 #Ascii 0
+        asc_offset = 39 #Distance from 0 to 'a'.
+        output = []
+        while v:
+            v_mod = v % int_base
+            v //= int_base
+            output.insert(0, chr(num_base + v_mod + (v_mod > 10 and asc_offset or 0)))
+        return ''.join(output)
+    elif is_char:
+        return chr(v)
+    else:
         return str(v)
         
-    if not 2 <= int_base <= 36:
-        raise ValueError("Integer base must be between 2 and 36, inclusive, not %(i)r" % {
-         'i': int_base,
-        })
-    if not type(v) == int:
-        raise ValueError("Unable to process non-integer value %(i)r" % {
-         'i': v,
-        })
-    num_base = 48 #Ascii 0
-    asc_offset = 39 #Distance from 0 to 'a'.
-    output = []
-    while v:
-        v_mod = v % int_base
-        v //= int_base
-        output.insert(0, chr(num_base + v_mod + (v_mod > 10 and asc_offset or 0)))
-    return ''.join(output)
-    
 class _Container:
     """
     A generic data-type for any structure that has a variable length.

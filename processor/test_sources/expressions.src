@@ -54,6 +54,9 @@ convert_integer4(){
 convert_integer5(){
     return types.int(v='10', base=8);
 }
+convert_integer6(){
+    return types.int(v='a', is_char=True);
+}
 
 convert_string(){
     return types.string(v=True);
@@ -72,6 +75,9 @@ convert_string5(){
 }
 convert_string6(){
     return types.string(v=255, int_base=16);
+}
+convert_string7(){
+    return types.string(v=97, is_char=True);
 }
 
 
