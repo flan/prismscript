@@ -1,6 +1,0 @@
-hello{
-    True xor False;
-    x xor True;
-    False xor x;
-}
-

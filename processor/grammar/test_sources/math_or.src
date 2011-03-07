@@ -1,6 +1,0 @@
-hello{
-    True or False;
-    x or True;
-    False or x;
-}
-

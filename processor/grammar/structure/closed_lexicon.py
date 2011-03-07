@@ -35,13 +35,6 @@ reserved = {
  #literals
  'True': 'TRUE',
  'False': 'FALSE',
- #operands
- 'and': 'AND',
- 'or': 'OR',
- 'xor': 'XOR',
- 'not': 'NOT',
- 'lshift': 'LSHIFT',
- 'rshift': 'RSHIFT',
  #statements
  'goto': 'STMT_GOTO',
  'return': 'STMT_RETURN',

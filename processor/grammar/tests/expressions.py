@@ -176,54 +176,6 @@ class MathsTestCase(unittest.TestCase):
         (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_and(self):
-        source = get_source('math_and')
-        (nodes, functions) = get_digest('math_and')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_or(self):
-        source = get_source('math_or')
-        (nodes, functions) = get_digest('math_or')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_xor(self):
-        source = get_source('math_xor')
-        (nodes, functions) = get_digest('math_xor')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-        
-    def test_not(self):
-        source = get_source('math_not')
-        (nodes, functions) = get_digest('math_not')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-        
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-        
-    def test_lshift(self):
-        source = get_source('math_lshift')
-        (nodes, functions) = get_digest('math_lshift')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-        
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-        
-    def test_rshift(self):
-        source = get_source('math_rshift')
-        (nodes, functions) = get_digest('math_rshift')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-        
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         
 class SequencesTestCase(unittest.TestCase):
     def test_sequence(self):
