@@ -152,6 +152,17 @@ class MathTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_exponentiate(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('exponentiate', {
+             'x': 2,
+             'y': 3,
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 8)
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_and(self):
         try:
             execute_no_yield(self._interpreter.execute_function('_and', {

@@ -22,6 +22,10 @@ mod(x, y){
     return x % y;
 }
 
+exponentiate(x, y){
+    return x ^ y;
+}
+
 _and(x, y){
     return x and y;
 }

@@ -434,7 +434,9 @@ class Interpreter:
                 scope[identifier[1]] = math.fmod(scope[identifier[1]], expression_result)
             else:
                 scope[identifier[1]] %= expression_result
-                
+        elif method == parser.ASSIGN_EXPONENTIATE:
+            scope[identifier[1]] = math.pow(scope[identifier[1]], expression_result)
+            
     def _assign_sequence(self, destination, source_expression, _locals, evaluate_expression=True):
         """
         Unpacks a Sequence into a series of bound variables.
@@ -653,6 +655,8 @@ class Interpreter:
             raise StatementReturn(result_left << result_right)
         elif method == parser.MATH_RSHIFT:
             raise StatementReturn(result_left >> result_right)
+        elif method == parser.MATH_EXPONENTIATE:
+            raise StatementReturn(math.pow(result_left, result_right))
             
     def _evaluate_conditional(self, statement, _locals):
         """
@@ -738,7 +742,7 @@ class Interpreter:
         elif expression_type == parser.TERM_IDENTIFIER_SCOPED: #Only locally-scoped variables may have attributes
             raise StatementReturn(self._resolve_scoped_identifier(expression[1], _locals))
         elif expression_type in (
-         parser.MATH_MULTIPLY, parser.MATH_DIVIDE, parser.MATH_DIVIDE_INTEGER, parser.MATH_ADD, parser.MATH_SUBTRACT,
+         parser.MATH_EXPONENTIATE, parser.MATH_MULTIPLY, parser.MATH_DIVIDE, parser.MATH_DIVIDE_INTEGER, parser.MATH_ADD, parser.MATH_SUBTRACT,
          parser.MATH_MOD, parser.MATH_AND, parser.MATH_OR, parser.MATH_XOR, parser.MATH_LSHIFT, parser.MATH_RSHIFT,
         ):
             generator = self._compute(expression[1], expression[2], expression_type, _locals)
@@ -1076,8 +1080,9 @@ class Interpreter:
                         except StopIteration:
                             pass
                     elif statement_type in (
-                     parser.ASSIGN_ADD, parser.ASSIGN_SUBTRACT, parser.ASSIGN_MULTIPLY,
-                     parser.ASSIGN_DIVIDE, parser.ASSIGN_DIVIDE_INTEGER, parser.ASSIGN_MOD,
+                     parser.ASSIGN_ADD, parser.ASSIGN_SUBTRACT, parser.ASSIGN_EXPONENTIATE,
+                     parser.ASSIGN_MULTIPLY, parser.ASSIGN_DIVIDE, parser.ASSIGN_DIVIDE_INTEGER,
+                     parser.ASSIGN_MOD,
                     ):
                         generator = self._assign_augment(statement[1], statement[2], statement_type, _locals)
                         try:
