@@ -195,6 +195,28 @@ class MathTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_lshift(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('_lshift', {
+             'x': 48,
+             'y': 3,
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 48 << 3)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_rshift(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('_rshift', {
+             'x': 48,
+             'y': 3,
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 48 >> 3)
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_assign_add_str(self):
         try:
             execute_no_yield(self._interpreter.execute_function('assign_add', {

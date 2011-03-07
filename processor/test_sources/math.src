@@ -38,6 +38,13 @@ _not(x){
     return not x;
 }
 
+_lshift(x, y){
+    return x lshift y;
+}
+_rshift(x, y){
+    return x rshift y;
+}
+
 assign_add(x, y){
     x += y;
     return x;

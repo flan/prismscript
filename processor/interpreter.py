@@ -649,6 +649,10 @@ class Interpreter:
             raise StatementReturn(result_left | result_right)
         elif method == parser.MATH_XOR:
             raise StatementReturn(result_left ^ result_right)
+        elif method == parser.MATH_LSHIFT:
+            raise StatementReturn(result_left << result_right)
+        elif method == parser.MATH_RSHIFT:
+            raise StatementReturn(result_left >> result_right)
             
     def _evaluate_conditional(self, statement, _locals):
         """
@@ -735,7 +739,7 @@ class Interpreter:
             raise StatementReturn(self._resolve_scoped_identifier(expression[1], _locals))
         elif expression_type in (
          parser.MATH_MULTIPLY, parser.MATH_DIVIDE, parser.MATH_DIVIDE_INTEGER, parser.MATH_ADD, parser.MATH_SUBTRACT,
-         parser.MATH_MOD, parser.MATH_AND, parser.MATH_OR, parser.MATH_XOR
+         parser.MATH_MOD, parser.MATH_AND, parser.MATH_OR, parser.MATH_XOR, parser.MATH_LSHIFT, parser.MATH_RSHIFT,
         ):
             generator = self._compute(expression[1], expression[2], expression_type, _locals)
             try:
