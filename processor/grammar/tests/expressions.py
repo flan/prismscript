@@ -192,7 +192,15 @@ class MathsTestCase(unittest.TestCase):
         (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        
+    def test_not(self):
+        source = get_source('test_not')
+        (nodes, functions) = get_digest('test_not')
 
+        (digest_nodes, digest_functions) = parser.parse(source)
+        
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        
 class SequencesTestCase(unittest.TestCase):
     def test_sequence(self):
         source = get_source('sequence')
@@ -358,9 +366,9 @@ class TestsTestCase(unittest.TestCase):
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
 
-    def test_not(self):
-        source = get_source('test_not')
-        (nodes, functions) = get_digest('test_not')
+    def test_negate(self):
+        source = get_source('test_negate')
+        (nodes, functions) = get_digest('test_negate')
 
         (digest_nodes, digest_functions) = parser.parse(source)
         

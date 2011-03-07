@@ -39,6 +39,7 @@ reserved = {
  'and': 'AND',
  'or': 'OR',
  'xor': 'XOR',
+ 'not': 'NOT',
  #statements
  'goto': 'STMT_GOTO',
  'return': 'STMT_RETURN',

@@ -64,6 +64,7 @@ MATH_ADD = 73
 MATH_SUBTRACT = 74
 MATH_AND = 75
 MATH_OR = 76
+MATH_NOT = 77
 MATH_XOR = 79
 MATH_MOD = 1070
 FUNCTIONCALL_LOCAL = 80
@@ -86,7 +87,7 @@ precedence = (
  ('left', 'ADD', 'SUBTRACT',),
  ('left', 'MULTIPLY', 'DIVIDE', 'DIVIDE_INTEGER', 'MOD',),
  ('left', 'BOOL_OR', 'BOOL_AND',),
- ('right', 'NEGATE'),
+ ('right', 'NEGATE', 'NOT',),
 )
 
 start = 'nodelist'
@@ -289,6 +290,7 @@ def p_expression_math(p):
                | expression AND expression
                | expression OR expression
                | expression XOR expression
+               | NOT expression
     """
     if p[2] == '+':
         p[0] = (MATH_ADD, p[1], p[3])
@@ -308,6 +310,8 @@ def p_expression_math(p):
         p[0] = (MATH_OR, p[1], p[3])
     elif p[2] == 'xor':
         p[0] = (MATH_XOR, p[1], p[3])
+    elif p[1] == 'not':
+        p[0] = (MATH_NOT, p[2])
 def p_expression_test(p):
     r"""
     expression : expression EQUALITY expression
