@@ -23,6 +23,7 @@ __no_recurse = (
  math,
 )
 
+from . import bitwise
 from . import random
 from . import trig
 
