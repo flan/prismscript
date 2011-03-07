@@ -57,3 +57,8 @@ assign_mod(x, y){
     return x;
 }
 
+assign_exponentiate(x, y){
+    x ^= y;
+    return x;
+}
+
