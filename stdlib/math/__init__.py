@@ -78,9 +78,6 @@ def mode(items, **kwargs):
     (c, b) = max(((c, b) for (b, c) in buckets.items()))
     return b
     
-def pow(v, exponent, **kwargs):
-    return math.pow(v, exponent)
-    
 def sqrt(v, **kwargs):
     return math.sqrt(v)
     

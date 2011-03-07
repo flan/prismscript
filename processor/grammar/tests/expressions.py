@@ -128,7 +128,15 @@ class MathsTestCase(unittest.TestCase):
         (digest_nodes, digest_functions) = parser.parse(source)
 
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        
+    def test_exponentiate(self):
+        source = get_source('math_exponentiate')
+        (nodes, functions) = get_digest('math_exponentiate')
 
+        (digest_nodes, digest_functions) = parser.parse(source)
+
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        
     def test_divide(self):
         source = get_source('math_divide')
         (nodes, functions) = get_digest('math_divide')

@@ -65,6 +65,7 @@ MATH_SUBTRACT = 74
 MATH_AND = 75
 MATH_OR = 76
 MATH_NOT = 77
+MATH_EXPONENTIATE = 78
 MATH_XOR = 79
 MATH_MOD = 1070
 MATH_LSHIFT=1071
@@ -80,14 +81,16 @@ ASSIGN_DIVIDE = 94
 ASSIGN_DIVIDE_INTEGER = 95
 ASSIGN_SEQUENCE = 96
 ASSIGN_MOD = 97
+ASSIGN_EXPONENTIATE = 98
 
 precedence = (
  ('right',
    'EQUALITY', 'INEQUALITY', 'GREATER_EQUAL', 'GREATER', 'LESSER_EQUAL', 'LESSER',
    'AND', 'OR', 'XOR', 'LSHIFT', 'RSHIFT',
  ),
- ('left', 'ADD', 'SUBTRACT',),
+ ('left', 'SUBTRACT', 'ADD',),
  ('left', 'MULTIPLY', 'DIVIDE', 'DIVIDE_INTEGER', 'MOD',),
+ ('left', 'EXPONENTIATE',),
  ('left', 'BOOL_OR', 'BOOL_AND',),
  ('right', 'NEGATE', 'NOT',),
 )
@@ -213,6 +216,7 @@ def p_assignment_augmented(p):
     r"""
     assignment : identifier_local ASSIGN_ADD expression
                | identifier_local ASSIGN_SUBTRACT expression
+               | identifier_local ASSIGN_EXPONENTIATE expression
                | identifier_local ASSIGN_MULTIPLY expression
                | identifier_local ASSIGN_DIVIDE expression
                | identifier_local ASSIGN_DIVIDE_INTEGER expression
@@ -222,6 +226,8 @@ def p_assignment_augmented(p):
         p[0] = (ASSIGN_ADD, p[1], p[3])
     elif p[2] == '-=':
         p[0] = (ASSIGN_SUBTRACT, p[1], p[3])
+    elif p[2] == '^=':
+        p[0] = (ASSIGN_EXPONENTIATE, p[1], p[3])
     elif p[2] == '*=':
         p[0] = (ASSIGN_MULTIPLY, p[1], p[3])
     elif p[2] == '/=':
@@ -283,7 +289,8 @@ def p_expression(p):
         p[0] = p[1]
 def p_expression_math(p):
     r"""
-    expression : expression MULTIPLY expression
+    expression : expression EXPONENTIATE expression
+               | expression MULTIPLY expression
                | expression DIVIDE_INTEGER expression
                | expression DIVIDE expression
                | expression SUBTRACT expression
@@ -300,6 +307,8 @@ def p_expression_math(p):
         p[0] = (MATH_ADD, p[1], p[3])
     elif p[2] == '-':
         p[0] = (MATH_SUBTRACT, p[1], p[3])
+    elif p[2] == '^':
+        p[0] = (MATH_EXPONENTIATE, p[1], p[3])
     elif p[2] == '*':
         p[0] = (MATH_MULTIPLY, p[1], p[3])
     elif p[2] == '/':
