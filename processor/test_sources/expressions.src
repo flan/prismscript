@@ -376,13 +376,13 @@ bool_and4(){
     return True && True;
 }
 
-not(){
+negate(){
     return !False;
 }
-not2(){
+negate2(){
     return !(5 == 5);
 }
-not3(){
+negate3(){
     return !'';
 }
 

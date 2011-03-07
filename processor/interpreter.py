@@ -758,17 +758,6 @@ class Interpreter:
                     prompt = generator.send(x)
             except StopIteration:
                 raise ValueError("StatementReturn not received")
-        elif expression_type == parser.TEST_NEGATE:
-            generator = self._evaluate_expression(expression[1], _locals)
-            try:
-                prompt = generator.send(None) #Coroutine boilerplate
-                while True:
-                    x = yield prompt
-                    prompt = generator.send(x)
-            except StopIteration:
-                raise ValueError("StatementReturn not received")
-            except StatementReturn as e:
-                raise StatementReturn(not e.value)
         elif expression_type in (parser.FUNCTIONCALL_LOCAL, parser.FUNCTIONCALL_SCOPED):
             generator = self._invoke_function(expression, _locals)
             try:
@@ -778,6 +767,19 @@ class Interpreter:
                     prompt = generator.send(x)
             except StopIteration:
                 raise ValueError("StatementReturn not received")
+        elif expression_type in (parser.TEST_NEGATE, parser.MATH_NOT):
+            generator = self._evaluate_expression(expression[1], _locals)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while True:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                raise ValueError("StatementReturn not received")
+            except StatementReturn as e:
+                if expression_type == parser.TEST_NEGATE:
+                    raise StatementReturn(not e.value)
+                raise StatementReturn(~e.value)
         elif expression_type == parser.SEQUENCE:
             sequence = []
             for e in expression[1]:

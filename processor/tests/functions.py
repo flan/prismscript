@@ -185,6 +185,16 @@ class MathTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_not(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('_not', {
+             'x': 2,
+            }))
+        except StatementReturn as e:
+            self.assertEquals(e.value, ~2)
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_assign_add_str(self):
         try:
             execute_no_yield(self._interpreter.execute_function('assign_add', {

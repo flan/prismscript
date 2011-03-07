@@ -872,25 +872,25 @@ class TestsTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
-    def test_not(self):
+    def test_negate(self):
         try:
-            execute_no_yield(self._interpreter.execute_function('not', {}))
+            execute_no_yield(self._interpreter.execute_function('negate', {}))
         except StatementReturn as e:
             self.assertEquals(e.value, True)
         else:
             self.fail("StatementReturn not received")
 
-    def test_not2(self):
+    def test_negate2(self):
         try:
-            execute_no_yield(self._interpreter.execute_function('not2', {}))
+            execute_no_yield(self._interpreter.execute_function('negate2', {}))
         except StatementReturn as e:
             self.assertEquals(e.value, False)
         else:
             self.fail("StatementReturn not received")
 
-    def test_not3(self):
+    def test_negate3(self):
         try:
-            execute_no_yield(self._interpreter.execute_function('not3', {}))
+            execute_no_yield(self._interpreter.execute_function('negate3', {}))
         except StatementReturn as e:
             self.assertEquals(e.value, True)
         else:

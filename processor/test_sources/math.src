@@ -34,6 +34,10 @@ _xor(x, y){
     return x xor y;
 }
 
+_not(x){
+    return not x;
+}
+
 assign_add(x, y){
     x += y;
     return x;
