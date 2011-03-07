@@ -37,8 +37,26 @@ def convert_int(v, base=None, **kwargs):
     except Exception:
         return None
         
-def convert_string(v, **kwargs):
-    return str(v)
+def convert_string(v, int_base=None, **kwargs):
+    if not int_base:
+        return str(v)
+        
+    if not 2 <= int_base <= 36:
+        raise ValueError("Integer base must be between 2 and 36, inclusive, not %(i)r" % {
+         'i': int_base,
+        })
+    if not type(v) == int:
+        raise ValueError("Unable to process non-integer value %(i)r" % {
+         'i': v,
+        })
+    num_base = 48 #Ascii 0
+    asc_offset = 39 #Distance from 0 to 'a'.
+    output = []
+    while v:
+        v_mod = v % int_base
+        v //= int_base
+        output.insert(0, chr(num_base + v_mod + (v_mod > 10 and asc_offset or 0)))
+    return ''.join(output)
     
 class _Container:
     """

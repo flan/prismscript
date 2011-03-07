@@ -273,6 +273,14 @@ class ConversionTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_string6(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_string6', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 'ff')
+        else:
+            self.fail("StatementReturn not received")
+            
 class SequenceTestCase(unittest.TestCase):
     _interpreter = None
     

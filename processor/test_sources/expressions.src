@@ -70,8 +70,11 @@ convert_string4(){
 convert_string5(){
     return types.string(v='whee');
 }
+convert_string6(){
+    return types.string(v=255, int_base=16);
+}
 
-            
+
 dictionary(){
     x = types.Dictionary();
     x.put(key=1, value=2);
