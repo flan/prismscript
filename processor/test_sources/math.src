@@ -26,28 +26,6 @@ exponentiate(x, y){
     return x ^ y;
 }
 
-_and(x, y){
-    return x and y;
-}
-
-_or(x, y){
-    return x or y;
-}
-
-_xor(x, y){
-    return x xor y;
-}
-
-_not(x){
-    return not x;
-}
-
-_lshift(x, y){
-    return x lshift y;
-}
-_rshift(x, y){
-    return x rshift y;
-}
 
 assign_add(x, y){
     x += y;

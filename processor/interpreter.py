@@ -645,16 +645,6 @@ class Interpreter:
             if type(result_left) == float or type(result_right) == float:
                 raise StatementReturn(math.fmod(result_left, result_right))
             raise StatementReturn(result_left % result_right)
-        elif method == parser.MATH_AND:
-            raise StatementReturn(result_left & result_right)
-        elif method == parser.MATH_OR:
-            raise StatementReturn(result_left | result_right)
-        elif method == parser.MATH_XOR:
-            raise StatementReturn(result_left ^ result_right)
-        elif method == parser.MATH_LSHIFT:
-            raise StatementReturn(result_left << result_right)
-        elif method == parser.MATH_RSHIFT:
-            raise StatementReturn(result_left >> result_right)
         elif method == parser.MATH_EXPONENTIATE:
             raise StatementReturn(math.pow(result_left, result_right))
             
@@ -742,8 +732,8 @@ class Interpreter:
         elif expression_type == parser.TERM_IDENTIFIER_SCOPED: #Only locally-scoped variables may have attributes
             raise StatementReturn(self._resolve_scoped_identifier(expression[1], _locals))
         elif expression_type in (
-         parser.MATH_EXPONENTIATE, parser.MATH_MULTIPLY, parser.MATH_DIVIDE, parser.MATH_DIVIDE_INTEGER, parser.MATH_ADD, parser.MATH_SUBTRACT,
-         parser.MATH_MOD, parser.MATH_AND, parser.MATH_OR, parser.MATH_XOR, parser.MATH_LSHIFT, parser.MATH_RSHIFT,
+         parser.MATH_EXPONENTIATE, parser.MATH_MULTIPLY, parser.MATH_DIVIDE,
+         parser.MATH_DIVIDE_INTEGER, parser.MATH_ADD, parser.MATH_SUBTRACT, parser.MATH_MOD,
         ):
             generator = self._compute(expression[1], expression[2], expression_type, _locals)
             try:
