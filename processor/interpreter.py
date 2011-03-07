@@ -758,7 +758,7 @@ class Interpreter:
                     prompt = generator.send(x)
             except StopIteration:
                 raise ValueError("StatementReturn not received")
-        elif expression_type == parser.TEST_NOT:
+        elif expression_type == parser.TEST_NEGATE:
             generator = self._evaluate_expression(expression[1], _locals)
             try:
                 prompt = generator.send(None) #Coroutine boilerplate
