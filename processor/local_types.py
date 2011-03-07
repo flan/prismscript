@@ -29,9 +29,11 @@ def convert_float(v, **kwargs):
     except Exception:
         return None
         
-def convert_int(v, **kwargs):
+def convert_int(v, base=None, **kwargs):
     try:
-        return int(v)
+        if not base:
+            return int(v)
+        return int(v, base)
     except Exception:
         return None
         

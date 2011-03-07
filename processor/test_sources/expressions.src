@@ -48,6 +48,12 @@ convert_integer2(){
 convert_integer3(){
     return types.int(v='Whee');
 }
+convert_integer4(){
+    return types.int(v='0x0a', base=16);
+}
+convert_integer5(){
+    return types.int(v='10', base=8);
+}
 
 convert_string(){
     return types.string(v=True);

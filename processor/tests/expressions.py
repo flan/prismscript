@@ -217,6 +217,22 @@ class ConversionTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_integer4(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_integer4', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 10)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_integer5(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('convert_integer5', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 8)
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_string(self):
         try:
             execute_no_yield(self._interpreter.execute_function('convert_string', {}))
