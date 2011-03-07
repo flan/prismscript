@@ -40,6 +40,8 @@ reserved = {
  'or': 'OR',
  'xor': 'XOR',
  'not': 'NOT',
+ 'lshift': 'LSHIFT',
+ 'rshift': 'RSHIFT',
  #statements
  'goto': 'STMT_GOTO',
  'return': 'STMT_RETURN',

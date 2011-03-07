@@ -194,8 +194,24 @@ class MathsTestCase(unittest.TestCase):
         self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
         
     def test_not(self):
-        source = get_source('test_not')
-        (nodes, functions) = get_digest('test_not')
+        source = get_source('math_not')
+        (nodes, functions) = get_digest('math_not')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
+        
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        
+    def test_lshift(self):
+        source = get_source('math_lshift')
+        (nodes, functions) = get_digest('math_lshift')
+
+        (digest_nodes, digest_functions) = parser.parse(source)
+        
+        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        
+    def test_rshift(self):
+        source = get_source('math_rshift')
+        (nodes, functions) = get_digest('math_rshift')
 
         (digest_nodes, digest_functions) = parser.parse(source)
         

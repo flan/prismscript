@@ -67,6 +67,8 @@ MATH_OR = 76
 MATH_NOT = 77
 MATH_XOR = 79
 MATH_MOD = 1070
+MATH_LSHIFT=1071
+MATH_RSHIFT=1072
 FUNCTIONCALL_LOCAL = 80
 FUNCTIONCALL_SCOPED = 81
 FUNCTIONCALL_UNDEFINED = 82
@@ -82,7 +84,7 @@ ASSIGN_MOD = 97
 precedence = (
  ('right',
    'EQUALITY', 'INEQUALITY', 'GREATER_EQUAL', 'GREATER', 'LESSER_EQUAL', 'LESSER',
-   'AND', 'OR', 'XOR',
+   'AND', 'OR', 'XOR', 'LSHIFT', 'RSHIFT',
  ),
  ('left', 'ADD', 'SUBTRACT',),
  ('left', 'MULTIPLY', 'DIVIDE', 'DIVIDE_INTEGER', 'MOD',),
@@ -291,6 +293,8 @@ def p_expression_math(p):
                | expression OR expression
                | expression XOR expression
                | NOT expression
+               | expression LSHIFT expression
+               | expression RSHIFT expression
     """
     if p[2] == '+':
         p[0] = (MATH_ADD, p[1], p[3])
@@ -312,6 +316,10 @@ def p_expression_math(p):
         p[0] = (MATH_XOR, p[1], p[3])
     elif p[1] == 'not':
         p[0] = (MATH_NOT, p[2])
+    elif p[2] == 'lshift':
+        p[0] = (MATH_LSHIFT, p[1], p[3])
+    elif p[2] == 'rshift':
+        p[0] = (MATH_RSHIFT, p[1], p[3])
 def p_expression_test(p):
     r"""
     expression : expression EQUALITY expression
