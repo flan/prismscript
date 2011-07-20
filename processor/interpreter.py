@@ -180,7 +180,10 @@ class Interpreter:
         
         If the script is invalid, an exception is raised.
         """
-        (self._nodes, self._functions) = parser.parse(script)
+        self._nodes = {}
+        self._functions = {}
+        self.extend_namespace(script)
+        
         self._scoped_functions = {
          'types.bool': convert_bool,
          'types.float': convert_float,
@@ -190,7 +193,9 @@ class Interpreter:
          'types.Set': Set,
          'types.Sequence': Sequence,
         }
+        
         self._globals = {}
+        
         self._log = []
         
     def execute_function(self, function_name, arguments):
