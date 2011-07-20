@@ -281,23 +281,13 @@ class Interpreter:
             
     def extend_namespace(self, script):
         """
-        Adds the script's nodes and functions to the current namespace,
-        returning references to any nodes or functions displaced by the action.
+        Adds the script's nodes and functions to the current namespace.
         
         If the script is invalid, an exception is raised.
         """
         (new_nodes, new_functions) = parser.parse(script)
-        
-        displaced_nodes = {}
-        displaced_functions = {}
-        
-        for (new_element_dict, self_element_dict, displaced_element_dict) in ((new_nodes, self._nodes, displaced_nodes), (new_functions, self._functions, displaced_functions)):
-            for element in new_element_dict:
-                displaced_element = self_element_dict.get(element)
-                if displaced_element:
-                    displaced_element_dict[element] = displaced_element
-            self_element_dict.update(new_element_dict)     
-        return (displaced_nodes, displaced_functions)
+        self._nodes.update(new_nodes)
+        self._functions.update(new_functions)
         
     def get_log(self):
         """
