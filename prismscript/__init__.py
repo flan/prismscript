@@ -10,7 +10,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 1.0.0 : Feb. 20, 2011
+:Version: 1.0.1 : Feb. 20, 2011
 
 Legal
 -----

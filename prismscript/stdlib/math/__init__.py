@@ -28,6 +28,7 @@ from . import random
 from . import trig
 
 _abs = abs
+_pow = pow
 _round = round
 
 def get_e(**kwargs):
@@ -78,6 +79,9 @@ def mode(items, **kwargs):
             buckets[item] = 1
     (c, b) = max(((c, b) for (b, c) in buckets.items()))
     return b
+    
+def pow(v, exponent, **kwargs):
+    return math.pow(v, exponent)
     
 def sqrt(v, **kwargs):
     return math.sqrt(v)

@@ -10,7 +10,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: Feb. 24, 2011
+:Version: Oct. 11, 2011
 
 Legal
 -----
@@ -47,6 +47,9 @@ def replace(s, old, new, limit=0, **kwargs):
     else:
         return s.replace(old, new, count)
         
+def join(s, glue, **kwargs):
+    return glue.join((str(t) for t in s))
+    
 def split(s, delimiter=' ', limit=0, from_left=True, **kwargs):
     split_function = s.split
     if not from_left:
