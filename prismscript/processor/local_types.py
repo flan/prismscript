@@ -221,7 +221,7 @@ class ThreadFactory:
         _thread = threading.Thread(target=thread._run)
         _thread.daemon = True
         with self._lock:
-            _thread.name = = 'prismscript-thread-' + str(self._threads_spawned)
+            _thread.name = 'prismscript-thread-' + str(self._threads_spawned)
             self._threads_spawned += 1
         _thread.start()
         return thread
