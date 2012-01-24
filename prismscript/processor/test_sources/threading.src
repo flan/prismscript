@@ -10,9 +10,7 @@ thread_local(x){
 }
 
 thread_scoped(x){
-    l = types.int;
-    t1 = types.Thread(_f=l, v=(15 * 2));
-    //t1 = types.Thread(_f='thread1');
+    t1 = types.Thread(_f=types.int, v=(15 * 2));
     t2 = types.Thread(_f='thread2', x=5, y=20);
     v0 = thread2(x=5, y=0);
 
