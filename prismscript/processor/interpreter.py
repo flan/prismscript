@@ -260,8 +260,6 @@ class Interpreter:
             raise ExecutionError(container_name, [], "An unexpected error occurred: %(error)s" % {
              'error': str(e),
             })
-        finally:
-            self._lock_factory.release_dead()
         raise StatementReturn(None)
         
     def execute_node(self, node_name):
@@ -302,8 +300,6 @@ class Interpreter:
             raise ExecutionError(node_name, [], "An unexpected error occurred: %(error)s" % {
              'error': str(e),
             })
-        finally:
-            self._lock_factory.release_dead()
             
     def extend_namespace(self, script):
         """
@@ -367,6 +363,22 @@ class Interpreter:
                  'function': function,
                 })
         self._scoped_functions.update(dict(functions))
+
+    def release_locks(self, current_thread_is_dead=True):
+        """
+        Releases all locks provisioned within the interpreter's domain, such that, if the thread
+        that acquired a lock no longer exists, the lock goes back to an idle state.
+
+        If `current_thread_is_dead`, the current thread is considered non-existent because it is
+        cleaning up, meaning that its locks should be released.
+
+        In general, this method is most useful for internal threads, since interpreter contexts are
+        usually discarded after the main node has been followed to completion, but invocation before
+        re-entering an interpreter context, with the calling thread considered dead, is not a bad
+        or particularly expensive idea, especially compared to the cost of deadlocks due to lazy
+        code.
+        """
+        self._lock_factory.release_dead(current_thread_is_dead)
         
     def set_loop_limit(self, limit):
         """

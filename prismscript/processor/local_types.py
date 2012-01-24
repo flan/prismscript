@@ -234,10 +234,14 @@ class _FunctionThread:
     _result = None
     _exception = False
     
-    def __init__(self):
+    def __init__(self, interpreter, function, arguments):
         self._lock = threading.Lock()
         self._pre_running = True
         self._running = False
+
+        self._interpreter = interpreter
+        self._function = function
+        self._arguments = arguments
         
     def _run(self):
         """
@@ -252,7 +256,8 @@ class _FunctionThread:
                 self._result = e
                 self._exception = True
             self._running = False
-            
+        self._interpreter.release_locks()
+        
     @property
     def exception(self):
         """
@@ -296,10 +301,6 @@ class _ExternalFunctionThread(_FunctionThread):
     """
     Executes a Python function.
     """
-    def __init__(self, function, arguments):
-        self._function = function
-        self._arguments = arguments
-        
     def _run_function(self):
         return self._function(**self._arguments)
         
@@ -307,11 +308,6 @@ class _InternalFunctionThread(_FunctionThread):
     """
     Executes an interpreter function, 
     """
-    def __init__(self, interpreter, function, arguments):
-        self._interpreter = interpreter
-        self._function = function
-        self._arguments = arguments
-        
     def _run_function(self):
         try:
             self._interpreter.execute_function(self._function, self._arguments)
@@ -338,10 +334,14 @@ class LockFactory:
             self._locks.append(lock)
         return lock
 
-    def release_dead(self):
+    def release_dead(self, omit_current_thread):
+        """
+        Iterates over every provisioned lock, releasing all holds made by threads that no longer
+        exist.
+        """
         with self._lock:
             for lock in self._locks:
-                lock.release_dead()
+                lock.release_dead(omit_current_thread)
                 
 class _Lock:
     """
@@ -353,13 +353,20 @@ class _Lock:
         self._lock_count = 0
         self._rlock = threading.RLock()
 
-    def release_dead(self):
+    def release_dead(self, omit_current_thread):
+        """
+        Iterates over every existing thread, releasing all holds on this lock if the locker has
+        died.
+        """
         with self._lock:
-            if self._locker and not self._locker in threading.enumerate():
+            if self._locker and ((omit_current_thread and self._locker == threading.current_thread()) or not self._locker in threading.enumerate()):
                 while self._lock_count:
                     self.release()
                     
     def acquire(self):
+        """
+        Acquires the underlying lock and tracks the locker.
+        """
         self._rlock.acquire()
         with self._lock:
             if not self._lock_count:
@@ -367,6 +374,9 @@ class _Lock:
             self._lock_count += 1
             
     def release(self):
+        """
+        Releases the underlying lock and stops tracking the locker, if not nested.
+        """
         self._rlock.release()
         with self._lock:
             self._lock_count -= 1
