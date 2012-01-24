@@ -193,6 +193,7 @@ class Sequence(list, _Container):
             return self[:end]
         else:
             return self.copy()
+
             
 class ThreadFactory:
     """
@@ -227,6 +228,8 @@ class ThreadFactory:
         
 class _FunctionThread:
     """
+    A wrapper for a function that executes in a thread, collecting its output for deferred
+    retrieval.
     """
     _result = None
     _exception = False
@@ -314,5 +317,59 @@ class _InternalFunctionThread(_FunctionThread):
             self._interpreter.execute_function(self._function, self._arguments)
         except (StatementExit, StatementReturn) as e:
             return e.value
-        return None
+        raise ValueError("Indicated function did not return a value; most likely cause: an occurrence of the co-routine interface was encountered")
         
+class LockFactory:
+    """
+    A lock-factory that spawns lock objects that automatically unlock when their holding thread
+    terminates unexpectedly.
+    """
+    def __init__(self, interpreter):
+        self._interpreter = interpreter
+        self._lock = threading.Lock()
+        self._locks = []
+        
+    def __call__(self):
+        """
+        Creates a new supervised lock object.
+        """
+        lock = _Lock()
+        with self._lock:
+            self._locks.append(lock)
+        return lock
+
+    def release_dead(self):
+        with self._lock:
+            for lock in self._locks:
+                lock.release_dead()
+                
+class _Lock:
+    """
+    A wrapper around a re-entrant lock, adding support for supervised thread-management.
+    """
+    def __init__(self):
+        self._lock = threading.RLock() #A lock to control access to the acquisition history. A lock with a lock.
+        self._locker = None
+        self._lock_count = 0
+        self._rlock = threading.RLock()
+
+    def release_dead(self):
+        with self._lock:
+            if self._locker and not self._locker in threading.enumerate():
+                while self._lock_count:
+                    self.release()
+                    
+    def acquire(self):
+        self._rlock.acquire()
+        with self._lock:
+            if not self._lock_count:
+                self._locker = threading.current_thread()
+            self._lock_count += 1
+            
+    def release(self):
+        self._rlock.release()
+        with self._lock:
+            self._lock_count -= 1
+            if not self._lock_count:
+                self._locker = None
+                

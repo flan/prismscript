@@ -169,7 +169,7 @@ from .errors import (
 from .local_types import (
  convert_bool, convert_float, convert_int, convert_string,
  Dictionary, Set, Sequence,
- ThreadFactory,
+ ThreadFactory, LockFactory,
 )
 from .grammar import parser
 
@@ -185,6 +185,8 @@ class Interpreter:
     _log = None #A high-level execution log to aid debugging
     
     _loop_limit = 100000 #Limit loop-iterations to 100,000 by default, to hard-break infinite loops
+
+    _lock_factory = None #A lock-factory for concurrency-control primitives
     
     def __init__(self, script):
         """
@@ -195,7 +197,8 @@ class Interpreter:
         self._nodes = {}
         self._functions = {}
         self.extend_namespace(script)
-        
+
+        self._lock_factory = LockFactory(self)
         self._scoped_functions = {
          'types.bool': convert_bool,
          'types.float': convert_float,
@@ -205,6 +208,7 @@ class Interpreter:
          'types.Set': Set,
          'types.Sequence': Sequence,
          'types.Thread': ThreadFactory(self),
+         'types.Lock': self._lock_factory,
         }
         
         self._globals = {}
@@ -256,6 +260,8 @@ class Interpreter:
             raise ExecutionError(container_name, [], "An unexpected error occurred: %(error)s" % {
              'error': str(e),
             })
+        finally:
+            self._lock_factory.release_dead()
         raise StatementReturn(None)
         
     def execute_node(self, node_name):
@@ -296,6 +302,8 @@ class Interpreter:
             raise ExecutionError(node_name, [], "An unexpected error occurred: %(error)s" % {
              'error': str(e),
             })
+        finally:
+            self._lock_factory.release_dead()
             
     def extend_namespace(self, script):
         """
