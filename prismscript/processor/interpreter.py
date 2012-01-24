@@ -155,6 +155,16 @@ import math
 import re
 import types
 
+#Python 2.x/3.x compatibility
+try: #'long' was replaced by 'int' in py3k
+    long
+except NameError: #Make them aliases
+    long = int
+try: #StringTypes were unified in py3k
+    types.StringTypes
+except AttributeError:
+    types.StringTypes = (str,)
+
 from .errors import (
  Error,
  ExecutionError,
@@ -1290,7 +1300,8 @@ class Interpreter:
         
         Since the intent of the language for which this interpreter was written is such that all
         variables have to be bound locally, the root must exist in either the local or global store,
-        and the specific target identifier must be a child-attribute of that variable.
+        and the specific target identifier must be a child-attribute of that variable. If no root
+        binding is provided, the scoped functions table is consulted as a fall-back.
         
         Within the context of Python, reflection makes this hierarchy very easy to traverse.
         
@@ -1306,8 +1317,11 @@ class Interpreter:
         try:
             variable = self._resolve_local_identifier(elements[0], _locals)
         except VariableNotFoundError:
+            scoped_function = self._scoped_functions.get(identifier) #See if it's a reference to a scoped function.
+            if scoped_function:
+                return scoped_function
             raise ScopedVariableNotFoundError(identifier, "Unable to resolve scoped identifier: root is not a bound local variable")
-        if variable is None or type(variable) in (bool, str, int, float):
+        if variable is None or type(variable) in (bool, str, int, long, float):
             raise ScopedVariableNotFoundError(identifier, "Unable to resolve scoped identifier: found a primitive data-type as a local referent")
             
         try:

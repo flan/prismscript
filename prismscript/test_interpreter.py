@@ -27,6 +27,7 @@ from processor.tests import nodes
 from processor.tests import functions
 from processor.tests import conditionals
 from processor.tests import complex
+from processor.tests import threading
 
 if __name__ == '__main__':
     all_tests = unittest.TestSuite((
@@ -54,7 +55,10 @@ if __name__ == '__main__':
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(complex.NestedTestCase),
       unittest.TestLoader().loadTestsFromTestCase(complex.CoroutineTestCase),
-     ))
+     )),
+     unittest.TestSuite((
+      unittest.TestLoader().loadTestsFromTestCase(threading.ThreadTestCase),
+     )),
     ))
     unittest.TextTestRunner().run(all_tests)
     

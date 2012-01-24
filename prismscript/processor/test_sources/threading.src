@@ -1,0 +1,32 @@
+thread_local(x){
+    t1 = types.Thread(_f='thread1');
+    t2 = types.Thread(_f='thread2', x=5, y=20);
+    v0 = thread2(x=5, y=0);
+
+    t1.join();
+    t2.join();
+    
+    return (t1.result + t2.result - v0) \ x;
+}
+
+thread_scoped(x){
+    l = types.int;
+    t1 = types.Thread(_f=l, v=(15 * 2));
+    //t1 = types.Thread(_f='thread1');
+    t2 = types.Thread(_f='thread2', x=5, y=20);
+    v0 = thread2(x=5, y=0);
+
+    t1.join();
+    t2.join();
+    
+    return (t1.result + t2.result - v0) \ x;
+}
+
+thread1(){
+    return 15 * 2;
+}
+
+thread2(x, y){
+    return x + y;
+}
+
