@@ -19,6 +19,13 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
 import random
+import threading
+import time
+import types
+
+from .errors import (
+ StatementExit, StatementReturn,
+)
 
 def convert_bool(v, **kwargs):
     return bool(v)
@@ -187,3 +194,125 @@ class Sequence(list, _Container):
         else:
             return self.copy()
             
+class ThreadFactory:
+    """
+    A thread-factory that spawns the correct thread-instance for the given function.
+    """
+    def __init__(self, interpreter):
+        self._interpreter = interpreter
+        self._lock = threading.Lock()
+        self._threads_spawned = 0
+        
+    def __call__(self, _f, **kwargs):
+        """
+        Creates and runs a thread instance when an instance of this object-type is invoked,
+        permitting transparent pass-through of the interpreter instance.
+        
+        `_f` may be either a string, for a prismscript function, or a Python callable. All other
+        arguments are passed to `_f` when it is invoked. The returned value is the instantiated
+        thread.
+        """
+        if type(_f) in types.StringTypes:
+            thread = _InternalFunctionThread(self._interpreter, _f, kwargs)
+        else:
+            thread = _ExternalFunctionThread(_f, kwargs)
+            
+        _thread = threading.Thread(target=thread._run)
+        _thread.daemon = True
+        with self._lock:
+            _thread.name = = 'prismscript-thread-' + str(self._threads_spawned)
+            self._threads_spawned += 1
+        _thread.start()
+        return thread
+        
+class _FunctionThread:
+    """
+    """
+    _result = None
+    _exception = False
+    
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._pre_running = True
+        self._running = False
+        
+    def _run(self):
+        """
+        Handles execution of the thread's task.
+        """
+        with self._lock:
+            self._running = True
+            self._pre_running = False
+            try:
+                self._result = self._run_function()
+            except Exception as e:
+                self._result = e
+                self._exception = True
+            self._running = False
+            
+    @property
+    def exception(self):
+        """
+        If the thread's task completed with an exception, this will be ``True``. The exception
+        itself is available as the thread's ``result``.
+        """
+        return self._exception
+        
+    @property
+    def result(self):
+        """
+        Provides the result of the thread's task; this is an exception instance if ``exception``
+        is ``True``.
+        
+        The value contained here is meaningful only after the thread has finished running.
+        """
+        return self._result
+        
+    @property
+    def running(self):
+        """
+        Can be used to check to see whether the thread is still running; useful in case a decision
+        needs to be made about performing another parallel task, but not usually as convenient as
+        ``join()``.
+        
+        A thread is considered running from the moment it is created until its task has completed.
+        """
+        return self._running or self._pre_running
+        
+    def join(self):
+        """
+        Blocks until the thread has finished executing; should be invoked prior to checking the
+        result.
+        """
+        while self._pre_running:
+            time.sleep(0.05)
+        self._lock.acquire()
+        self._lock.release()
+        
+class _ExternalFunctionThread(_FunctionThread):
+    """
+    Executes a Python function.
+    """
+    def __init__(self, function, arguments):
+        self._function = function
+        self._arguments = arguments
+        
+    def _run_function(self):
+        return self._function(**self._arguments)
+        
+class _InternalFunctionThread(_FunctionThread):
+    """
+    Executes an interpreter function, 
+    """
+    def __init__(self, interpreter, function, arguments):
+        self._interpreter = interpreter
+        self._function = function
+        self._arguments = arguments
+        
+    def _run_function(self):
+        try:
+            self._interpreter.execute_function(self._function, self._arguments)
+        except (StatementExit, StatementReturn) as e:
+            return e.value
+        return None
+        
