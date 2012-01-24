@@ -382,4 +382,7 @@ class _Lock:
             self._lock_count -= 1
             if not self._lock_count:
                 self._locker = None
-                
+
+    lock = acquire
+    unlock = release
+    
