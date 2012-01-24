@@ -34,6 +34,10 @@ try: #'long' was replaced by 'int' in py3k
     long
 except NameError: #Make them aliases
     long = int
+try: #StringTypes were unified in py3k
+    types.StringTypes
+except AttributeError:
+    types.StringTypes = (str,)
 
 #Type definitions
 STMT_GOTO = 10
