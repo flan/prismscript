@@ -198,11 +198,14 @@ class Interpreter:
 
     _lock_factory = None #A lock-factory for concurrency-control primitives
     
-    def __init__(self, script):
+    def __init__(self, script, threading=True):
         """
         Parses the given script and initialises the operating environment.
         
         If the script is invalid, an exception is raised.
+        
+        If `threading` is ``False``, threads and locks will not be enabled and
+        will cause exceptions.
         """
         self._nodes = {}
         self._functions = {}
@@ -217,10 +220,13 @@ class Interpreter:
          'types.Dictionary': Dictionary,
          'types.Set': Set,
          'types.Sequence': Sequence,
-         'types.Thread': ThreadFactory(self),
-         'types.Lock': self._lock_factory,
         }
-        
+        if threading:
+            self._scoped_functions.update({
+             'types.Thread': ThreadFactory(self),
+             'types.Lock': self._lock_factory,
+            })
+            
         self._globals = {}
         
         self._log = []
@@ -390,7 +396,10 @@ class Interpreter:
 
         A list of all offending threads is returned.
         """
-        return self._lock_factory.release_dead(current_thread_is_dead)
+        misbehaving_threads = self._lock_factory.release_dead(current_thread_is_dead)
+        if misbehaving_threads:
+            self._log.append("The following misbehaving threads left locks in use: " + repr(misbehaving_threads))
+        return misbehaving_threads
         
     def set_loop_limit(self, limit):
         """
