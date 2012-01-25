@@ -453,10 +453,8 @@ class Interpreter:
         If the operation is addition and the expression being added is a string or the value being
         augmented is a string, both terms are converted appropriately.
         """
-        scope = self._get_assignment_scope(identifier[0], _locals)
-        if not identifier[1] in scope:
-            raise VariableNotFoundError(identifier[1], "Local identifier not declared")
-            
+        scope = self._identify_assignment_scope(identifier[1], _locals, identifier[0])
+        
         expression_result = expression
         if evaluate_expression: #Resolve the term
             try:
@@ -932,6 +930,32 @@ class Interpreter:
         if scope_identifier == parser.TERM_IDENTIFIER_LOCAL_GLOBAL:
             return self._globals
         return _locals
+
+    def _identify_assignment_scope(self, identifier, _locals, scope=parser.TERM_IDENTIFIER_LOCAL):
+        """
+        Provides the scope of a local identifier by first looking for it in the local scope, then
+        the global scope.
+        
+        `identifier` is the name of the variable to be retrieved, and `_locals` is the current
+        scope's local variable store.
+        
+        `scope` is an optional constant that can be used to narrow the search-scope from the onset.
+        
+        A `VariableNotFoundError` is raised if the requested identifier has not been declared.
+        """
+        if scope == parser.TERM_IDENTIFIER_LOCAL: #Search for the proper scope
+            if identifier in _locals:
+                return _locals
+            elif identifier in self._globals:
+                return self._globals
+        elif scope == parser.TERM_IDENTIFIER_LOCAL_LOCAL:
+            if identifier in _locals:
+                return _locals
+        elif scope == parser.TERM_IDENTIFIER_LOCAL_GLOBAL:
+            if identifier in self._globals:
+                return self._globals
+
+        raise VariableNotFoundError(identifier, "Local identifier not declared")
         
     def _invoke_function(self, expression, _locals):
         """
@@ -1273,26 +1297,14 @@ class Interpreter:
         Provides the value of a local identifier by first looking in the local scope, then the
         global scope.
         
-        `identifier` is the name of the variable to be retrieved, and `locals` is the current
+        `identifier` is the name of the variable to be retrieved, and `_locals` is the current
         scope's local variable store.
         
         `scope` is an optional constant that can be used to narrow the search-scope from the onset.
         
         A `VariableNotFoundError` is raised if the requested identifier has not been declared.
         """
-        if scope == parser.TERM_IDENTIFIER_LOCAL: #Search for the proper scope
-            if identifier in _locals:
-                return _locals[identifier]
-            elif identifier in self._globals:
-                return self._globals[identifier]
-        elif scope == parser.TERM_IDENTIFIER_LOCAL_LOCAL:
-            if identifier in _locals:
-                return _locals[identifier]
-        elif scope == parser.TERM_IDENTIFIER_LOCAL_GLOBAL:
-            if identifier in self._globals:
-                return self._globals[identifier]
-                
-        raise VariableNotFoundError(identifier, "Local identifier not declared")
+        return self._identify_assignment_scope(identifier, _locals, scope)[identifier]
         
     def _resolve_scoped_identifier(self, identifier, _locals):
         """

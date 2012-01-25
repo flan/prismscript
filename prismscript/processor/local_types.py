@@ -354,6 +354,13 @@ class _Lock:
         self._lock_count = 0
         self._rlock = threading.RLock()
 
+    @property
+    def acquired(self):
+        """
+        Indicates whether the lock is currently in a locked state.
+        """
+        return bool(self._locker)
+
     def release_dead(self, omit_current_thread, **kwargs):
         """
         Iterates over every existing thread, releasing all holds on this lock if the locker has
@@ -384,6 +391,7 @@ class _Lock:
             if not self._lock_count:
                 self._locker = None
 
+    locked = acquired
     lock = acquire
     unlock = release
     

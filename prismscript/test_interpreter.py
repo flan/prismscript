@@ -58,6 +58,7 @@ if __name__ == '__main__':
      )),
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(threading.ThreadTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(threading.LockTestCase),
      )),
     ))
     unittest.TextTestRunner().run(all_tests)

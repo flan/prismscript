@@ -51,4 +51,49 @@ class ThreadTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
 
+class LockTestCase(unittest.TestCase):
+    _interpreter = None
+    
+    def setUp(self):
+        self._interpreter = get_interpreter('locking')
+        
+    def test_locking(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('locking_basic', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, False)
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_locking_thread(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('locking_thread', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 50)
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_locking_thread_cleanup(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('locking_thread_cleanup', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, False)
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_locking_nocleanup(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('locking_nocleanup', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, True)
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_locking_cleanup(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('locking_cleanup', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, False)
+        else:
+            self.fail("StatementReturn not received")
             
