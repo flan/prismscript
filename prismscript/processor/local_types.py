@@ -22,6 +22,7 @@ import random
 import threading
 import time
 import types
+import warnings
 
 from .errors import (
  StatementExit, StatementReturn,
@@ -257,8 +258,10 @@ class _FunctionThread:
                 self._result = e
                 self._exception = True
             self._running = False
-        self._interpreter.release_locks()
-        
+        misbehaving_threads = self._interpreter.release_locks()
+        if misbehaving_threads:
+            warnings.warn("The following threads did not release locks properly: " + repr(misbehaving_threads))
+            
     @property
     def exception(self):
         """
