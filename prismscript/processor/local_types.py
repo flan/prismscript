@@ -339,11 +339,17 @@ class LockFactory:
         """
         Iterates over every provisioned lock, releasing all holds made by threads that no longer
         exist. If `omit_current_thread` is set, the current thread is considered dead.
+
+        A list of all offending threads is returned.
         """
+        bad_threads = []
         with self._lock:
             for lock in self._locks:
-                lock.release_dead(omit_current_thread)
-                
+                bad_thread = lock.release_dead(omit_current_thread)
+                if bad_thread:
+                    bad_threads.append(bad_thread)
+        return bad_threads
+        
 class _Lock:
     """
     A wrapper around a re-entrant lock, adding support for supervised thread-management.
@@ -365,12 +371,16 @@ class _Lock:
         """
         Iterates over every existing thread, releasing all holds on this lock if the locker has
         died. If `omit_current_thread` is set, the current thread is considered dead.
+
+        If the lock is released, the thread's instance is returned.
         """
         with self._lock:
             if self._locker and ((omit_current_thread and self._locker == threading.current_thread()) or not self._locker in threading.enumerate()):
+                locker = self._locker
                 while self._lock_count:
                     self.release()
-                    
+                return self._locker
+                
     def acquire(self, **kwargs):
         """
         Acquires the underlying lock and tracks the locker.

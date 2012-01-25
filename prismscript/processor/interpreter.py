@@ -387,8 +387,10 @@ class Interpreter:
         re-entering an interpreter context, with the calling thread considered dead, is not a bad
         or particularly expensive idea, especially compared to the cost of deadlocks due to lazy
         code.
+
+        A list of all offending threads is returned.
         """
-        self._lock_factory.release_dead(current_thread_is_dead)
+        return self._lock_factory.release_dead(current_thread_is_dead)
         
     def set_loop_limit(self, limit):
         """
