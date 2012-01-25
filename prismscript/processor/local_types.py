@@ -338,7 +338,7 @@ class LockFactory:
     def release_dead(self, omit_current_thread, **kwargs):
         """
         Iterates over every provisioned lock, releasing all holds made by threads that no longer
-        exist.
+        exist. If `omit_current_thread` is set, the current thread is considered dead.
         """
         with self._lock:
             for lock in self._locks:
@@ -364,7 +364,7 @@ class _Lock:
     def release_dead(self, omit_current_thread, **kwargs):
         """
         Iterates over every existing thread, releasing all holds on this lock if the locker has
-        died.
+        died. If `omit_current_thread` is set, the current thread is considered dead.
         """
         with self._lock:
             if self._locker and ((omit_current_thread and self._locker == threading.current_thread()) or not self._locker in threading.enumerate()):
