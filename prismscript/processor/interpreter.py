@@ -230,6 +230,16 @@ class Interpreter:
         self._globals = {}
         
         self._log = []
+
+    @property
+    def globals(self):
+        """
+        Provides the globals dictionary for external analysis or manipulation.
+
+        For safety reasons, this should be accessed only before processing has begun or after it
+        has finished, especially if threading is enabled.
+        """
+        return self._globals
         
     def execute_function(self, function_name, arguments):
         """
@@ -410,7 +420,7 @@ class Interpreter:
         Since this language's primary purpose is to provide a comprehensive, though sandboxed,
         environment for simple control-scripts, it's very possible that someone may, ignorantly or
         maliciously, add a loop that never terminates, killing everything. It's probably better to
-        make their script fail than to productive work seize.
+        make their script fail than to have productive work halt.
         
         The default limit is 100,000.
         """
