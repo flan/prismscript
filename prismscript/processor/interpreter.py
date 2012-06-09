@@ -281,11 +281,11 @@ class Interpreter:
         except FlowControl:
             raise
         except ExecutionError as e:
-            raise ExecutionError(container_name, e.location_path, e.message)
+            raise ExecutionError(container_name, e.location_path, e.message, e.base_exception)
         except Exception as e:
             raise ExecutionError(container_name, [], "An unexpected error occurred: %(error)s" % {
              'error': str(e),
-            })
+            }, e)
         raise StatementReturn(None)
         
     def execute_node(self, node_name):
@@ -321,11 +321,11 @@ class Interpreter:
             self._log.append("Warning: exit-statement inferred from top-level return.")
             raise StatementExit(e.value)
         except ExecutionError as e:
-            raise ExecutionError(node_name, e.location_path, e.message)
+            raise ExecutionError(node_name, e.location_path, e.message, e.base_exception)
         except Exception as e:
             raise ExecutionError(node_name, [], "An unexpected error occurred: %(error)s" % {
              'error': str(e),
-            })
+            }, e)
             
     def extend_namespace(self, script):
         """
@@ -1286,26 +1286,26 @@ class Interpreter:
                             pass
             except StatementBreak:
                 if not while_expression and not foreach_identifier and not conditional:
-                    raise ExecutionError(str(i + 1), [], "`break` statement not allowed outside of a loop")
+                    raise ExecutionError(str(i + 1), [], "`break` statement not allowed outside of a loop", None)
                 break
             except StatementContinue:
                 if not while_expression and not foreach_identifier and not conditional:
-                    raise ExecutionError(str(i + 1), [], "`continue` statement not allowed outside of a loop")
+                    raise ExecutionError(str(i + 1), [], "`continue` statement not allowed outside of a loop", None)
                 continue
             except StatementReturn:
                 raise
             except StatementExit: #Allow exits to pass.
                 raise
             except ExecutionError as e:
-                raise ExecutionError(str(i + 1), e.location_path, e.message)
+                raise ExecutionError(str(i + 1), e.location_path, e.message, e.base_exception)
             except Error as e:
-                raise ExecutionError(str(i + 1), [], str(e))
+                raise ExecutionError(str(i + 1), [], str(e), e)
             except Exception as e:
                 raise ExecutionError(str(i + 1), [], "An unexpected error occurred: %(error)s | locals: %(locals)r | globals: %(globals)r" % {
                  'error': str(e),
                  'locals': sorted(_locals.items()),
                  'globals': sorted(self._globals.items()),
-                })
+                }, e)
                 
             if not while_expression: #It's not actually a loop, so kill it. This is benign in the case of a foreach.
                 _while_expression = (parser.TERM_BOOL, False)
