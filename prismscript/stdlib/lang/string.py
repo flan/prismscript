@@ -92,6 +92,9 @@ def is_digit(s, **kwargs):
 def is_number(s, **kwargs):
     return bool(re.match('^[-]?\d+(?:\.\d+)?$', s))
 
+def is_regex_match(s, r, **kwargs):
+    return bool(re.match(r, s))
+    
 def format(s, values, **kwargs):
     return s % tuple(values)
     
