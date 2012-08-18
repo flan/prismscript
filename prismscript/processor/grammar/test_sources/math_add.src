@@ -1,0 +1,12 @@
+hello{
+    5 + -5;
+    x + 5;
+    5 + x;
+    5.5 + x;
+    x + -5.5;
+    x + (-1 + x);
+    "hello" + 'goodbye';
+    x + "goodbye";
+    'hello' + x;
+}
+

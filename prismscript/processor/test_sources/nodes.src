@@ -1,0 +1,34 @@
+simple{
+}
+
+_goto{
+    goto simple;
+}
+
+local_function{
+    exit function();
+}
+
+function(){
+    return 5.67;
+}
+
+bound_function{
+    x = [];
+    x.append(item='b');
+    x.append(item="c");
+    exit x.length;
+}
+
+scoped_function{
+    exit test.test();
+}
+
+local_function_goto{
+    function_goto();
+}
+
+function_goto(){
+    goto simple;
+}
+

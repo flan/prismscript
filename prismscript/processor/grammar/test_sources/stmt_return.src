@@ -1,0 +1,9 @@
+hello{//It's legal to return from a node -- the effect is the same as exit -- but it's confusing.
+    return x;
+    return [1, 2, 3];
+    return 5.5;
+    return lang.test;
+    return "Hello!";
+    return 5 == 4 == 4 == (3 == 3);
+}
+

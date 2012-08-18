@@ -1,0 +1,231 @@
+if_true(){
+    x = 0;
+    if(True){
+        x += 1;
+    }
+    return x;
+}
+if_false(){
+    x = 0;
+    if(False){
+        x += 1;
+    }
+    return x;
+}
+
+elif_true(){
+    x = 0;
+    if(False){
+        x += 1;
+    }elif(True){
+        x += 2;
+    }
+    return x;
+}
+elif_false(){
+    x = 0;
+    if(False){
+        x += 1;
+    }elif(False){
+        x += 2;
+    }
+    return x;
+}
+
+elif2_true(){
+    x = 0;
+    if(False){
+        x += 1;
+    }elif(False){
+        x += 2;
+    }elif(True){
+        x += 4;
+    }
+    return x;
+}
+elif2_false(){
+    x = 0;
+    if(False){
+        x += 1;
+    }elif(False){
+        x += 2;
+    }elif(False){
+        x += 4;
+    }
+    return x;
+}
+
+if_else(){
+    x = 0;
+    if(False){
+        x += 1;
+    }else{
+        x += 2;
+    }
+    return x;
+}
+if_elif_else(){
+    x = 0;
+    if(False){
+        x += 1;
+    }elif(False){
+        x += 2;
+    }else{
+        x += 4;
+    }
+    return x;
+}
+if_elif2_else(){
+    x = 0;
+    if(False){
+        x += 1;
+    }elif(False){
+        x += 2;
+    }elif(False){
+        x += 4;
+    }else{
+        x += 8;
+    }
+    return x;
+}
+
+if_true_else(){
+    x = 0;
+    if(True){
+        x += 1;
+    }else{
+        x += 2;
+    }
+    return x;
+}
+elif_true_else(){
+    x = 0;
+    if(False){
+        x += 1;
+    }elif(True){
+        x += 2;
+    }else{
+        x += 4;
+    }
+    return x;
+}
+elif2_true_else(){
+    x = 0;
+    if(False){
+        x += 1;
+    }elif(False){
+        x += 2;
+    }elif(True){
+        x += 4;
+    }else{
+        x += 8;
+    }
+    return x;
+}
+
+
+_while(){
+    i = 5;
+    x = 0;
+    while(i > 0){
+        x += 1;
+        i -= 1;
+    }
+    return x;
+}
+
+_for(){
+    x = 0;
+    for(i in [1, 2, 3, 4, 5]){
+        x += 1;
+    }
+    return x;
+}
+_for_sequence(){
+    x = [];
+    for([i, j] in [[1, 2], [3, 4]]){
+        x.append(item=i * j);
+    }
+    return x;
+}
+
+
+if_exit{
+    if(True){
+        exit 'test';
+    }
+    exit 'fail';
+}
+if_return(){
+    if(True){
+        return 'test';
+    }
+    return 'fail';
+}
+
+while_exit{
+    x = 0;
+    while(x < 5){
+        exit 'test';
+        x += 1;
+    }
+    exit 'fail';
+}
+while_return(){
+    x = 0;
+    while(x < 5){
+        return 'test';
+        x += 1;
+    }
+    return 'fail';
+}
+while_break(){
+    x = 0;
+    while(x < 5){
+        x += 1;
+        break;
+        x -= 1;
+    }
+    return x;
+}
+while_continue(){
+    x = 0;
+    while(x < 5){
+        x += 1;
+        continue;
+        x -= 1;
+    }
+    return x;
+}
+
+for_exit{
+    for(i in [1, 2, 3, 4, 5]){
+        exit 'test';
+    }
+    exit 'fail';
+}
+for_return(){
+    for(i in [1, 2, 3, 4, 5]){
+        return 'test';
+    }
+    return 'fail';
+}
+for_break(){
+    x = 0;
+    for(i in [1, 2, 3, 4, 5]){
+        x += 1;
+        break;
+        x -= 1;
+    }
+    return x;
+}
+for_continue(){
+    x = 0;
+    for(i in [1, 2, 3, 4, 5]){
+        x += 1;
+        continue;
+        x -= 1;
+    }
+    return x;
+}
+

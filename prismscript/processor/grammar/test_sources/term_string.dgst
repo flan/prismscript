@@ -1,0 +1,3 @@
+{'hello': [(34, 'Hello!'), (34, 'Goodbye.'), (34, 'Lots of spaces.'), (34, "Escaped apostrophe: '."), (34, 'Escaped quotes: ".'), (34, 'Special characters: \x08\x07\t\n\r.')]}
+{}
+

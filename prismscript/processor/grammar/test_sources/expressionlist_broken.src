@@ -1,0 +1,10 @@
+hello{
+    x = 5;
+    x == x;
+    x >= 10;
+    x = 'hello';
+    x += "bonjour";
+
+    x += ('whee');
+}
+
