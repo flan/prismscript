@@ -30,6 +30,7 @@ from . import trig
 _abs = abs
 _pow = pow
 _round = round
+_sum = sum
 
 def get_e(**kwargs):
     return math.e
@@ -85,6 +86,9 @@ def pow(v, exponent, **kwargs):
     
 def sqrt(v, **kwargs):
     return math.sqrt(v)
+    
+def sum(items, **kwargs):
+    return _sum(items)
     
 def factorial(v, **kwargs):
     return math.factorial(v)
