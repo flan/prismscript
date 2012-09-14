@@ -35,6 +35,9 @@ def rstrip(s, **kwargs):
     return s.rstrip()
 rtrim = rstrip
 
+def reverse(s, **kwargs):
+    return ''.join(reversed(s))
+
 def contains(s, substring, **kwargs):
     return substring in s
     
