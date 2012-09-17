@@ -1285,11 +1285,15 @@ class Interpreter:
                         except StatementReturn as e:
                             pass
             except StatementBreak:
-                if not while_expression and not foreach_identifier and not conditional:
+                if conditional:
+                    raise
+                elif not while_expression and not foreach_identifier:
                     raise ExecutionError(str(i + 1), [], "`break` statement not allowed outside of a loop", None)
                 break
             except StatementContinue:
-                if not while_expression and not foreach_identifier and not conditional:
+                if conditional:
+                    raise
+                elif not while_expression and not foreach_identifier:
                     raise ExecutionError(str(i + 1), [], "`continue` statement not allowed outside of a loop", None)
                 continue
             except StatementReturn:

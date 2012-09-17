@@ -189,6 +189,14 @@ class WhileTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_while_break_conditional(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('while_break_conditional', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 6)
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_while_continue(self):
         try:
             execute_no_yield(self._interpreter.execute_function('while_continue', {}))
@@ -196,6 +204,15 @@ class WhileTestCase(unittest.TestCase):
             self.assertEquals(e.value, 5)
         else:
             self.fail("StatementReturn not received")
+            
+    def test_while_continue_conditional(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('while_continue_conditional', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 1)
+        else:
+            self.fail("StatementReturn not received")
+            
             
 class ForTestCase(unittest.TestCase):
     _interpreter = None
@@ -251,11 +268,27 @@ class ForTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_for_break_conditional(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('for_break_conditional', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 3)
+        else:
+            self.fail("StatementReturn not received")
+            
     def test_for_continue(self):
         try:
             execute_no_yield(self._interpreter.execute_function('for_continue', {}))
         except StatementReturn as e:
             self.assertEquals(e.value, 5)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_for_continue_conditional(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('for_continue_conditional', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 1)
         else:
             self.fail("StatementReturn not received")
             
