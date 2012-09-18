@@ -8,7 +8,7 @@ from distutils.core import setup
 
 setup(
  name = 'prismscript',
- version = '1.0.1',
+ version = '1.0.2',
  description = 'A flexible, embeddable interpreted language for I/O-control logic',
  author = 'Neil Tallim',
  author_email = 'neil.tallim@linux.com',
