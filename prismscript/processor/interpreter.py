@@ -271,7 +271,7 @@ class Interpreter:
             
         try:
             prompt = None
-            generator = self._process_statements(function, seed_locals=arguments, function=True)
+            generator = self._process_statements(function, seed_locals=self._marshall_type(arguments), function=True)
             prompt = generator.send(None) #Coroutine boilerplate
             while True:
                 x = yield prompt

@@ -28,9 +28,14 @@ from processor.tests import functions
 from processor.tests import conditionals
 from processor.tests import complex
 from processor.tests import threading
+from processor.tests import types
 
 if __name__ == '__main__':
     all_tests = unittest.TestSuite((
+     unittest.TestSuite((
+      unittest.TestLoader().loadTestsFromTestCase(types.MarshallingTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(types.RecursionTestCase),
+     )),
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(expressions.ScopesTestCase),
       unittest.TestLoader().loadTestsFromTestCase(expressions.TypesTestCase),

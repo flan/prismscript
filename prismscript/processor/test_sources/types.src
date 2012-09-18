@@ -1,0 +1,5 @@
+//v is marshalled in on execution, meaning the Prismscript version is returned directly
+convert(v){
+    return v;
+}
+
