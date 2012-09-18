@@ -376,7 +376,7 @@ class Interpreter:
         """
         name_re = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)+$')
         for (name, function) in functions: #Validate the list.
-            if not type(name) == str:
+            if not type(name) in types.StringTypes:
                 raise ValueError("%(name)r is not a string" % {
                  'name': name,
                 })
@@ -491,7 +491,7 @@ class Interpreter:
                 expression_result = e.value
                 
         if method == parser.ASSIGN_ADD:
-            if isinstance(scope[identifier[1]], str) or isinstance(expression_result, str): #Special handling for strings
+            if isinstance(scope[identifier[1]], types.StringTypes) or isinstance(expression_result, types.StringTypes): #Special handling for strings
                 scope[identifier[1]] = ''.join((str(scope[identifier[1]]), str(expression_result)))
             elif type(scope[identifier[1]]) == Sequence and type(expression_result) == Sequence: #Special handling for sequences
                 scope[identifier[1]] = Sequence(scope[identifier[1]] + expression_result)
@@ -704,7 +704,7 @@ class Interpreter:
             result_right = e.value
             
         if method == parser.MATH_ADD:
-            if isinstance(result_left, str) or isinstance(result_right, str): #Special handling for strings
+            if isinstance(result_left, types.StringTypes) or isinstance(result_right, types.StringTypes): #Special handling for strings
                 raise StatementReturn(''.join((str(result_left), str(result_right))))
             elif type(result_left) == Sequence and type(result_right) == Sequence: #Special handling for sequences
                 raise StatementReturn(Sequence(result_left + result_right))
@@ -1037,7 +1037,7 @@ class Interpreter:
         Coerces `data` received from external sources into equivalent, Prismscript-compatible
         formats.
         """
-        if not isinstance(data, str) and not type(data) == Sequence and isinstance(data, collections.Sequence):
+        if not isinstance(data, types.StringTypes) and not type(data) == Sequence and isinstance(data, collections.Sequence):
             #Python sequences -> Sequence
             return Sequence((self._marshall_type(d) for d in data))
         elif not type(data) == Dictionary and isinstance(data, collections.Mapping):
@@ -1358,7 +1358,7 @@ class Interpreter:
             if scoped_function:
                 return scoped_function
             raise ScopedVariableNotFoundError(identifier, "Unable to resolve scoped identifier: root is not a bound local variable")
-        if variable is None or type(variable) in (bool, str, int, long, float):
+        if variable is None or type(variable) in (bool, int, long, float) or type(variable) in types.StringTypes:
             raise ScopedVariableNotFoundError(identifier, "Unable to resolve scoped identifier: found a primitive data-type as a local referent")
             
         try:
