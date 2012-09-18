@@ -1039,13 +1039,13 @@ class Interpreter:
         """
         if not isinstance(data, str) and not type(data) == Sequence and isinstance(data, collections.Sequence):
             #Python sequences -> Sequence
-            return Sequence(data)
+            return Sequence((self._marshall_type(d) for d in data))
         elif not type(data) == Dictionary and isinstance(data, collections.Mapping):
             #Python mappings -> Dictionary
-            return Dictionary(data)
+            return Dictionary(((self._marshall_type(k), self._marshall_type(v)) for (k, v) in data.items()))
         elif not type(data) == Set and isinstance(data, collections.Set):
             #Python sets -> Set
-            return Set(data)
+            return Set((self._marshall_type(d) for d in data))
         return data
         
     def _process_statements(self,

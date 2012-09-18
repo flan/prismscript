@@ -64,5 +64,7 @@ def parse(source):
     An invalid script will never be partially salvaged by this routine. If something is illegal,
     `ValueError` will be raised.
     """
-    return _parser.parse(source)
+    result = _parser.parse(source)
+    _parser.restart()
+    return result
     
