@@ -17,7 +17,6 @@ class ExecutionError(Error):
     def __init__(self, location, location_path, message, base_exception):
         self.location_path = [location] + location_path
         self.message = message
-        }
         self.base_exception = base_exception
         
     def __str__(self):
