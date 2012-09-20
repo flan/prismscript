@@ -1,3 +1,8 @@
+import inspect
+
+def get_origin_details():
+    return inspect.getframeinfo(inspect.trace()[-1])
+    
 class Error(Exception):
     """
     The base exception from which all exceptions native to this module inherit.
@@ -12,6 +17,7 @@ class ExecutionError(Error):
     def __init__(self, location, location_path, message, base_exception):
         self.location_path = [location] + location_path
         self.message = message
+        }
         self.base_exception = base_exception
         
     def __str__(self):

@@ -174,7 +174,8 @@ from .errors import (
  VariableNotFoundError, ScopedVariableNotFoundError,
  FlowControl, StatementBreak, StatementContinue,
  StatementReturn, StatementExit,
- StatementsEnd
+ StatementsEnd,
+ get_origin_details,
 )
 from .local_types import (
  convert_bool, convert_float, convert_int, convert_string,
@@ -283,8 +284,9 @@ class Interpreter:
         except ExecutionError as e:
             raise ExecutionError(container_name, e.location_path, e.message, e.base_exception)
         except Exception as e:
-            raise ExecutionError(container_name, [], "An unexpected error occurred: %(error)s" % {
+            raise ExecutionError(container_name, [], "An unexpected error occurred: %(error)s : %(origin)s" % {
              'error': str(e),
+             'origin': get_origin_details(),
             }, e)
         raise StatementReturn(None)
         
@@ -323,8 +325,9 @@ class Interpreter:
         except ExecutionError as e:
             raise ExecutionError(node_name, e.location_path, e.message, e.base_exception)
         except Exception as e:
-            raise ExecutionError(node_name, [], "An unexpected error occurred: %(error)s" % {
+            raise ExecutionError(node_name, [], "An unexpected error occurred: %(error)s : %(origin)s" % {
              'error': str(e),
+             'origin': get_origin_details(),
             }, e)
             
     def extend_namespace(self, script):
@@ -1305,8 +1308,9 @@ class Interpreter:
             except Error as e:
                 raise ExecutionError(str(i + 1), [], str(e), e)
             except Exception as e:
-                raise ExecutionError(str(i + 1), [], "An unexpected error occurred: %(error)s | locals: %(locals)r | globals: %(globals)r" % {
+                raise ExecutionError(str(i + 1), [], "An unexpected error occurred: %(error)s : %(origin)s | locals: %(locals)r | globals: %(globals)r" % {
                  'error': str(e),
+                 'origin': get_origin_details(),
                  'locals': sorted(_locals.items()),
                  'globals': sorted(self._globals.items()),
                 }, e)
