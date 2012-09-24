@@ -22,6 +22,9 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unpo
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or send a
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
+import threading
+
+from .structure.closed_lexicon import lexer as _lexer
 from .structure.syntax import parser as _parser
 from .structure.syntax import (
  STMT_GOTO, STMT_RETURN, STMT_EXIT,
@@ -50,6 +53,8 @@ from .structure.syntax import (
  ASSIGN_SEQUENCE,
 )
 
+_LOCK = threading.Lock()
+
 def parse(source):
     """
     Digests a script as ``source`` and provides a (``nodes``, ``functions``) tuple as output:
@@ -64,7 +69,9 @@ def parse(source):
     An invalid script will never be partially salvaged by this routine. If something is illegal,
     `ValueError` will be raised.
     """
-    result = _parser.parse(source)
-    _parser.restart()
-    return result
-    
+    with _LOCK:
+        result = _parser.parse(source)
+        _parser.restart()
+        _lexer.lineno = 1
+        return result
+        
