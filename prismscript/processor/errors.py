@@ -1,7 +1,7 @@
 import inspect
 
 def get_origin_details():
-    return inspect.getframeinfo(inspect.trace()[-1])
+    return inspect.getframeinfo(inspect.trace()[-1][0])
     
 class Error(Exception):
     """
