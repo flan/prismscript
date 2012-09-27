@@ -23,6 +23,8 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 import ply.lex
 
+import type_abstractions
+
 reserved = {
  #conditionals
  'if': 'IF',
@@ -112,7 +114,7 @@ def t_IDENTIFIER_LOCAL(t):
     
 def t_STRING(t):
     r'(?:"(?:[^"]|(?<=\\)")*"|\'(?:[^\']|(?<=\\)\')*\')'
-    t.value = t.value[1:-1]
+    value = t.value[1:-1]
     for (escape, replacement) in (
      ('\\\\', '\\'),
      ('\\b', '\b'),
@@ -123,7 +125,8 @@ def t_STRING(t):
      ('\\"', '"'),
      ("\\'", "'"),
     ):
-        t.value = t.value.replace(escape, replacement)
+        value = value.replace(escape, replacement)
+    t.value = type_abstractions.String(value)
     return t
 def t_FLOAT(t):
     r'-?\d+\.\d+'

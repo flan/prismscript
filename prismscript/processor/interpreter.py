@@ -141,7 +141,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 1.0.3 : Sept. 26, 2012
+:Version: 1.0.4 : Sept. 27, 2012
 
 
 Legal
@@ -179,7 +179,7 @@ from .errors import (
 )
 from .local_types import (
  convert_bool, convert_float, convert_int, convert_string,
- Dictionary, Set, Sequence,
+ Dictionary, Set, Sequence, String,
  ThreadFactory, LockFactory,
 )
 from .grammar import parser
@@ -1068,7 +1068,10 @@ class Interpreter:
         Coerces `data` received from external sources into equivalent, Prismscript-compatible
         formats.
         """
-        if not isinstance(data, types.StringTypes) and not type(data) == Sequence and isinstance(data, collections.Sequence):
+        if not type(data) == String and isinstance(data, types.StringTypes):
+            #Python strings/unicodes -> String
+            return String(data)
+        elif not type(data) in (Sequence, String) and isinstance(data, collections.Sequence):
             #Python sequences -> Sequence
             return Sequence((self._marshall_type(d) for d in data))
         elif not type(data) == Dictionary and isinstance(data, collections.Mapping):
