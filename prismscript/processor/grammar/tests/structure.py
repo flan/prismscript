@@ -22,218 +22,80 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 import unittest
 
 from .. import parser
-from . import (
- get_source, get_digest, compare_nodesets,
- ConditionalInconsistencyError, ExpressionInconsistencyError, ExpressionListInconsistencyError,
-)
+from . import _GenericTestCase
 
-class ConditionalTestCase(unittest.TestCase):
+class ConditionalTestCase(_GenericTestCase):
     def test_conditional(self):
-        source = get_source('conditional')
-        (nodes, functions) = get_digest('conditional')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('conditional')
+        
     def test_conditional_broken(self):
-        source = get_source('conditional_broken')
-        (nodes, functions) = get_digest('conditional_broken')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertRaises(
-         ExpressionInconsistencyError, compare_nodesets,
-         nodes, digest_nodes
-        )
+        self._test_error('conditional_broken', True)
         
     def test_conditional_elif(self):
-        source = get_source('conditional_elif')
-        (nodes, functions) = get_digest('conditional_elif')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('conditional_elif')
+        
     def test_conditional_elif_broken(self):
-        source = get_source('conditional_elif_broken')
-        (nodes, functions) = get_digest('conditional_elif_broken')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertRaises(
-         ExpressionInconsistencyError, compare_nodesets,
-         nodes, digest_nodes
-        )
+        self._test_error('conditional_elif_broken', True)
         
     def test_conditional_elifs(self):
-        source = get_source('conditional_elifs')
-        (nodes, functions) = get_digest('conditional_elifs')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('conditional_elifs')
+        
     def test_conditional_elifs_broken(self):
-        source = get_source('conditional_elifs_broken')
-        (nodes, functions) = get_digest('conditional_elifs_broken')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertRaises(
-         ConditionalInconsistencyError, compare_nodesets,
-         nodes, digest_nodes
-        )
+        self._test_error('conditional_elifs_broken', True)
         
     def test_conditional_else(self):
-        source = get_source('conditional_else')
-        (nodes, functions) = get_digest('conditional_else')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('conditional_else')
+        
     def test_conditional_else_broken(self):
-        source = get_source('conditional_else_broken')
-        (nodes, functions) = get_digest('conditional_else_broken')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertRaises(
-         ConditionalInconsistencyError, compare_nodesets,
-         nodes, digest_nodes
-        )
-
+        self._test_error('conditional_else_broken', True)
+        
     def test_conditional_elif_else(self):
-        source = get_source('conditional_elif_else')
-        (nodes, functions) = get_digest('conditional_elif_else')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('conditional_elif_else')
+        
     def test_conditional_elif_else_broken(self):
-        source = get_source('conditional_elif_else_broken')
-        (nodes, functions) = get_digest('conditional_elif_else_broken')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertRaises(
-         ExpressionInconsistencyError, compare_nodesets,
-         nodes, digest_nodes
-        )
-
+        self._test_error('conditional_elif_else_broken', True)
+        
     def test_conditional_nested(self):
-        source = get_source('conditional_nested')
-        (nodes, functions) = get_digest('conditional_nested')
+        self._test('conditional_nested')
+        
 
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-
-class ExpressionListTestCase(unittest.TestCase):
+class ExpressionListTestCase(_GenericTestCase):
     def test_expressionlist(self):
-        source = get_source('expressionlist')
-        (nodes, functions) = get_digest('expressionlist')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('expressionlist')
+        
     def test_expressionlist_broken(self):
-        source = get_source('expressionlist_broken')
-        (nodes, functions) = get_digest('expressionlist_broken')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertRaises(
-         ExpressionInconsistencyError, compare_nodesets,
-         nodes, digest_nodes
-        )
-
+        self._test_error('expressionlist_broken', True)
+        
     def test_expressionlist_broken_2(self):
-        source = get_source('expressionlist_broken_2')
-        (nodes, functions) = get_digest('expressionlist_broken_2')
+        self._test_error('expressionlist_broken_2', True)
+        
 
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertRaises(
-         ExpressionListInconsistencyError, compare_nodesets,
-         nodes, digest_nodes
-        )
-
-class WhileTestCase(unittest.TestCase):
+class WhileTestCase(_GenericTestCase):
     def test_while(self):
-        source = get_source('while')
-        (nodes, functions) = get_digest('while')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('while')
+        
     def test_while_break(self):
-        source = get_source('while_break')
-        (nodes, functions) = get_digest('while_break')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('while_break')
+        
     def test_while_continue(self):
-        source = get_source('while_continue')
-        (nodes, functions) = get_digest('while_continue')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        self._test('while_continue')
         
     def test_while_nested(self):
-        source = get_source('while_nested')
-        (nodes, functions) = get_digest('while_nested')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-class ForTestCase(unittest.TestCase):
-    def test_for(self):
-        source = get_source('for')
-        (nodes, functions) = get_digest('for')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
+        self._test('while_nested')
         
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+class ForTestCase(_GenericTestCase):
+    def test_for(self):
+        self._test('for')
         
     def test_for_sequence(self):
-        source = get_source('for_sequence')
-        (nodes, functions) = get_digest('for_sequence')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
+        self._test('for_sequence')
         
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
     def test_for_break(self):
-        source = get_source('for_break')
-        (nodes, functions) = get_digest('for_break')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
+        self._test('for_break')
         
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
     def test_for_continue(self):
-        source = get_source('for_continue')
-        (nodes, functions) = get_digest('for_continue')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-        
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        self._test('for_continue')
         
     def test_for_nested(self):
-        source = get_source('for_nested')
-        (nodes, functions) = get_digest('for_nested')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
+        self._test('for_nested')
         
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-

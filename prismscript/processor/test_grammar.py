@@ -49,6 +49,7 @@ if __name__ == '__main__':
       unittest.TestLoader().loadTestsFromTestCase(expressions.StatementsTestCase),
       unittest.TestLoader().loadTestsFromTestCase(expressions.AssignmentsTestCase),
       unittest.TestLoader().loadTestsFromTestCase(expressions.FunctionCallsTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.SuffixExpressionsTestCase),
      )),
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(structure.ExpressionListTestCase),

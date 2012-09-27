@@ -50,6 +50,7 @@ reserved = {
 
 tokens = [
  'IDENTIFIER_SCOPED', #hello.lawlwhut
+ 'IDENTIFIER_SUFFIX', #.whee : any suffix off of a term or function-call
  'IDENTIFIER_LOCAL', #lawlwhut : note the lack of a dot
  #literals
  'STRING',
@@ -99,7 +100,11 @@ tokens = [
 def t_IDENTIFIER_SCOPED(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)+'
     t.type = reserved.get(t.value, 'IDENTIFIER_SCOPED')
-    return t    
+    return t
+def t_IDENTIFIER_SUFFIX(t):
+    r'(?:\.[a-zA-Z_][a-zA-Z0-9_]*)+'
+    t.type = reserved.get(t.value, 'IDENTIFIER_SUFFIX')
+    return t
 def t_IDENTIFIER_LOCAL(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
     t.type = reserved.get(t.value, 'IDENTIFIER_LOCAL')

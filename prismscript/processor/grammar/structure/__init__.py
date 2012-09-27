@@ -11,7 +11,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 1.0.0 : Oct. 17, 2010
+:Version: 1.0.1 : Sept 26, 2012
 
 Legal
 -----

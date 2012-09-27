@@ -11,7 +11,7 @@ Meta
 :Authors:
     Neil Tallim <flan@uguu.ca>
 
-:Version: 1.0.1 : Mar. 06, 2011
+:Version: 1.0.2 : Sept. 26, 2012
 
 Legal
 -----
@@ -22,331 +22,163 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 import unittest
 
 from .. import parser
-from . import (
- get_source, get_digest, compare_nodesets,
-)
+from . import _GenericTestCase
 
-class AssignmentsTestCase(unittest.TestCase):
+class AssignmentsTestCase(_GenericTestCase):
     def test_assign(self):
-        source = get_source('assign')
-        (nodes, functions) = get_digest('assign')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('assign')
+        
     def test_assign_add(self):
-        source = get_source('assign_add')
-        (nodes, functions) = get_digest('assign_add')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('assign_add')
+        
     def test_assign_divide(self):
-        source = get_source('assign_divide')
-        (nodes, functions) = get_digest('assign_divide')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('assign_divide')
+        
     def test_assign_divide_integer(self):
-        source = get_source('assign_divide_integer')
-        (nodes, functions) = get_digest('assign_divide_integer')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('assign_divide_integer')
+        
     def test_assign_mod(self):
-        source = get_source('assign_mod')
-        (nodes, functions) = get_digest('assign_mod')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('assign_mod')
+        
     def test_assign_multiply(self):
-        source = get_source('assign_multiply')
-        (nodes, functions) = get_digest('assign_multiply')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('assign_multiply')
+        
     def test_assign_sequence(self):
-        source = get_source('assign_sequence')
-        (nodes, functions) = get_digest('assign_sequence')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('assign_sequence')
+        
     def test_assign_subtract(self):
-        source = get_source('assign_subtract')
-        (nodes, functions) = get_digest('assign_subtract')
+        self._test('assign_subtract')
+        
 
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-
-class CommentsTestCase(unittest.TestCase):
+class CommentsTestCase(_GenericTestCase):
     def test_comments(self):
-        source = get_source('comments')
-        (nodes, functions) = get_digest('comments')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-
-class FunctionCallsTestCase(unittest.TestCase):
+        self._test('comments')
+        
+        
+class FunctionCallsTestCase(_GenericTestCase):
     def test_local(self):
-        source = get_source('functioncall_local')
-        (nodes, functions) = get_digest('functioncall_local')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('functioncall_local')
+        
     def test_scoped(self):
-        source = get_source('functioncall_scoped')
-        (nodes, functions) = get_digest('functioncall_scoped')
+        self._test('functioncall_scoped')
+        
 
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-
-class MathsTestCase(unittest.TestCase):
+class SuffixExpressionsTestCase(_GenericTestCase):
+    def test_scoped_suffix_identifier(self):
+        self._test('functioncall_scoped_suffix_identifier')
+        
+    def test_scoped_suffix_identifier_2(self):
+        self._test('functioncall_scoped_suffix_identifier_2')
+        
+    def test_scoped_suffix_call(self):
+        self._test('functioncall_scoped_suffix_call')
+        
+    def test_scoped_suffix_call_2(self):
+        self._test('functioncall_scoped_suffix_call_2')
+        
+    def test_scoped_suffix_call_identifier(self):
+        self._test('functioncall_scoped_suffix_call_identifier')
+        
+    def test_scoped_suffix_call_call(self):
+        self._test('functioncall_scoped_suffix_call_call')
+        
+    def test_suffix_term_call(self):
+        self._test('suffix_term_call')
+        
+    def test_suffix_term_identifier(self):
+        self._test('suffix_term_identifier')
+        
+        
+class MathsTestCase(_GenericTestCase):
     def test_add(self):
-        source = get_source('math_add')
-        (nodes, functions) = get_digest('math_add')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        self._test('math_add')
         
     def test_exponentiate(self):
-        source = get_source('math_exponentiate')
-        (nodes, functions) = get_digest('math_exponentiate')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        self._test('math_exponentiate')
         
     def test_divide(self):
-        source = get_source('math_divide')
-        (nodes, functions) = get_digest('math_divide')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_divide_integer(self):
-        source = get_source('math_divide_integer')
-        (nodes, functions) = get_digest('math_divide_integer')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_mod(self):
-        source = get_source('math_mod')
-        (nodes, functions) = get_digest('math_mod')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_multiply(self):
-        source = get_source('math_multiply')
-        (nodes, functions) = get_digest('math_multiply')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-    
-    def test_subtract(self):
-        source = get_source('math_subtract')
-        (nodes, functions) = get_digest('math_subtract')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        self._test('math_divide')
         
-class SequencesTestCase(unittest.TestCase):
+    def test_divide_integer(self):
+        self._test('math_divide_integer')
+        
+    def test_mod(self):
+        self._test('math_mod')
+        
+    def test_multiply(self):
+        self._test('math_multiply')
+        
+    def test_subtract(self):
+        self._test('math_subtract')
+        
+        
+class SequencesTestCase(_GenericTestCase):
     def test_sequence(self):
-        source = get_source('sequence')
-        (nodes, functions) = get_digest('sequence')
+        self._test('sequence')
+        
 
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-class StatementsTestCase(unittest.TestCase):
+class StatementsTestCase(_GenericTestCase):
     def test_exit(self):
-        source = get_source('stmt_exit')
-        (nodes, functions) = get_digest('stmt_exit')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('stmt_exit')
+        
     def test_goto(self):
-        source = get_source('stmt_goto')
-        (nodes, functions) = get_digest('stmt_goto')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('stmt_goto')
+        
     def test_return(self):
-        source = get_source('stmt_return')
-        (nodes, functions) = get_digest('stmt_return')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-class TermsTestCase(unittest.TestCase):
+        self._test('stmt_return')
+        
+        
+class TermsTestCase(_GenericTestCase):
     def test_bool(self):
-        source = get_source('term_bool')
-        (nodes, functions) = get_digest('term_bool')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('term_bool')
+        
     def test_float(self):
-        source = get_source('term_float')
-        (nodes, functions) = get_digest('term_float')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('term_float')
+        
     def test_identifier_local(self):
-        source = get_source('term_identifier_local')
-        (nodes, functions) = get_digest('term_identifier_local')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        self._test('term_identifier_local')
         
     def test_identifier_local_qualified(self):
-        source = get_source('term_identifier_local_qualified')
-        (nodes, functions) = get_digest('term_identifier_local_qualified')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('term_identifier_local_qualified')
+        
     def test_identifier_scoped(self):
-        source = get_source('term_identifier_scoped')
-        (nodes, functions) = get_digest('term_identifier_scoped')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('term_identifier_scoped')
+        
     def test_integer(self):
-        source = get_source('term_integer')
-        (nodes, functions) = get_digest('term_integer')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('term_integer')
+        
     def test_none(self):
-        source = get_source('term_none')
-        (nodes, functions) = get_digest('term_none')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        self._test('term_none')
         
     def test_string(self):
-        source = get_source('term_string')
-        (nodes, functions) = get_digest('term_string')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        self._test('term_string')
         
 
-class TestsTestCase(unittest.TestCase):
+class TestsTestCase(_GenericTestCase):
     def test_equality(self):
-        source = get_source('test_equality')
-        (nodes, functions) = get_digest('test_equality')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('test_equality')
+        
     def test_greater(self):
-        source = get_source('test_greater')
-        (nodes, functions) = get_digest('test_greater')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('test_greater')
+        
     def test_greater_equal(self):
-        source = get_source('test_greater_equal')
-        (nodes, functions) = get_digest('test_greater_equal')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('test_greater_equal')
+        
     def test_inequality(self):
-        source = get_source('test_inequality')
-        (nodes, functions) = get_digest('test_inequality')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
+        self._test('test_inequality')
+        
     def test_lesser(self):
-        source = get_source('test_lesser')
-        (nodes, functions) = get_digest('test_lesser')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+        self._test('test_lesser')
         
     def test_lesser_equal(self):
-        source = get_source('test_lesser_equal')
-        (nodes, functions) = get_digest('test_lesser_equal')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_bool_and(self):
-        source = get_source('test_bool_and')
-        (nodes, functions) = get_digest('test_bool_and')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_bool_or(self):
-        source = get_source('test_bool_or')
-        (nodes, functions) = get_digest('test_bool_or')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
-
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
-
-    def test_negate(self):
-        source = get_source('test_negate')
-        (nodes, functions) = get_digest('test_negate')
-
-        (digest_nodes, digest_functions) = parser.parse(source)
+        self._test('test_lesser_equal')
         
-        self.assertEquals(compare_nodesets(nodes, digest_nodes), None)
+    def test_bool_and(self):
+        self._test('test_bool_and')
+        
+    def test_bool_or(self):
+        self._test('test_bool_or')
+        
+    def test_negate(self):
+        self._test('test_negate')
         

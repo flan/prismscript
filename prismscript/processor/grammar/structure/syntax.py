@@ -57,9 +57,11 @@ TERM_BOOL = 33
 TERM_STRING = 34
 TERM_INTEGER = 35
 TERM_FLOAT = 36
+TERM_IDENTIFIER_SUFFIX = 37
 TERM_IDENTIFIER_LOCAL_LOCAL = 39
 TERM_IDENTIFIER_LOCAL_GLOBAL = 1030
 SEQUENCE = 40
+SUFFIX = 41
 TEST_EQUALITY = 50
 TEST_INEQUALITY = 51
 TEST_GREATER_EQUAL = 52
@@ -78,6 +80,7 @@ MATH_MOD = 77
 MATH_EXPONENTIATE = 78
 FUNCTIONCALL_LOCAL = 80
 FUNCTIONCALL_SCOPED = 81
+FUNCTIONCALL_SUFFIX = 82
 ASSIGN = 90
 ASSIGN_ADD = 91
 ASSIGN_SUBTRACT = 92
@@ -282,11 +285,15 @@ def p_expression(p):
     r"""
     expression : LPAREN expression RPAREN
                | sequence
+               | functioncall suffix_expression
                | functioncall
+               | term suffix_expression
                | term
     """
     if len(p) == 4:
         p[0] = p[2]
+    elif len(p) == 3:
+        p[0] = (SUFFIX, p[1], p[2])
     else:
         p[0] = p[1]
 def p_expression_math(p):
@@ -373,6 +380,22 @@ def p_functioncall_local(p):
     functioncall : IDENTIFIER_LOCAL LPAREN argumentset RPAREN
     """
     p[0] = (FUNCTIONCALL_LOCAL, p[1], p[3])
+
+def p_suffix_expression(p):
+    r"""
+    suffix_expression : IDENTIFIER_SUFFIX LPAREN argumentset RPAREN suffix_expression
+                      | IDENTIFIER_SUFFIX LPAREN argumentset RPAREN
+                      | IDENTIFIER_SUFFIX suffix_expression
+                      | IDENTIFIER_SUFFIX
+    """
+    if len(p) >= 5:
+        p[0] = (FUNCTIONCALL_SUFFIX, p[1][1:], p[3])
+        if len(p) == 6:
+            p[0] = (SUFFIX, p[0], p[5])
+    elif len(p) >= 2:
+        p[0] = (TERM_IDENTIFIER_SUFFIX, p[1][1:])
+        if len(p) == 3:
+            p[0] = (SUFFIX, p[0], p[2])
 
 def p_term(p):
     r"""
