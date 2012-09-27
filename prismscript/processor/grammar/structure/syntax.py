@@ -285,10 +285,9 @@ def p_expression(p):
     r"""
     expression : LPAREN expression RPAREN
                | sequence
-               | functioncall suffix_expression
                | functioncall
-               | term suffix_expression
                | term
+               | expression suffix_expression
     """
     if len(p) == 4:
         p[0] = p[2]
@@ -383,19 +382,13 @@ def p_functioncall_local(p):
 
 def p_suffix_expression(p):
     r"""
-    suffix_expression : IDENTIFIER_SUFFIX LPAREN argumentset RPAREN suffix_expression
-                      | IDENTIFIER_SUFFIX LPAREN argumentset RPAREN
-                      | IDENTIFIER_SUFFIX suffix_expression
+    suffix_expression : IDENTIFIER_SUFFIX LPAREN argumentset RPAREN
                       | IDENTIFIER_SUFFIX
     """
     if len(p) >= 5:
         p[0] = (FUNCTIONCALL_SUFFIX, p[1][1:], p[3])
-        if len(p) == 6:
-            p[0] = (SUFFIX, p[0], p[5])
     elif len(p) >= 2:
         p[0] = (TERM_IDENTIFIER_SUFFIX, p[1][1:])
-        if len(p) == 3:
-            p[0] = (SUFFIX, p[0], p[2])
 
 def p_term(p):
     r"""
