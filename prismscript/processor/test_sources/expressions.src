@@ -436,3 +436,27 @@ scoped_local_auto2(){
     return y.length;
 }
 
+
+suffix_local_function(){
+    return _suffix_local_function().get(index=1);
+}
+_suffix_local_function(){
+    return [1, 2, 3];
+}
+
+suffix_nested_dictionary(dict){
+    return dict.get(key='one').get(key='two');
+}
+
+suffix_nested_dictionary_identifiers(dict){
+    return dict.get(key='one').get(key='two').denominator.numerator;
+}
+
+suffix_term(){
+    return 54.9882.real;
+}
+
+suffix_term_2(){
+    return "hello world".split();
+}
+

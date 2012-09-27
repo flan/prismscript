@@ -936,3 +936,50 @@ class TestsTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+            
+class SuffixesTestCase(unittest.TestCase):
+    _interpreter = None
+    
+    def setUp(self):
+        self._interpreter = get_interpreter('expressions')
+        
+    def test_local_function(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('suffix_local_function', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 2)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_nested_dictionary(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('suffix_nested_dictionary', {'dict': {'one': {'two': 2}}}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 2)
+        else:
+            self.fail("StatementReturn not received")
+
+    def test_local_function(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('suffix_nested_dictionary_identifiers', {'dict': {'one': {'two': 2}}}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 1)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_term(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('suffix_term', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, 54.9882)
+        else:
+            self.fail("StatementReturn not received")
+            
+    def test_term_2(self):
+        try:
+            execute_no_yield(self._interpreter.execute_function('suffix_term_2', {}))
+        except StatementReturn as e:
+            self.assertEquals(e.value, ['hello', 'world'])
+        else:
+            self.fail("StatementReturn not received")
+            

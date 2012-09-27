@@ -44,6 +44,7 @@ if __name__ == '__main__':
       unittest.TestLoader().loadTestsFromTestCase(expressions.SetTestCase),
       unittest.TestLoader().loadTestsFromTestCase(expressions.DictionaryTestCase),
       unittest.TestLoader().loadTestsFromTestCase(expressions.TestsTestCase),
+      unittest.TestLoader().loadTestsFromTestCase(expressions.SuffixesTestCase),
      )),
      unittest.TestSuite((
       unittest.TestLoader().loadTestsFromTestCase(nodes.SimpleTestCase),

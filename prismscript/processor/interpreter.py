@@ -856,6 +856,32 @@ class Interpreter:
                 raise ValueError("StatementReturn not received")
             except StatementReturn as e:
                 raise StatementReturn(not e.value)
+        elif expression_type == parser.SUFFIX:
+            generator = self._evaluate_expression(expression[1], _locals)
+            try:
+                prompt = generator.send(None) #Coroutine boilerplate
+                while True:
+                    x = yield prompt
+                    prompt = generator.send(x)
+            except StopIteration:
+                raise ValueError("StatementReturn not received")
+            except StatementReturn as e:
+                target = e.value
+                #if expression[2][0] == parser.SUFFIX:
+                #    self._evaluate_expression((parser.SUFFIX, e.value, expression[2][), _locals)
+                for token in expression[2][1].split('.'):
+                    target = getattr(target, token)
+                if expression[2][0] == parser.TERM_IDENTIFIER_SUFFIX:
+                    raise StatementReturn(self._marshall_type(target))
+                elif expression[2][0] == parser.FUNCTIONCALL_SUFFIX:
+                    generator = self._invoke_function((expression[2][0], target, expression[2][2]), _locals)
+                    try:
+                        prompt = generator.send(None) #Coroutine boilerplate
+                        while True:
+                            x = yield prompt
+                            prompt = generator.send(x)
+                    except StopIteration:
+                        raise ValueError("StatementReturn not received")
         elif expression_type == parser.SEQUENCE:
             sequence = []
             for e in expression[1]:
@@ -1018,6 +1044,8 @@ class Interpreter:
                 result = self._execute_local_function(expression[1], arguments, _locals)
             elif expression[0] == parser.FUNCTIONCALL_SCOPED:
                 result = self._execute_scoped_function(expression[1], arguments, _locals)
+            elif expression[0] == parser.FUNCTIONCALL_SUFFIX:
+                result = expression[1](**arguments)
         except StatementReturn as e:
             raise StatementReturn(self._marshall_type(e.value))
             
@@ -1320,7 +1348,7 @@ class Interpreter:
             iteration_count += 1
             
         raise StatementsEnd()
-            
+        
     def _resolve_local_identifier(self, identifier, _locals, scope=parser.TERM_IDENTIFIER_LOCAL):
         """
         Provides the value of a local identifier by first looking in the local scope, then the
