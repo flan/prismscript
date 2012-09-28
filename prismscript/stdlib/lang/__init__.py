@@ -23,8 +23,6 @@ try:
 except ImportError:
     from processor.local_types import Sequence
 
-from . import string
-
 _zip = zip
 
 def build_range(stop, start=0, step=1, **kwargs):
