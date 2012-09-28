@@ -48,7 +48,7 @@ def replace(s, old, new, limit=0, **kwargs):
     if not limit:
         return s.replace(old, new)
     else:
-        return s.replace(old, new, count)
+        return s.replace(old, new, limit)
         
 def join(s, glue, **kwargs):
     return glue.join((str(t) for t in s))
@@ -87,7 +87,7 @@ def is_alpha(s, **kwargs):
     return s.isalpha()
     
 def is_alphanumeric(s, **kwargs):
-    return s.isalnum
+    return s.isalnum()
 
 def is_digit(s, **kwargs):
     return s.isdigit()

@@ -53,6 +53,10 @@ from .structure.syntax import (
  ASSIGN_DIVIDE_INTEGER, ASSIGN_MOD,
  ASSIGN_SEQUENCE,
 )
+from .structure.type_abstractions import (
+ convert_bool, convert_float, convert_int, convert_string,
+ Dictionary, Set, Sequence, String,
+)
 
 _LOCK = threading.Lock()
 

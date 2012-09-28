@@ -24,7 +24,7 @@ from . import (
  get_interpreter, execute_no_yield,
  StatementReturn, StatementExit,
 )
-from ..local_types import (Dictionary, Set, Sequence)
+from ..grammar.parser import (Dictionary, Set, Sequence)
 
 class _BaseTestCase(unittest.TestCase):
     _interpreter = None

@@ -177,12 +177,14 @@ from .errors import (
  StatementsEnd,
  get_origin_details,
 )
-from .local_types import (
- convert_bool, convert_float, convert_int, convert_string,
- Dictionary, Set, Sequence, String,
+from .thread_types import (
  ThreadFactory, LockFactory,
 )
 from .grammar import parser
+from .grammar.parser import (
+ convert_bool, convert_float, convert_int, convert_string,
+ Dictionary, Set, Sequence, String,
+)
 
 class Interpreter:
     """
