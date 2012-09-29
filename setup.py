@@ -22,6 +22,7 @@ setup(
   'prismscript.stdlib',
   'prismscript.stdlib.lang',
   'prismscript.stdlib.math',
+  'prismscript.stdlib.util',
  ],
 )
 
