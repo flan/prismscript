@@ -1,0 +1,462 @@
+bool(){
+    return True;
+}
+bool2(){
+    return False;
+}
+
+string(){
+    return 'hello';
+}
+
+integer(){
+    return -5134;
+}
+
+float(){
+    return 6.23;
+}
+
+none(){
+    return None;
+}
+
+
+convert_bool(){
+    return types.bool(v=1);
+}
+convert_bool2(){
+    return types.bool(v=0);
+}
+
+convert_float(){
+    return types.float(v='5.65');
+}
+convert_float2(){
+    return types.float(v='-5.65');
+}
+convert_float3(){
+    return types.float(v='whee');
+}
+
+convert_integer(){
+    return types.int(v='5');
+}
+convert_integer2(){
+    return types.int(v=-5.1);
+}
+convert_integer3(){
+    return types.int(v='Whee');
+}
+convert_integer4(){
+    return types.int(v='0x0a', base=16);
+}
+convert_integer5(){
+    return types.int(v='10', base=8);
+}
+convert_integer6(){
+    return types.int(v='a', is_char=True);
+}
+
+convert_string(){
+    return types.string(v=True);
+}
+convert_string2(){
+    return types.string(v=-65);
+}
+convert_string3(){
+    return types.string(v=5.65);
+}
+convert_string4(){
+    return types.string(v=None);
+}
+convert_string5(){
+    return types.string(v='whee');
+}
+convert_string6(){
+    return types.string(v=255, int_base=16);
+}
+convert_string7(){
+    return types.string(v=97, is_char=True);
+}
+
+
+dictionary(){
+    x = types.Dictionary();
+    x.put(key=1, value=2);
+    return x;
+}
+dictionary2(){
+    return types.Dictionary(items=[[1, 2]]);
+}
+dictionary3(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return types.Dictionary(items=x);
+}
+dictionary_contains(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.contains(item=1);
+}
+dictionary_contains2(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.contains(item=2);
+}
+dictionary_copy(){
+    x = types.Dictionary(items=[[1, 2]]);
+    y = x.copy();
+    y.put(key=3, value=4);
+    return [x, y];
+}
+dictionary_get(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get(key=1);
+}
+dictionary_get2(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get(key=2);
+}
+dictionary_get3(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get(key=2, default=5);
+}
+dictionary_get_items(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get_items();
+}
+dictionary_get_keys(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get_keys();
+}
+dictionary_get_values(){
+    x = types.Dictionary(items=[[1, 2]]);
+    return x.get_values();
+}
+dictionary_length(){
+    x = types.Dictionary(items=[[1, 2], [3, 4]]);
+    return x.length;
+}
+dictionary_put(){
+    x = types.Dictionary();
+    x.put(key=1, value=2);
+    return x;
+}
+dictionary_remove(){
+    x = types.Dictionary(items=[[1, 2]]);
+    x.remove(key=1);
+    return x;
+}
+dictionary_remove2(){
+    x = types.Dictionary(items=[[1, 2]]);
+    x.remove(key=2);
+    return x;
+}
+
+set(){
+    x = types.Set();
+    x.add(item=1);
+    return x;
+}
+set2(){
+    return types.Set(items=[1]);
+}
+set3(){
+    x = types.Set(items=[1]);
+    return types.Set(items=x);
+}
+set_add(){
+    x = types.Set();
+    x.add(item=1);
+    return x;
+}
+set_add2(){
+    x = types.Set(items=[1]);
+    x.add(item=1);
+    return x;
+}
+set_contains(){
+    x = types.Set(items=[1]);
+    return x.contains(item=1);
+}
+set_contains2(){
+    x = types.Set(items=[1]);
+    return x.contains(item=2);
+}
+set_copy(){
+    x = types.Set(items=[1]);
+    y = x.copy();
+    y.add(item=2);
+    return [x, y];
+}
+set_difference(){
+    x = types.Set(items=[1, 2]);
+    y = types.Set(items=[2, 3]);
+    return x.difference(other_set=y);
+}
+set_get_items(){
+    x = types.Set(items=[1]);
+    return x.get_items();
+}
+set_intersection(){
+    x = types.Set(items=[1, 2]);
+    y = types.Set(items=[2, 3]);
+    return x.intersection(other_set=y);
+}
+set_remove(){
+    x = types.Set(items=[1]);
+    x.remove(item=1);
+    return x;
+}
+set_remove2(){
+    x = types.Set(items=[1]);
+    x.remove(item=2);
+    return x;
+}
+set_union(){
+    x = types.Set(items=[1, 2]);
+    y = types.Set(items=[2, 3]);
+    return x.union(other_set=y);
+}
+
+sequence(){
+    return [1, 'b', 3.45];
+}
+sequence2(){
+    x = types.Sequence();
+    x.append(item=1);
+    x.append(item='b');
+    x.append(item=3.45);
+    return x;
+}
+sequence3(){
+    return types.Sequence(items=[1, 'b', 3.45]);
+}
+sequence_append(v){
+    x = [1, 2];
+    x.append(item=v);
+    return x;
+}
+sequence_copy(){
+    x = [1, 2, 3];
+    y = x.copy();
+    y.append(item=4);
+    return [y, x];
+}
+sequence_contains(){
+    x = [1, 2, 3];
+    return x.contains(item=2);
+}
+sequence_contains2(){
+    x = [1, 3];
+    return x.contains(item=2);
+}
+sequence_get(){
+    x = [1, 2, 3];
+    return x.get(index=1);
+}
+sequence_insert(v){
+    x = [1, 3];
+    x.insert(index=1, item=v);
+    return x;
+}
+sequence_length(){
+    x = [1, 2, 3];
+    return x.length;
+}
+sequence_pop_head(){
+    x = [1, 2, 3];
+    y = x.pop_head();
+    return [y, x];
+}
+sequence_pop_item(){
+    x = [1, 2, 3];
+    y = x.pop_item(index=1);
+    return [y, x];
+}
+sequence_pop_tail(){
+    x = [1, 2, 3];
+    y = x.pop_tail();
+    return [y, x];
+}
+sequence_prepend(v){
+    x = [2, 3];
+    x.prepend(item=v);
+    return x;
+}
+sequence_remove(){
+    x = [1, 2, 3];
+    x.remove(index=1);
+    return x;
+}
+sequence_reverse(){
+    x = [3, 2, 1];
+    x.reverse();
+    return x;
+}
+sequence_shuffle(){
+    x = [1, 2, 3];
+    x.shuffle();
+    return x;
+}
+sequence_slice(){
+    x = [1, 2, 3];
+    return x.slice(start=1, end=2);
+}
+sequence_slice2(){
+    x = [1, 2, 3];
+    return x.slice(start=1);
+}
+sequence_slice3(){
+    x = [1, 2, 3];
+    return x.slice(end=2);
+}
+sequence_slice4(){
+    x = [1, 2, 3];
+    return x.slice();
+}
+sequence_sort(){
+    x = [3, 2, 1];
+    x.sort();
+    return x;
+}
+sequence_assign(){
+    [x, global y, None, local z] = [1, 2, 3, 4];
+    return [x, y, z];
+}
+
+equality(){
+    return 1 == 2;
+}
+equality2(){
+    return 1 == 1;
+}
+
+inequality(){
+    return 1 != 1;
+}
+inequality2(){
+    return 1 != 2;
+}
+
+greater_equal(){
+    return 1 >= 2;
+}
+greater_equal2(){
+    return 1 >= 1;
+}
+
+greater(){
+    return 1 > 1;
+}
+greater2(){
+    return 1 > 0;
+}
+
+lesser_equal(){
+    return 1 <= 0;
+}
+lesser_equal2(){
+    return 1 <= 1;
+}
+
+lesser(){
+    return 1 < 1;
+}
+lesser2(){
+    return 1 < 2;
+}
+
+bool_or(){
+    return False || False;
+}
+bool_or2(){
+    return True || False;
+}
+bool_or3(){
+    return False || True;
+}
+bool_or4(){
+    return True || True;
+}
+
+bool_and(){
+    return False && False;
+}
+bool_and2(){
+    return True && False;
+}
+bool_and3(){
+    return False && True;
+}
+bool_and4(){
+    return True && True;
+}
+
+negate(){
+    return !False;
+}
+negate2(){
+    return !(5 == 5);
+}
+negate3(){
+    return !'';
+}
+
+
+setup_scopes{
+    global x = 5;
+    global y = [1, 2, 3];
+}
+
+local_auto(){
+    return x;
+}
+local_auto2(){
+    x = 4;
+    return x;
+}
+
+local_local(){
+    x = 4;
+    return local x;
+}
+
+local_global(){
+    return global x;
+}
+local_global2(){
+    x = 4;
+    return global x;
+}
+
+scoped_local_auto(){
+    return y.length;
+}
+scoped_local_auto2(){
+    y = [1, 2];
+    return y.length;
+}
+
+
+suffix_local_function(){
+    return _suffix_local_function().get(index=1);
+}
+_suffix_local_function(){
+    return [1, 2, 3];
+}
+
+suffix_nested_dictionary(dict){
+    return dict.get(key='one').get(key='two');
+}
+
+suffix_nested_dictionary_identifiers(dict){
+    return dict.get(key='one').get(key='two').denominator.numerator;
+}
+
+suffix_term(){
+    return 54.9882.real;
+}
+
+suffix_term_2(){
+    return "hello world".split();
+}
+

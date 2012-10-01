@@ -1,0 +1,9 @@
+hello{
+    "Hello!";
+    'Goodbye.';
+    "Lots of spaces.";
+    'Escaped apostrophe: \'.';
+    "Escaped quotes: \".";
+    "Special characters: \b\a\t\n\r.";
+}
+

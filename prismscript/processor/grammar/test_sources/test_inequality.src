@@ -1,0 +1,14 @@
+hello{
+    x != y;
+    x != 5;
+    -5 != x;
+    5.5 != x;
+    x != -5.5;
+    x != 'hello';
+    "hello" != x;
+    x != lang.x;
+    lang.x != x;
+    x != None;
+    None != x;
+}
+

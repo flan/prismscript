@@ -1,0 +1,59 @@
+locking_basic(){
+    l = types.Lock();
+    l.acquire();
+    l.lock();
+    l.release();
+    l.unlock();
+
+    return l.acquired;
+}
+
+locking_thread(){
+    global l = types.Lock();
+    
+    l.acquire();
+    t = types.Thread(_f='thread');
+    global x = 25;
+    l.release();
+    t.join();
+
+    return x;
+}
+
+locking_thread_cleanup(){
+    global l = types.Lock();
+    
+    l.acquire();
+    t = types.Thread(_f='thread');
+    l.release();
+    t.join();
+
+    return l.locked;
+}
+
+locking_nocleanup(){
+    l = types.Lock();
+    l.acquire();
+    
+    return l.locked;
+}
+
+locking_cleanup(){
+    l = types.Lock();
+    l.acquire();
+
+    _l = types.Lock;
+    _l.release_dead(omit_current_thread=True); //NOT meant to be used this way, but exposed for special cases
+    return l.locked;
+}
+
+thread(){
+    l.acquire();
+    x *= 2;
+    l.release();
+}
+
+thread_lazy(){
+    l.acquire();
+}
+

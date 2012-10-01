@@ -1,0 +1,4 @@
+The interpreter should have an _interpreter reserved namespace, which contains
+things like the location of the current instruction and globals/locals.
+
+The possibility of the interpreter starting execution from an arbitrary instruction, with arbitrary locals/globals needs to be investigated.

@@ -1,0 +1,6 @@
+hello{
+    True && True;
+    False && True;
+    5 && 9;
+}
+
