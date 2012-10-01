@@ -18,20 +18,19 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unpo
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or send a
 letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 """
-import time
+import sys as _sys
+_time = _sys.modules['time']
 __no_recurse = (
- time,
+ _time,
+ _sys,
 )
 
 def asctime(t, **kwargs):
-    return time.ctime(t)
-
-def localtime(**kwargs):
-    return time.time()
+    return _time.ctime(t)
 
 def utctime(**kwargs):
-    return time.mktime(time.gmtime())
+    return _time.time()
 
 def sleep(t, **kwargs):
-    time.sleep(t)
+    _time.sleep(t)
     
