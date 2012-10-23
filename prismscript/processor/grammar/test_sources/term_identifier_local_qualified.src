@@ -1,0 +1,5 @@
+hello{
+    local x;
+    global x_y;
+}
+

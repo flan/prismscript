@@ -1,0 +1,32 @@
+conditionals_in_loop(iterations, else_iterations, x, y, break_on_if, break_on_elif_1, break_on_elif_2, break_on_else){
+    while(iterations > 0){
+        break_on_last_run = iterations == 1;
+        
+        if(break_on_if){
+            if(break_on_last_run){
+                return x;
+            }
+        }elif(break_on_elif_1){
+            if(break_on_last_run){
+                return x;
+            }
+        }elif(break_on_elif_2){
+            if(break_on_last_run){
+                return x;
+            }
+        }else{
+            if(break_on_else && break_on_last_run){
+                for(i in lang.build_range(stop=else_iterations)){
+                    x += i;
+                }
+                return x;
+            }
+        }
+        
+        x *= y;
+        
+        iterations -= 1;
+    }
+    return x;
+}
+

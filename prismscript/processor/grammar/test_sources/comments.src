@@ -1,0 +1,7 @@
+hello{
+    #I am a shell-style comment, frequently found in scripting languages.
+    //I am a C-style comment, frequently found in compiled languages.
+    "I am a string"; //Yes, you are.
+    "I wish I were a comment."; #Why? So you could disappear when parsed?
+}
+

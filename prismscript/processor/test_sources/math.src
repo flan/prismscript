@@ -1,0 +1,64 @@
+add(x, y){
+    return x + y;
+}
+
+subtract(x, y){
+    return x - y;
+}
+
+multiply(x, y){
+    return x * y;
+}
+
+divide(x, y){
+    return x / y;
+}
+
+int_divide(x, y){
+    return x \ y;
+}
+
+mod(x, y){
+    return x % y;
+}
+
+exponentiate(x, y){
+    return x ^ y;
+}
+
+
+assign_add(x, y){
+    x += y;
+    return x;
+}
+
+assign_subtract(x, y){
+    x -= y;
+    return x;
+}
+
+assign_multiply(x, y){
+    x *= y;
+    return x;
+}
+
+assign_divide(x, y){
+    x /= y;
+    return x;
+}
+
+assign_int_divide(x, y){
+    x \= y;
+    return x;
+}
+
+assign_mod(x, y){
+    x %= y;
+    return x;
+}
+
+assign_exponentiate(x, y){
+    x ^= y;
+    return x;
+}
+

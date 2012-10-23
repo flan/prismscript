@@ -1,0 +1,8 @@
+hello{
+    x += 1;
+    x += 'w';
+    x += "q";
+    local x += 5.5;
+    global x += (global y);
+}
+

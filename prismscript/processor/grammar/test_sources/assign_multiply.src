@@ -1,0 +1,7 @@
+hello{
+    x *= 1;
+    x *= 5.5;
+    local x *= y;
+    global x *= y;
+}
+

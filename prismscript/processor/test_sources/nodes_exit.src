@@ -1,0 +1,24 @@
+n_exit{
+    exit 'test';
+}
+
+goto_exit{
+    goto n_exit;
+}
+
+function_exit{
+    f_exit();
+}
+
+f_exit(){
+    exit 'test';
+}
+
+goto_exit{
+    goto_exit();
+}
+
+goto_exit(){
+    goto n_exit;
+}
+

@@ -1,0 +1,12 @@
+hello{
+    x = 1;
+    x = 'w';
+    x = "q";
+    x = 5.5;
+    global x = y;
+    local x = 3.0;
+    x = True;
+    x = False;
+    x = None;
+}
+

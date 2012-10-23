@@ -1,0 +1,10 @@
+hello{
+    x > y;
+    x > 5;
+    -5 > x;
+    5.5 > x;
+    x > -5.5;
+    x > lang.x;
+    lang.x > x;
+}
+

@@ -1,0 +1,7 @@
+hello(x, y){
+    5 == 5;
+    False;
+
+    return [x, 'hello'];
+}
+

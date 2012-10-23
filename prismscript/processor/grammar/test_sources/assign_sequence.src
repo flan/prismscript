@@ -1,0 +1,6 @@
+hello{
+    [a, b, c] = [d, e, global f];
+    [a, b, c, d,] = y;
+    [a, (local b), (global c), d,] = local x;
+}
+
