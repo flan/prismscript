@@ -1130,7 +1130,7 @@ class Interpreter:
         after a ``goto`` statement.
         """
         if not while_expression is None and foreach_identifier:
-            raise ValueError("A while-loop cannot also be a foreach-loop. This is a design issue.")
+            raise ValueError("A while-loop cannot also be a foreach-loop -- this is a design issue")
             
         if not while_expression is None:
             self._log.append("Entering while-loop...")
@@ -1178,6 +1178,8 @@ class Interpreter:
                         prompt = generator.send(x)
                 except StopIteration:
                     pass
+            elif foreach_identifier:
+                raise ValueError("A foreach-loop cannot iterate over a non-collection")
             else: #Possibly a while-loop
                 generator = self._evaluate_expression(_while_expression, _locals)
                 try: #Resolve the while-loop's term

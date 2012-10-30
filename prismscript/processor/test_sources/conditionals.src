@@ -272,4 +272,9 @@ for_continue_conditional(){
     }
     return x;
 }
+for_in_none(){
+    for(i in None){
+        return i;
+    }
+}
 
