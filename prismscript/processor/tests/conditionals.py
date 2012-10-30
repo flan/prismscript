@@ -292,3 +292,9 @@ class ForTestCase(unittest.TestCase):
         else:
             self.fail("StatementReturn not received")
             
+    def test_for_in_none(self):
+        self.assertRaises(
+         Exception, execute_no_yield,
+         self._interpreter.execute_function('for_in_none', {})
+        )
+        
