@@ -869,8 +869,6 @@ class Interpreter:
                 raise ValueError("StatementReturn not received")
             except StatementReturn as e:
                 target = e.value
-                #if expression[2][0] == parser.SUFFIX:
-                #    self._evaluate_expression((parser.SUFFIX, e.value, expression[2][), _locals)
                 for token in expression[2][1].split('.'):
                     target = getattr(target, token)
                 if expression[2][0] == parser.TERM_IDENTIFIER_SUFFIX:
