@@ -48,7 +48,7 @@ hard-to-follow) or wrapping them in exception-types and unwrapping them at the a
 control. Once observed, the process of tracing them should be simple (hint: they're attached to
 every coroutine entry-point, which means if you search for 'yield', you'll find them all and know
 how to add them when expanding). The overhead associated with exception-handling in Python is
-marginal compared to most other languages, owing to its namespace-oriented design, so there's no
+marginal compared to many other languages (C++, I'm looking at your stack-unwinds), so there's no
 real penalty to handling things this way, other than being a bit of a slap in Martin Fowler's face,
 but I don't really like his preachy tone anyway. (Even though he's right about most things when
 thinking in a Gosling-like mindset, but this is more Kay's domain, so the rules are a fair bit
