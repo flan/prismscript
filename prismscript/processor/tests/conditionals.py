@@ -20,6 +20,9 @@ letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, Califor
 """
 import unittest
 
+from ..interpreter import (
+ ExecutionError
+)
 from . import (
  get_interpreter, execute_no_yield,
  StatementReturn, StatementExit,
@@ -294,7 +297,7 @@ class ForTestCase(unittest.TestCase):
             
     def test_for_in_none(self):
         self.assertRaises(
-         Exception, execute_no_yield,
+         ExecutionError, execute_no_yield,
          self._interpreter.execute_function('for_in_none', {})
         )
         

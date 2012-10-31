@@ -46,7 +46,7 @@ class ThreadFactory:
         arguments are passed to `_f` when it is invoked. The returned value is the instantiated
         thread.
         """
-        if type(_f) is String or type(_f) in types.StringTypes:
+        if isinstance(_f, String) or isinstance(_f, types.StringTypes):
             thread_class = _InternalFunctionThread
         else:
             thread_class = _ExternalFunctionThread
