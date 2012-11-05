@@ -117,6 +117,15 @@ class String(unicode, _Container):
             result = self.rsplit(delimiter, limit)
         return Sequence((String(s) for s in result))
         
+    def slice(self, start=None, end=None, **kwargs):
+        if start is not None and end is not None:
+            return String(self[start:end])
+        elif start is not None:
+            return String(self[start:])
+        elif end is not None:
+            return String(self[:end])
+        return String(self)
+        
     def ends_with(self, end, **kwargs):
         return String(self.endswith(end))
         
@@ -257,11 +266,11 @@ class Sequence(list, _Container):
         list.sort(self)
         
     def slice(self, start=None, end=None, **kwargs):
-        if not start is None and not end is None:
+        if start is not None and end is not None:
             return self[start:end]
-        elif not start is None:
+        elif start is not None:
             return self[start:]
-        elif not end is None:
+        elif end is not None:
             return self[:end]
-        else:
-            return self.copy()
+        return self.copy()
+        
