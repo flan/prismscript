@@ -1,2 +1,2 @@
-+# prismscript
-+For details, please see the [wiki](../../wiki)
+# prismscript
+For details, please see the [wiki](../../wiki)
